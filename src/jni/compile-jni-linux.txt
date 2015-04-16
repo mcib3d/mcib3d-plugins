@@ -1,0 +1,8 @@
+javah -jni filters3d_
+ 
+gcc filters3d_.c -o libfilter3d -shared -O2 -fPIC -I/usr/lib/jvm/java-6-sun/include/ -I/usr/lib/jvm/java-6-sun/include/linux/
+
+javac -classpath /home/thomas/Applications/ImageJ/ij.jar filters3d_.java 
+
+
+gcc filters3d_.c -o libfilter3d -shared -O3 -fPIC -funroll-loops  -mtune=core2 -I/usr/lib/jvm/java-6-sun/include/ -I/usr/lib/jvm/java-6-sun/include/linux/ 
