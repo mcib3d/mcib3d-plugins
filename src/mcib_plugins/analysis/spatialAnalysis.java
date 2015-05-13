@@ -127,10 +127,12 @@ public class spatialAnalysis {
         }
         if (save) {
             PlotWindow plotW = plotF.show();
-            try {
-                plotW.getResultsTable().saveAs(IJ.getDirectory("home") + "StatsPlot-F.csv");
-            } catch (IOException ex) {
-                Logger.getLogger(spatialAnalysis.class.getName()).log(Level.SEVERE, null, ex);
+            if (plotW != null) {
+                try {
+                    plotW.getResultsTable().saveAs(IJ.getDirectory("home") + "StatsPlot-F.csv");
+                } catch (IOException ex) {
+                    Logger.getLogger(spatialAnalysis.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
 
@@ -201,11 +203,14 @@ public class spatialAnalysis {
         }
         if (save) {
             PlotWindow plotW = plotG.show();
-            try {
-                plotW.getResultsTable().saveAs(IJ.getDirectory("home") + "StatsPlot-G.csv");
-            } catch (IOException ex) {
-                Logger.getLogger(spatialAnalysis.class.getName()).log(Level.SEVERE, null, ex);
+            if (plotW != null) {
+                try {
+                    plotW.getResultsTable().saveAs(IJ.getDirectory("home") + "StatsPlot-G.csv");
+                } catch (IOException ex) {
+                    Logger.getLogger(spatialAnalysis.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
+
         }
 
         IJ.log("--- G Function ---");
@@ -274,11 +279,14 @@ public class spatialAnalysis {
         }
         if (save) {
             PlotWindow plotW = plotH.show();
-            try {
-                plotW.getResultsTable().saveAs(IJ.getDirectory("home") + "StatsPlot-H.csv");
-            } catch (IOException ex) {
-                Logger.getLogger(spatialAnalysis.class.getName()).log(Level.SEVERE, null, ex);
+            if (plotW != null) {
+                try {
+                    plotW.getResultsTable().saveAs(IJ.getDirectory("home") + "StatsPlot-H.csv");
+                } catch (IOException ex) {
+                    Logger.getLogger(spatialAnalysis.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
+
         }
 
         IJ.log("--- H Function ---");

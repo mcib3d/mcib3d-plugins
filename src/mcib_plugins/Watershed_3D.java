@@ -2,11 +2,15 @@ package mcib_plugins;
 
 //import fish.FishImage3D;
 //import fish.FishObject;
-import ij.*;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.Prefs;
+import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
-import mcib3d.image3d.regionGrowing.Watershed3D;
 import mcib3d.image3d.processing.FastFilters3D;
+import mcib3d.image3d.regionGrowing.Watershed3D;
 
 /**
  * Description of the Class
