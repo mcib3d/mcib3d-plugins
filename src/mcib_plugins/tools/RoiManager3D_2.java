@@ -1507,24 +1507,21 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         boolean res = false;
         // distance between centers (in pixels)
         int dist = (int) Prefs.get("RoiManager3D-Options_splitDist.double", 5);
-        //int new1 = val0;
-        //int new2 = nb;
-        // rad 2 for max loco // dim 2 for split (can be 2 or 3)
-        //ArrayList[] objslist = Segment3DSpots.splitSpotProjection(ima, val0, obj0, new1, new2, dist, 2, 2);
         IJ.log("Splitting");
         Object3DVoxels[] objslist = Segment3DSpots.splitSpotWatershed(obj0, 2, dist);
         IJ.log("split complete");
-        //res = obj0.separeSpot2D(ima, val0, 0, obj0, obj1, obj2, dist, obj0.getZmin(), obj0.getZmax());
-        //IJ.write(val0 + " " + res);        
+        //IJ.log(objslist+" "+objslist.length+" "+objslist[0]+" "+objslist[0].getVolumePixels()+" "+objslist[1]+" "+objslist[1].getVolumePixels());
         if ((objslist != null) && (objslist[0].getVolumePixels() > 0) && (objslist[1].getVolumePixels() > 0)) {
             res = true;
             // with arraylist
             obj1 = objslist[0];
             obj1.setCalibration(cal);
             obj1.setValue(val0);
+            obj1.setName(obj0.getName() + "-split1");
             obj2 = objslist[1];
             obj2.setCalibration(cal);
             obj2.setValue(val0);
+            obj2.setName(obj0.getName() + "-split2");
             // 3D
 //            Color3f col = null;
 //            Color3f col1 = null;
@@ -1539,11 +1536,11 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 //                Color color = new Color(cc);
 //                col1 = new Color3f(color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f);
 //            }
-            delete(i0, (String) model.get(i0));
-            addObject3D(obj1);
+            //delete(i0, (String) model.get(i0));
+            objects3D.setObject(i0, obj1);
+            model.set(i0, obj1.getName());
             addObject3D(obj2);
             buildHash();
-            int nblist = model.size();
 //            // 3D
 //            if (col != null) {
 //                add3DViewer(obj1, list.getItem(nblist - 2), col);
