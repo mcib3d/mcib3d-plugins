@@ -7,7 +7,6 @@ import ij.measure.ResultsTable;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import mcib3d.geom.Object3D;
 import mcib3d.geom.ObjectCreator3D;
 import mcib3d.geom.Objects3DPopulation;
@@ -121,6 +120,12 @@ public class Ellipsoids_3D implements PlugInFilter {
                 Vector3D end = Vec.add(obj.getVectorAxis(2), 1, rad1);
                 vectors.createLineUnit(Vec, end, val, 1);
 
+                // The two poles
+                Voxel3D Feret1 = obj.getFeretVoxel1();
+                Voxel3D Feret2 = obj.getFeretVoxel2();
+                IJ.log("Pole1 as Feret 1 : "+Feret1);
+                IJ.log("Pole2 as Feret 2 : "+Feret2);
+
                 //  ORIENTED BB
                 oriC.drawVoxels(obj.getBoundingOriented());
 
@@ -174,7 +179,7 @@ public class Ellipsoids_3D implements PlugInFilter {
             plus2.setCalibration(cal);
         }
         plus2.show();
-        
+
         ImagePlus plus3 = new ImagePlus("Oriented Contours", oriC.getStack());
         if (cal != null) {
             plus3.setCalibration(cal);
