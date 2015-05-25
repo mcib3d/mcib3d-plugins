@@ -96,7 +96,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
     private ResultsFrame tableResultsMeasure = null;
     private ResultsFrame tableResultsQuantif;
-    private String version = "2.0a";
+    private String version = "2.0";
     private boolean multi = false;
     private Image3DUniverse universe = null;
     private boolean showUniverse = true;
