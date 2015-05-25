@@ -32,7 +32,9 @@ public class Watershed_3D implements PlugIn {
     int seeds_threshold = 7000;
     int voxels_threshold = 0;
     int rad = 2;
-    //boolean segMaxLocal = true;    
+    //boolean segMaxLocal = true;
+    
+    boolean fast=false;
 
     @Override
     public void run(String arg) {
@@ -65,6 +67,7 @@ public class Watershed_3D implements PlugIn {
         dia.addChoice("Image", namesRaw, namesRaw[spot]);
         dia.addChoice("Seeds", namesSeeds, namesSeeds[seed]);
         dia.addNumericField("Radius for automatic seeds", rad, 0);
+        dia.addCheckbox("Use Fast but less accurate", fast);
 
         dia.showDialog();
         if (dia.wasOKed()) {
@@ -73,6 +76,7 @@ public class Watershed_3D implements PlugIn {
             spot = dia.getNextChoiceIndex();
             seed = dia.getNextChoiceIndex();
             rad = (int) dia.getNextNumber();
+            fast=dia.getNextBoolean();
 
             // set Preferences
             Prefs.set("Watershed3D_SeedsThreshold.int", seeds_threshold);
@@ -100,6 +104,7 @@ public class Watershed_3D implements PlugIn {
     private void Watershed() {
         IJ.log("Computing watershed");
         Watershed3D water = new Watershed3D(spotStack, seedStack, voxels_threshold, seeds_threshold);
-        water.getWatershedImage3D().show("Watershed");
+        water.setFastButLessAccurate(fast);
+        water.getWatershedImage3D().show("Watershed");          
     }
 }
