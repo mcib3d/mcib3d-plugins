@@ -123,8 +123,10 @@ public class Ellipsoids_3D implements PlugInFilter {
                 // The two poles
                 Voxel3D Feret1 = obj.getFeretVoxel1();
                 Voxel3D Feret2 = obj.getFeretVoxel2();
-                IJ.log("Pole1 as Feret 1 : "+Feret1);
-                IJ.log("Pole2 as Feret 2 : "+Feret2);
+                IJ.log("Pole1 as Feret 1 : " + Feret1);
+                IJ.log("Pole2 as Feret 2 : " + Feret2);
+                IJ.log("Pole1 as Feret 1 (calibrated) : " + Feret1.getX() * resXY + " " + Feret1.getY() * resXY + " " + Feret1.getZ() * resZ);
+                IJ.log("Pole2 as Feret 2 (calibrated) : " + Feret2.getX() * resXY + " " + Feret2.getY() * resXY + " " + Feret2.getZ() * resZ);
 
                 //  ORIENTED BB
                 oriC.drawVoxels(obj.getBoundingOriented());
@@ -164,6 +166,13 @@ public class Ellipsoids_3D implements PlugInFilter {
                 rt.setValue("Vell(unit)", row, obj.getVolumeEllipseUnit());
                 rt.setValue("Vbb(pix)", row, obj.getVolumeBoundingBoxPixel());
                 rt.setValue("Vbbo(pix)", row, obj.getVolumeBoundingBoxOrientedPixel());
+                // poles
+                rt.setValue("Pole1.X", row, Feret1.getX());
+                rt.setValue("Pole1.Y", row, Feret1.getY());
+                rt.setValue("Pole1.Z", row, Feret1.getZ());
+                rt.setValue("Pole2.X", row, Feret2.getX());
+                rt.setValue("Pole2.Y", row, Feret2.getY());
+                rt.setValue("Pole2.Z", row, Feret2.getZ());
                 row++;
             }
         }
