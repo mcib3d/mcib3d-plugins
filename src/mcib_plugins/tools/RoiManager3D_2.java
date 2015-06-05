@@ -95,7 +95,11 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     boolean live = true;
 
     private ResultsFrame tableResultsMeasure = null;
-    private ResultsFrame tableResultsQuantif;
+    private ResultsFrame tableResultsQuantif = null;
+    private ResultsFrame tableResultsColoc = null;
+    private ResultsFrame tableResultsDistance = null;
+    private ResultsFrame tableResultsVoxels = null;
+
     private String version = "2.0";
     private boolean multi = false;
     private Image3DUniverse universe = null;
@@ -207,6 +211,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             ExtensionDescriptor.newDescriptor("Manager3D_Feret1", this, argCentroid3D),
             ExtensionDescriptor.newDescriptor("Manager3D_Feret2", this, argCentroid3D),
             ExtensionDescriptor.newDescriptor("Manager3D_BorderVoxel", this, argColoc),
+            // close results windows
+            ExtensionDescriptor.newDescriptor("Manager3D_CloseResult", this, argRename),
             // test transform universe
             ExtensionDescriptor.newDescriptor("Manager3D_Rotate", this, argCol),
             ExtensionDescriptor.newDescriptor("Manager3D_LoadView3D", this, argRename),};
@@ -407,7 +413,11 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         } else if (name.equals("Manager3D_LoadView3D")) {
             String S = (String) args[0];
             loadView3D(S);
+        } else if (name.equals("Manager3D_CloseResult")) {
+            String S = (String) args[0];
+            closeResult(S);
         }
+
         return null;
     }
 
@@ -1370,34 +1380,36 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         Object3D obj;
         Calibration cal = plus.getCalibration();
         Roi roi = plus.getRoi();
-        //int i = 1;
+        boolean excludeXY = Prefs.get("RoiManager3D-Options_ExcludeXY.boolean", false);
+        boolean excludeZ = Prefs.get("RoiManager3D-Options_ExcludeZ.boolean", false);
         ImageInt seg = ImageInt.wrap(plus);
         while (it.hasNext()) {
             // Object3D
             objList = (ArrayList<Voxel3D>) it.next();
             if (!objList.isEmpty()) {
+                boolean roiok = false;
+                boolean edgeok = false;
                 obj = new Object3DVoxels(objList);
                 obj.setCalibration(cal);
                 obj.setLabelImage(seg);
                 obj.computeContours();
                 // seg image is only used to compute contours, after remove, in case user closes image
                 obj.setLabelImage(null);
-//                if (obj.getAreaPixels() == 0) {
-//                    IJ.log("area 0 " + obj);
-//                }
                 // check if center inside roi
-                if (roi != null) {
-                    if (roi.contains((int) Math.round(obj.getCenterX()), (int) Math.round(obj.getCenterY()))) {
-                        addObject3D(obj);
-                    }
-                } else {
+                if (((roi != null) && (roi.contains((int) Math.round(obj.getCenterX()), (int) Math.round(obj.getCenterY())))) || (roi == null)) {
+                    roiok = true;
+                }
+                // check touch edges
+                if ((excludeXY || excludeZ) && (!obj.edgeImage(seg, excludeXY, excludeZ))) {
+                    edgeok = true;
+                }
+                if (roiok && edgeok) {
                     addObject3D(obj);
                 }
-                //i++;
             }
         }
         // HASH
-        buildHash();
+        //buildHash();
     }
 
     public void addObjects3DPopulation(Objects3DPopulation pop) {
@@ -1944,7 +1956,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         //Create and set up the window.
         String[] heads = new String[headings.size()];
         heads = headings.toArray(heads);
-        ResultsFrame tableResultsColoc = new ResultsFrame("3D Coloc", heads, data, this, ResultsFrame.OBJECTS_2);
+        tableResultsColoc = new ResultsFrame("3D Coloc", heads, data, this, ResultsFrame.OBJECTS_2);
         tableResultsColoc.showFrame();
 
         if (Recorder.record) {
@@ -2344,9 +2356,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         //Create and set up the window.
         String[] heads = new String[headings.size()];
         heads = headings.toArray(heads);
-        ResultsFrame tableResultsMeasure = new ResultsFrame("3D Voxels", heads, data, this, ResultsFrame.OBJECT_NO);
+        tableResultsVoxels = new ResultsFrame("3D Voxels", heads, data, this, ResultsFrame.OBJECT_NO);
         //Create and set up the content pane.        
-        tableResultsMeasure.showFrame();
+        tableResultsVoxels.showFrame();
 
         if (Recorder.record) {
             Recorder.record("Ext.Manager3D_List");
@@ -2495,7 +2507,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         //Create and set up the window.
         String[] heads = new String[headings.size()];
         heads = headings.toArray(heads);
-        ResultsFrame tableResultsDistance = new ResultsFrame("3D Distance", heads, data, this, ResultsFrame.OBJECTS_2);
+        tableResultsDistance = new ResultsFrame("3D Distance", heads, data, this, ResultsFrame.OBJECTS_2);
         tableResultsDistance.showFrame();
 
         if (Recorder.record) {
@@ -2982,6 +2994,24 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             universe.loadView(S);
         } catch (IOException ex) {
             IJ.log("View " + S + " does not exists");
+        }
+    }
+
+    private void closeResult(String win) {
+        if ((win.startsWith("A") || win.startsWith("M")) && (tableResultsMeasure != null)) {
+            tableResultsMeasure.dispose();
+        }
+        if ((win.startsWith("A") || win.startsWith("Q")) && (tableResultsQuantif != null)) {
+            tableResultsQuantif.dispose();
+        }
+        if ((win.startsWith("A") || win.startsWith("D")) && (tableResultsDistance != null)) {
+            tableResultsDistance.dispose();
+        }
+        if ((win.startsWith("A") || win.startsWith("C")) && (tableResultsColoc != null)) {
+            tableResultsColoc.dispose();
+        }
+        if ((win.startsWith("A") || win.startsWith("L")) && (tableResultsVoxels != null)) {
+            tableResultsVoxels.dispose();
         }
     }
 }

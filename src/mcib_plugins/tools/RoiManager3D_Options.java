@@ -25,6 +25,7 @@ package mcib_plugins.tools;
 import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
+import java.awt.Font;
 
 /**
  *
@@ -89,11 +90,16 @@ public class RoiManager3D_Options implements PlugIn {
         int splitDist = (int) Prefs.get("RoiManager3D-Options_splitDist.double", 10);
         double surfDist = (double) Prefs.get("RoiManager3D-Options_surfDist.double", 1.8);
         boolean useFloatSegment = Prefs.get("RoiManager3D-Options_Seg32.boolean", false);
+        boolean excludeXY = Prefs.get("RoiManager3D-Options_ExcludeXY.boolean", false);
+        boolean excludeZ = Prefs.get("RoiManager3D-Options_ExcludeZ.boolean", false);
 
         GenericDialog gd = new GenericDialog("RoiManager3D Set Measurements");
-        gd.addMessage("Parameters to calculate :");
+        gd.addMessage("Measurements :", Font.decode("dialog bold 14"));
         gd.addCheckboxGroup(8, 3, label, state);
+        gd.addMessage("Options :", Font.decode("dialog bold 14"));
         gd.addCheckbox("Use 32-bits image for segmentation (nb objects > 65 535)", useFloatSegment);
+        gd.addCheckbox("Exclude objects on edges XY", excludeXY);
+        gd.addCheckbox("Exclude objects on edges Z", excludeZ);
         gd.addMessage("Split options : ");
         gd.addNumericField("Distance_between_centers (pixel)", splitDist, 0);
         gd.addMessage("Surf. contact options : ");
@@ -114,7 +120,7 @@ public class RoiManager3D_Options implements PlugIn {
         Prefs.set("RoiManager3D-Options_intDens.boolean", gd.getNextBoolean());
         Prefs.set("RoiManager3D-Options_mean.boolean", gd.getNextBoolean());
         Prefs.set("RoiManager3D-Options_stdDev.boolean", gd.getNextBoolean());
-        Prefs.set("RoiManager3D-Options_Mode.boolean",gd.getNextBoolean());
+        Prefs.set("RoiManager3D-Options_Mode.boolean", gd.getNextBoolean());
         Prefs.set("RoiManager3D-Options_feret.boolean", gd.getNextBoolean());
         Prefs.set("RoiManager3D-Options_min.boolean", gd.getNextBoolean());
         Prefs.set("RoiManager3D-Options_max.boolean", gd.getNextBoolean());
@@ -129,6 +135,8 @@ public class RoiManager3D_Options implements PlugIn {
         Prefs.set("RoiManager3D-Options_Closest.boolean", gd.getNextBoolean());
         // options
         Prefs.set("RoiManager3D-Options_Seg32.boolean", gd.getNextBoolean());
+        Prefs.set("RoiManager3D-Options_ExcludeXY.boolean", gd.getNextBoolean());
+        Prefs.set("RoiManager3D-Options_ExcludeZ.boolean", gd.getNextBoolean());
         Prefs.set("RoiManager3D-Options_splitDist.double", gd.getNextNumber());
         Prefs.set("RoiManager3D-Options_surfDist.double", gd.getNextNumber());
 
