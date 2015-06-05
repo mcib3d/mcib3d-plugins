@@ -80,18 +80,6 @@ public class Mereo_3D implements PlugIn {
             Objects3DPopulation popA = new Objects3DPopulation(plusA);
             Objects3DPopulation popB = new Objects3DPopulation(plusB);
 
-            if (regularity) {
-                for (int ia = 0; ia < popA.getNbObjects(); ia++) {
-                    IJ.log("Object A" + ia + " : " + popA.getObject(ia));
-                    unchangedMorpho(popA.getObject(ia), (float) radXY, (float) radXY, (float) radZ);
-                }
-                IJ.log("");
-                for (int ib = 0; ib < popB.getNbObjects(); ib++) {
-                    IJ.log("Object B" + ib + " : " + popB.getObject(ib));
-                    unchangedMorpho(popB.getObject(ib), (float) radXY, (float) radXY, (float) radZ);
-                }
-            }
-
             // test connexity
             for (int ia = 0; ia < popA.getNbObjects(); ia++) {
                 Object3DVoxels vox = (Object3DVoxels) popA.getObject(ia);
@@ -107,7 +95,7 @@ public class Mereo_3D implements PlugIn {
                     IJ.log("WARNING Object B" + ib + " : " + popB.getObject(ib) + " is not connex");
                 }
             }
-            //  mereo Analysis
+//              mereo Analysis
             MereoAnalysis mereo = new MereoAnalysis(popA, popB);
             // radius
             mereo.setRadX(radXY);
@@ -120,24 +108,54 @@ public class Mereo_3D implements PlugIn {
             ResultsTable rt = mereo.getResultsTable(true, true);
             rt.show("Mereo");
             IJ.log("");
+
+            // TEST
+            //ImageHandler dup = ImageInt.wrap(plusA).createSameDimensions();
+           // Object3D obj = popA.getObject(0);
+          //  Object3D closed = obj.getClosedObject(radXY, radXY, radZ, false);
+
+//            closed.draw(dup);
+//            dup.show("Closed_obj");
+//            obj.getLabelImage().show("obj");
+//            closed.getLabelImage().show("closed_image");
+//            closed.setLabelImage(null);
+//            obj.setLabelImage(null);
+
+           // int a = closed.getColoc(obj);
+          //  IJ.log("main "+obj.getVolumePixels() + " " + closed.getVolumePixels() + " " + a);
+
+            if (regularity) {
+                for (int ia = 0; ia < popA.getNbObjects(); ia++) {
+                    IJ.log("Object A" + ia + " : " + popA.getObject(ia));
+                    unchangedMorpho(popA.getObject(ia), (float) radXY, (float) radXY, (float) radZ);
+                }
+                IJ.log("");
+                for (int ib = 0; ib < popB.getNbObjects(); ib++) {
+                    IJ.log("Object B" + ib + " : " + popB.getObject(ib));
+                    unchangedMorpho(popB.getObject(ib), (float) radXY, (float) radXY, (float) radZ);
+                }
+            }
             IJ.log("Finished");
         }
     }
 
     private void unchangedMorpho(Object3D object, float rx, float ry, float rz) {
-        Object3D objectClosed = object.getClosedObject(rz, ry, rz, true);
-        int a = objectClosed.getColoc(object);
-        if (a == object.getVolumePixels()) {
+        object.setLabelImage(null);
+        Object3D objectClosed = object.getClosedObject(rz, ry, rz, false); 
+        if (objectClosed.getVolumePixels() == object.getVolumePixels()) {
             IJ.log("No change after closing radii " + rx + " " + ry + " " + rz);
         } else {
-            IJ.log("Change after closing radii " + rx + " " + ry + " " + rz + " of " + (a - object.getVolumePixels()) + " voxels over " + object.getVolumePixels());
+            IJ.log("Change after closing radii " + rx + " " + ry + " " + rz + " of " + (objectClosed.getVolumePixels() - object.getVolumePixels()) + " voxels over " + object.getVolumePixels());
         }
+        object.setLabelImage(null);
         Object3D objectOpened = object.getOpenedObject(rz, ry, rz, true);
-        a = objectOpened.getColoc(object);
-        if (a == object.getVolumePixels()) {
+         // test
+        object.setLabelImage(null);
+        objectClosed.setLabelImage(null);
+        if (objectOpened.getVolumePixels() == object.getVolumePixels()) {
             IJ.log("No change after opening radii " + rx + " " + ry + " " + rz);
         } else {
-            IJ.log("Change after opening radii " + rx + " " + ry + " " + rz + " of " + (object.getVolumePixels() - a) + " voxels over " + object.getVolumePixels());
+            IJ.log("Change after opening radii " + rx + " " + ry + " " + rz + " of " + (object.getVolumePixels() - objectOpened.getVolumePixels()) + " voxels over " + object.getVolumePixels());
         }
     }
 }
