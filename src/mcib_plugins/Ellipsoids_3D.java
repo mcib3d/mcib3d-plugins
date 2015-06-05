@@ -8,6 +8,7 @@ import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import java.text.NumberFormat;
 import mcib3d.geom.Object3D;
+import mcib3d.geom.Object3DVoxels;
 import mcib3d.geom.ObjectCreator3D;
 import mcib3d.geom.Objects3DPopulation;
 import mcib3d.geom.Vector3D;
@@ -63,7 +64,7 @@ public class Ellipsoids_3D implements PlugInFilter {
         }
         int row = rt.getCounter();
         for (int ob = 0; ob < pop.getNbObjects(); ob++) {
-            IJ.showStatus("Trying obj " + ob);
+            IJ.showStatus("Processing obj " + ob);
             Object3D obj = pop.getObject(ob);
 
             NumberFormat nf = NumberFormat.getInstance();
@@ -88,7 +89,7 @@ public class Ellipsoids_3D implements PlugInFilter {
                 IJ.log("Angle with plane XZ " + axz);
                 IJ.log("Angle with plane YZ " + ayz);
 
-                obj.computeContours();
+                //obj.computeContours();
                 //double r1 = obj.getDistCenterMax();
                 double r1 = obj.getRadiusMoments(2);
                 double rad1 = r1;
@@ -120,13 +121,23 @@ public class Ellipsoids_3D implements PlugInFilter {
                 Vector3D end = Vec.add(obj.getVectorAxis(2), 1, rad1);
                 vectors.createLineUnit(Vec, end, val, 1);
 
-                // The two poles
+                // The two poles as Feret 
                 Voxel3D Feret1 = obj.getFeretVoxel1();
                 Voxel3D Feret2 = obj.getFeretVoxel2();
                 IJ.log("Pole1 as Feret 1 : " + Feret1);
                 IJ.log("Pole2 as Feret 2 : " + Feret2);
                 IJ.log("Pole1 as Feret 1 (calibrated) : " + Feret1.getX() * resXY + " " + Feret1.getY() * resXY + " " + Feret1.getZ() * resZ);
                 IJ.log("Pole2 as Feret 2 (calibrated) : " + Feret2.getX() * resXY + " " + Feret2.getY() * resXY + " " + Feret2.getZ() * resZ);
+
+                // The two poles as Feret of ellipsoid
+                Object3D ell = new Object3DVoxels(ellipsoid.getImageHandler());
+                //ell.computeContours();
+                Voxel3D Ell1 = ell.getFeretVoxel1();
+                Voxel3D Ell2 = ell.getFeretVoxel2();
+                IJ.log("Pole1 as ellipsoid 1 : " + Ell1);
+                IJ.log("Pole2 as ellipsoid 2 : " + Ell2);
+                IJ.log("Pole1 as ellipsoid 1 (calibrated) : " + Ell1.getX() * resXY + " " + Ell1.getY() * resXY + " " + Ell1.getZ() * resZ);
+                IJ.log("Pole2 as ellipsoid 2 (calibrated) : " + Ell2.getX() * resXY + " " + Ell2.getY() * resXY + " " + Ell2.getZ() * resZ);
 
                 //  ORIENTED BB
                 oriC.drawVoxels(obj.getBoundingOriented());
@@ -166,13 +177,21 @@ public class Ellipsoids_3D implements PlugInFilter {
                 rt.setValue("Vell(unit)", row, obj.getVolumeEllipseUnit());
                 rt.setValue("Vbb(pix)", row, obj.getVolumeBoundingBoxPixel());
                 rt.setValue("Vbbo(pix)", row, obj.getVolumeBoundingBoxOrientedPixel());
-                // poles
-                rt.setValue("Pole1.X", row, Feret1.getX());
-                rt.setValue("Pole1.Y", row, Feret1.getY());
-                rt.setValue("Pole1.Z", row, Feret1.getZ());
-                rt.setValue("Pole2.X", row, Feret2.getX());
-                rt.setValue("Pole2.Y", row, Feret2.getY());
-                rt.setValue("Pole2.Z", row, Feret2.getZ());
+                // poles obj
+                rt.setValue("Feret1.X", row, Feret1.getX());
+                rt.setValue("Feret1.Y", row, Feret1.getY());
+                rt.setValue("Feret1.Z", row, Feret1.getZ());
+                rt.setValue("Feret2.X", row, Feret2.getX());
+                rt.setValue("Feret2.Y", row, Feret2.getY());
+                rt.setValue("Feret2.Z", row, Feret2.getZ());
+                // poles obj
+                rt.setValue("Pole1.X", row, Ell1.getX());
+                rt.setValue("Pole1.Y", row, Ell1.getY());
+                rt.setValue("Pole1.Z", row, Ell1.getZ());
+                rt.setValue("Pole2.X", row, Ell2.getX());
+                rt.setValue("Pole2.Y", row, Ell2.getY());
+                rt.setValue("Pole2.Z", row, Ell2.getZ());
+
                 row++;
             }
         }
