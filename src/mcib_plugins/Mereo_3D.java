@@ -101,7 +101,7 @@ public class Mereo_3D implements PlugIn {
             mereo.setRadX(radXY);
             mereo.setRadY(radXY);
             mereo.setRadZ(radZ);
-            //mereo.computeRelationships();
+            //mereo.computeSlowRelationships();
             mereo.computeFastRelationships();
             IJ.log("MEREOTOPOLOGY RESULTS (DC if not specified)");
             IJ.log(mereo.getResults(true));
@@ -140,18 +140,18 @@ public class Mereo_3D implements PlugIn {
     }
 
     private void unchangedMorpho(Object3D object, float rx, float ry, float rz) {
-        object.setLabelImage(null);
+        //object.setLabelImage(null);
         Object3D objectClosed = object.getClosedObject(rz, ry, rz, false); 
         if (objectClosed.getVolumePixels() == object.getVolumePixels()) {
             IJ.log("No change after closing radii " + rx + " " + ry + " " + rz);
         } else {
             IJ.log("Change after closing radii " + rx + " " + ry + " " + rz + " of " + (objectClosed.getVolumePixels() - object.getVolumePixels()) + " voxels over " + object.getVolumePixels());
         }
-        object.setLabelImage(null);
+        //object.setLabelImage(null);
         Object3D objectOpened = object.getOpenedObject(rz, ry, rz, true);
          // test
-        object.setLabelImage(null);
-        objectClosed.setLabelImage(null);
+        //object.setLabelImage(null);
+        //objectClosed.setLabelImage(null);
         if (objectOpened.getVolumePixels() == object.getVolumePixels()) {
             IJ.log("No change after opening radii " + rx + " " + ry + " " + rz);
         } else {
