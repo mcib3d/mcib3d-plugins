@@ -1400,7 +1400,11 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                     roiok = true;
                 }
                 // check touch edges
-                if ((excludeXY || excludeZ) && (!obj.edgeImage(seg, excludeXY, excludeZ))) {
+                if (excludeXY || excludeZ) {
+                    if (!obj.edgeImage(seg, excludeXY, excludeZ)) {
+                        edgeok = true;
+                    }
+                } else {
                     edgeok = true;
                 }
                 if (roiok && edgeok) {

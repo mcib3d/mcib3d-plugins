@@ -98,8 +98,8 @@ public class RoiManager3D_Options implements PlugIn {
         gd.addCheckboxGroup(8, 3, label, state);
         gd.addMessage("Options :", Font.decode("dialog bold 14"));
         gd.addCheckbox("Use 32-bits image for segmentation (nb objects > 65 535)", useFloatSegment);
-        gd.addCheckbox("Exclude objects on edges XY", excludeXY);
-        gd.addCheckbox("Exclude objects on edges Z", excludeZ);
+        gd.addCheckbox("Exclude_objects_on_edges_XY", excludeXY);
+        gd.addCheckbox("Exclude_objects_on_edges_Z", excludeZ);
         gd.addMessage("Split options : ");
         gd.addNumericField("Distance_between_centers (pixel)", splitDist, 0);
         gd.addMessage("Surf. contact options : ");
