@@ -1332,6 +1332,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         int maxY = seg.sizeY;
         int minZ = 0;
         int maxZ = seg.sizeZ;
+        
+        int nb=objects3D.getNbObjects();
 
         int min = (int) seg.getMinAboveValue(0);
         int max = (int) seg.getMax();
@@ -1366,7 +1368,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         // HASH
         buildHash();
 
-        IJ.log(objects3D.getNbObjects() + " objects added");
+        IJ.log(objects3D.getNbObjects()-nb + " objects added. Total of "+objects3D.getNbObjects()+" objects");
 
         if (Recorder.record) {
             Recorder.record("Ext.Manager3D_AddImage");
