@@ -141,14 +141,14 @@ public class Mereo_3D implements PlugIn {
 
     private void unchangedMorpho(Object3D object, float rx, float ry, float rz) {
         //object.setLabelImage(null);
-        Object3D objectClosed = object.getClosedObject(rz, ry, rz, false); 
+        Object3D objectClosed = object.getClosedObject(rz, ry, rz); 
         if (objectClosed.getVolumePixels() == object.getVolumePixels()) {
             IJ.log("No change after closing radii " + rx + " " + ry + " " + rz);
         } else {
             IJ.log("Change after closing radii " + rx + " " + ry + " " + rz + " of " + (objectClosed.getVolumePixels() - object.getVolumePixels()) + " voxels over " + object.getVolumePixels());
         }
         //object.setLabelImage(null);
-        Object3D objectOpened = object.getOpenedObject(rz, ry, rz, true);
+        Object3D objectOpened = object.getOpenedObject(rz, ry, rz);
          // test
         //object.setLabelImage(null);
         //objectClosed.setLabelImage(null);
