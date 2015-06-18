@@ -154,6 +154,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         int[] argSel = {ARG_NUMBER};
         int[] argName = {ARG_NUMBER, ARG_OUTPUT + ARG_STRING};
         int[] argRename = {ARG_STRING};
+        int[] argSaveResult = {ARG_STRING,ARG_STRING};
         int[] argCount = {ARG_OUTPUT + ARG_NUMBER};
         //int[] argDist = {ARG_NUMBER, ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER};
         int[] argDist2 = {ARG_NUMBER, ARG_NUMBER, ARG_STRING, ARG_OUTPUT + ARG_NUMBER};
@@ -213,6 +214,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             ExtensionDescriptor.newDescriptor("Manager3D_BorderVoxel", this, argColoc),
             // close results windows
             ExtensionDescriptor.newDescriptor("Manager3D_CloseResult", this, argRename),
+            ExtensionDescriptor.newDescriptor("Manager3D_SaveResult", this, argSaveResult),
             // test transform universe
             ExtensionDescriptor.newDescriptor("Manager3D_Rotate", this, argCol),
             ExtensionDescriptor.newDescriptor("Manager3D_LoadView3D", this, argRename),};
@@ -353,14 +355,13 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             saveObjects(S);
         } else if (name.equals("Manager3D_SaveMeasure")) {
             String S = (String) args[0];
-            if (tableResultsMeasure != null) {
-                tableResultsMeasure.getModel().writeData(S);
-            }
+           saveResult("M",S);
         } else if (name.equals("Manager3D_SaveQuantif")) {
             String S = (String) args[0];
-            if (tableResultsQuantif != null) {
-                tableResultsQuantif.getModel().writeData(S);
-            }
+            saveResult("Q",S);
+//            if (tableResultsQuantif != null) {
+//                tableResultsQuantif.getModel().writeData(S);
+//            }
         } else if (name.equals("Manager3D_Closest")) {
             Double D = (Double) args[0];
             int a = D.intValue();
@@ -417,6 +418,12 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             String S = (String) args[0];
             closeResult(S);
         }
+        else if (name.equals("Manager3D_SaveResult")) {
+            String S = (String) args[0];
+             String file = (String) args[1];
+            saveResult(S,file);
+        }
+        
 
         return null;
     }
@@ -3020,4 +3027,24 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             tableResultsVoxels.dispose();
         }
     }
+    
+    private void saveResult(String win,String file) {        
+        if ((win.startsWith("A") || win.startsWith("M")) && (tableResultsMeasure != null)) {
+            tableResultsMeasure.getModel().writeData("M_"+file);
+        }
+        if ((win.startsWith("A") || win.startsWith("Q")) && (tableResultsQuantif != null)) {
+            tableResultsQuantif.getModel().writeData("Q_"+file);
+        }
+        if ((win.startsWith("A") || win.startsWith("D")) && (tableResultsDistance != null)) {
+            tableResultsDistance.getModel().writeData("D_"+file);
+        }
+        if ((win.startsWith("A") || win.startsWith("C")) && (tableResultsColoc != null)) {
+            tableResultsColoc.getModel().writeData("C_"+file);
+        }
+        if ((win.startsWith("A") || win.startsWith("L")) && (tableResultsVoxels != null)) {
+            tableResultsVoxels.getModel().writeData("L_"+file);
+        }
+    }
+    
+    
 }
