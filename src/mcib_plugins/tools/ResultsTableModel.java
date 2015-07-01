@@ -97,7 +97,7 @@ public class ResultsTableModel extends AbstractTableModel {
 
     }
 
-    public void writeData(String fileName) {
+    public boolean writeData(String fileName) {
         BufferedWriter buf;
         String name = fileName;
         if (!name.contains(".")) {
@@ -121,9 +121,13 @@ public class ResultsTableModel extends AbstractTableModel {
             buf.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ResultsTableModel.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
         } catch (IOException ex) {
             Logger.getLogger(ResultsTableModel.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
         }
+        
+        return true;
     }
 
     public void writeDataSelected(String fileName, int[] rows) {

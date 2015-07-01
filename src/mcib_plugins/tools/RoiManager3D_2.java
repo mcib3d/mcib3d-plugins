@@ -56,6 +56,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -154,7 +155,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         int[] argSel = {ARG_NUMBER};
         int[] argName = {ARG_NUMBER, ARG_OUTPUT + ARG_STRING};
         int[] argRename = {ARG_STRING};
-        int[] argSaveResult = {ARG_STRING,ARG_STRING};
+        int[] argSaveResult = {ARG_STRING, ARG_STRING};
         int[] argCount = {ARG_OUTPUT + ARG_NUMBER};
         //int[] argDist = {ARG_NUMBER, ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER};
         int[] argDist2 = {ARG_NUMBER, ARG_NUMBER, ARG_STRING, ARG_OUTPUT + ARG_NUMBER};
@@ -355,10 +356,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             saveObjects(S);
         } else if (name.equals("Manager3D_SaveMeasure")) {
             String S = (String) args[0];
-           saveResult("M",S);
+            saveResult("M", S);
         } else if (name.equals("Manager3D_SaveQuantif")) {
             String S = (String) args[0];
-            saveResult("Q",S);
+            saveResult("Q", S);
 //            if (tableResultsQuantif != null) {
 //                tableResultsQuantif.getModel().writeData(S);
 //            }
@@ -417,13 +418,11 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         } else if (name.equals("Manager3D_CloseResult")) {
             String S = (String) args[0];
             closeResult(S);
-        }
-        else if (name.equals("Manager3D_SaveResult")) {
+        } else if (name.equals("Manager3D_SaveResult")) {
             String S = (String) args[0];
-             String file = (String) args[1];
-            saveResult(S,file);
+            String file = (String) args[1];
+            saveResult(S, file);
         }
-        
 
         return null;
     }
@@ -1339,8 +1338,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         int maxY = seg.sizeY;
         int minZ = 0;
         int maxZ = seg.sizeZ;
-        
-        int nb=objects3D.getNbObjects();
+
+        int nb = objects3D.getNbObjects();
 
         int min = (int) seg.getMinAboveValue(0);
         int max = (int) seg.getMax();
@@ -1375,7 +1374,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         // HASH
         buildHash();
 
-        IJ.log(objects3D.getNbObjects()-nb + " objects added. Total of "+objects3D.getNbObjects()+" objects");
+        IJ.log(objects3D.getNbObjects() - nb + " objects added. Total of " + objects3D.getNbObjects() + " objects");
 
         if (Recorder.record) {
             Recorder.record("Ext.Manager3D_AddImage");
@@ -1711,6 +1710,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         //list.remove(i);
         model.remove(i);
         objects3D.removeObject(i);
+        // rebuild hash
+        buildHash();
         // 3D
         //delete3DViewer(name);
     }
@@ -2321,6 +2322,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 //        }
         String title = imp.getShortTitle();
         ImageHandler image = this.getImage3D();
+        if (image == null) {
+            IJ.log("Error, cannot list voxels for this image : " + imp.getTitle());
+            return false;
+        }
 
         ArrayList<String> headings = new ArrayList<String>();
         headings.add("Nb");
@@ -2346,6 +2351,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             int nbObj = indexes[ob] + 1;
             Object nameObj = model.get(indexes[ob]);
             obj = objects3D.getObject(indexes[ob]);
+            //IJ.log("image to list: "+image);
             v = obj.listVoxels(image);
             if (v == null) {
                 IJ.log("No voxels to display for " + model.get(indexes[ob]));
@@ -2534,9 +2540,11 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
      * @return The image value
      */
     ImagePlus getImage() {
-        ImagePlus imp = WindowManager.getCurrentImage();
+        //ImagePlus imp = WindowManager.getCurrentImage();
+        ImagePlus imp = IJ.getImage();
+        //IJ.log("Current image  : "+imp);
         if (imp == null) {
-            //IJ.log("There are no images open.");
+            IJ.log("There are no images open.");
             return null;
         } else {
             return imp;
@@ -3027,24 +3035,44 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             tableResultsVoxels.dispose();
         }
     }
-    
-    private void saveResult(String win,String file) {        
+
+    private void saveResult(String win, String file) {
+        File fi = new File(file);
+        String dir, name;
+        if (fi.isDirectory()) {
+            dir = file;
+            name = "Manager3DResults.csv";
+        } else {
+            dir = fi.getParent();
+            name = fi.getName();
+        }
+        String fs = File.separator;
         if ((win.startsWith("A") || win.startsWith("M")) && (tableResultsMeasure != null)) {
-            tableResultsMeasure.getModel().writeData("M_"+file);
+            if (!tableResultsMeasure.getModel().writeData(dir + fs + "M_" + name)) {
+                IJ.log("Pb saving " + dir + fs + "M_" + name);
+            }
         }
         if ((win.startsWith("A") || win.startsWith("Q")) && (tableResultsQuantif != null)) {
-            tableResultsQuantif.getModel().writeData("Q_"+file);
+            if (!tableResultsQuantif.getModel().writeData(dir + fs + "Q_" + name)) {
+                IJ.log("Pb saving " + dir + fs + "M_" + name);
+            }
         }
         if ((win.startsWith("A") || win.startsWith("D")) && (tableResultsDistance != null)) {
-            tableResultsDistance.getModel().writeData("D_"+file);
+            if (!tableResultsDistance.getModel().writeData(dir + fs + "D_" + name)) {
+                IJ.log("Pb saving " + dir + fs + "M_" + name);
+            }
         }
         if ((win.startsWith("A") || win.startsWith("C")) && (tableResultsColoc != null)) {
-            tableResultsColoc.getModel().writeData("C_"+file);
+            if (!tableResultsColoc.getModel().writeData(dir + fs + "C_" + name)) {
+                IJ.log("Pb saving " + dir + fs + "M_" + name);
+            }
         }
-        if ((win.startsWith("A") || win.startsWith("L")) && (tableResultsVoxels != null)) {
-            tableResultsVoxels.getModel().writeData("L_"+file);
+        if ((win.startsWith("A") || win.startsWith("L") || win.startsWith("V")) && (tableResultsVoxels != null)) {
+            if (!tableResultsVoxels.getModel().writeData(dir + fs + "V_" + name)) {
+                IJ.log("Pb saving " + dir + fs + "M_" + name);
+            }
         }
+
     }
-    
-    
+
 }
