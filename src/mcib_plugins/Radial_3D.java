@@ -12,6 +12,7 @@ import ij.measure.CurveFitter;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
+import mcib3d.geom.Object3D;
 import mcib3d.image3d.ImageHandler;
 import mcib3d.utils.ArrayUtil;
 
@@ -26,6 +27,7 @@ public class Radial_3D implements PlugInFilter {
     ImagePlus imp;
     int radMax;
     boolean fit = false;
+    String mes;
 
     /**
      * Main processing method for the Median3D_ object
@@ -63,11 +65,25 @@ public class Radial_3D implements PlugInFilter {
             // stats in sphere
             ArrayUtil sphere = ima.getNeighborhoodSphere(x, y, z, radMax, radMax, radMax);
             IJ.log("Mean in max sphere : " + sphere.getMean() + " StdDev : " + sphere.getStdDev());
-            double radtab[] = ima.radialDistribution(x, y, z, radMax);
+
+            int me;
+            if (mes.equals("Mean")) {
+                me = Object3D.MEASURE_INTENSITY_AVG;
+            } else if (mes.equals("Median")) {
+                me = Object3D.MEASURE_INTENSITY_MEDIAN;
+            } else if (mes.equals("Min")) {
+                me = Object3D.MEASURE_INTENSITY_MIN;
+            } else if (mes.equals("Max")) {
+                me = Object3D.MEASURE_INTENSITY_MAX;
+            } else {
+                me = Object3D.MEASURE_INTENSITY_SD;
+            }
+
+            double radtab[] = ima.radialDistribution(x, y, z, radMax, me, null);
 
             // max local
             ArrayUtil tab = new ArrayUtil(radtab);
-            int ml = tab.getFirstLocalMaxima(tab.getSize()/2+1, 0);
+            int ml = tab.getFirstLocalMaxima(tab.getSize() / 2 + 1, 0);
             IJ.log("Max local " + radidx[ml]);
             int maxl = tab.getMaximumIndex();
             IJ.log("Max " + -radidx[maxl]);
@@ -137,12 +153,16 @@ public class Radial_3D implements PlugInFilter {
      * @return Description of the Return Value
      */
     private boolean Dialogue() {
+        String[] meas = {"Mean", "Median", "Max", "Min", "StdDev"};
         GenericDialog gd = new GenericDialog("3D Radial distribution");
-        gd.addNumericField("Radius_X", radMax, 0);
+        gd.addNumericField("Radius_max", radMax, 0);
+        gd.addChoice("Measure", meas, meas[0]);
         gd.addCheckbox("Fit Gaussian", fit);
+
         gd.showDialog();
         radMax = (int) gd.getNextNumber();
         fit = gd.getNextBoolean();
+        mes = gd.getNextChoice();
         return (!gd.wasCanceled());
     }
 
