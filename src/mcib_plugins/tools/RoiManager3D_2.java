@@ -1674,7 +1674,6 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 if (index[j] == i) {
                     delete = true;
                 }
-
             }
             String name = (String) model.get(i);
             if (delete) {
@@ -3031,7 +3030,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         if ((win.startsWith("A") || win.startsWith("C")) && (tableResultsColoc != null)) {
             tableResultsColoc.dispose();
         }
-        if ((win.startsWith("A") || win.startsWith("L")) && (tableResultsVoxels != null)) {
+        if ((win.startsWith("A") || win.startsWith("L") || win.startsWith("V")) && (tableResultsVoxels != null)) {
             tableResultsVoxels.dispose();
         }
     }
@@ -3054,22 +3053,22 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         }
         if ((win.startsWith("A") || win.startsWith("Q")) && (tableResultsQuantif != null)) {
             if (!tableResultsQuantif.getModel().writeData(dir + fs + "Q_" + name)) {
-                IJ.log("Pb saving " + dir + fs + "M_" + name);
+                IJ.log("Pb saving " + dir + fs + "Q_" + name);
             }
         }
         if ((win.startsWith("A") || win.startsWith("D")) && (tableResultsDistance != null)) {
             if (!tableResultsDistance.getModel().writeData(dir + fs + "D_" + name)) {
-                IJ.log("Pb saving " + dir + fs + "M_" + name);
+                IJ.log("Pb saving " + dir + fs + "D_" + name);
             }
         }
         if ((win.startsWith("A") || win.startsWith("C")) && (tableResultsColoc != null)) {
             if (!tableResultsColoc.getModel().writeData(dir + fs + "C_" + name)) {
-                IJ.log("Pb saving " + dir + fs + "M_" + name);
+                IJ.log("Pb saving " + dir + fs + "C_" + name);
             }
         }
         if ((win.startsWith("A") || win.startsWith("L") || win.startsWith("V")) && (tableResultsVoxels != null)) {
             if (!tableResultsVoxels.getModel().writeData(dir + fs + "V_" + name)) {
-                IJ.log("Pb saving " + dir + fs + "M_" + name);
+                IJ.log("Pb saving " + dir + fs + "V_" + name);
             }
         }
 
