@@ -1698,8 +1698,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         buildHash();
 
         // update rois to nothing
-        computeRois();
-        updateRois();
+        if (!IJ.macroRunning() && !macro) {
+            computeRois();
+            updateRois();
+        }
 
         return true;
     }
