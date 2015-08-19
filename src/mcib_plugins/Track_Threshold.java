@@ -1,6 +1,5 @@
 package mcib_plugins;
 
-import mcib3d.image3d.IterativeThresholding.TrackThreshold;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -17,7 +16,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Vector;
 import mcib3d.image3d.ImageHandler;
-import mcib3d.image3d.ImageInt;
+import mcib3d.image3d.IterativeThresholding.TrackThreshold;
 import mcib3d.image3d.processing.FastFilters3D;
 
 /*
@@ -104,7 +103,7 @@ public class Track_Threshold implements PlugInFilter, DialogListener {
             if (filter) {
                 param = param.concat(" Filtering");
             }
-            //Recorder.record("run", param);
+            Recorder.record("run", param);
         }
 
         // extract current time 
