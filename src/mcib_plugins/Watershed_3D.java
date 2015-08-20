@@ -103,7 +103,8 @@ public class Watershed_3D implements PlugIn {
         IJ.log("Computing watershed");
         long t = System.currentTimeMillis();
         Watershed3D water = new Watershed3D(spotStack, seedStack, voxels_threshold, seeds_threshold);
-        water.getClassicWatershed(anim).show();
+        water.setAnim(anim);
+        water.getWatershedImage3D().show();
         IJ.log("Finished in " + (System.currentTimeMillis() - t) + " ms.");
     }
 }
