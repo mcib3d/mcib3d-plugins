@@ -1546,33 +1546,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             obj2.setCalibration(cal);
             obj2.setValue(val0);
             obj2.setName(obj0.getName() + "-split2");
-            // 3D
-//            Color3f col = null;
-//            Color3f col1 = null;
-//            Content c = universe.getContent(list.getItem(i0));
-//            if (c != null) {
-//                col = c.getColor();
-//                float[] hsb = new float[3];
-//                Color.RGBtoHSB((int) (col.getX() * 255), (int) (col.getY() * 255), (int) (col.getZ() * 255), hsb);
-//                //IJ.log("hsb : " + hsb[0] + " " + hsb[1] + " " + hsb[2]);
-//                float sat = hsb[1] / 2.0f;
-//                int cc = Color.HSBtoRGB(hsb[0], sat, hsb[2]);
-//                Color color = new Color(cc);
-//                col1 = new Color3f(color.getRed() / 255.0f, color.getGreen() / 255.0f, color.getBlue() / 255.0f);
-//            }
-            //delete(i0, (String) model.get(i0));
-            objects3D.setObject(i0, obj1);
-            model.set(i0, obj1.getName());
+            delete(i0, (String) model.get(i0));
+            addObject3D(obj1);
             addObject3D(obj2);
             buildHash();
-//            // 3D
-//            if (col != null) {
-//                add3DViewer(obj1, list.getItem(nblist - 2), col);
-//                add3DViewer(obj2, list.getItem(nblist - 1), col1);
-//            }
-
-            // update the image
-            //plus.updateAndDraw();
             list.updateUI();
         } else {
             IJ.log("Object was not splitted");
