@@ -93,18 +93,18 @@ public class Track_Threshold implements PlugInFilter, DialogListener {
             return;
         }
         //
-        if (Recorder.record) {
-            Recorder.setCommand(null);
-            String param = "3D Iterative Thresholding\",\"Min_vol_pix=" + volMin + " Max_vol_pix=" + volMax + " Threshold=" + methods[threshold_method]
-                    + " Criteria=" + criteria[crit] + " Value=" + step;
-            if (start) {
-                param = param.concat(" Starts");
-            }
-            if (filter) {
-                param = param.concat(" Filtering");
-            }
-            Recorder.record("run", param);
-        }
+//        if (Recorder.record) {
+//            Recorder.setCommand(null);
+//            String param = "3D Iterative Thresholding\",\"Min_vol_pix=" + volMin + " Max_vol_pix=" + volMax + " Threshold=" + methods[threshold_method]
+//                    + " Criteria=" + criteria[crit] + " Value=" + step;
+//            if (start) {
+//                param = param.concat(" Starts");
+//            }
+//            if (filter) {
+//                param = param.concat(" Filtering");
+//            }
+//            Recorder.record("run", param);
+//        }
 
         // extract current time 
         Duplicator dup = new Duplicator();
@@ -166,40 +166,40 @@ public class Track_Threshold implements PlugInFilter, DialogListener {
         methods = new String[]{"STEP", "KMEANS", "VOLUME"};
         criteria = new String[]{"ELONGATION", "VOLUME", "MSER"};
         GenericDialog gd = new GenericDialog("sizes");
-        gd.addNumericField("Min_vol", volMinUnit, 5, 10, unit);
+        //gd.addNumericField("Min_vol", volMinUnit, 5, 10, unit);
         gd.addNumericField("Min_vol_pix", volMin, 0, 10, "");
-        gd.addNumericField("Max_vol", volMaxUnit, 5, 10, unit);
+        //gd.addNumericField("Max_vol", volMaxUnit, 5, 10, unit);
         gd.addNumericField("Max_vol_pix", volMax, 0, 10, "");
         gd.addChoice("Criteria method", criteria, criteria[crit]);
         gd.addChoice("Threshold method", methods, methods[threshold_method]);
         gd.addNumericField("Value method", step, 1, 10, "");
         gd.addCheckbox("Starts at mean", start);
         gd.addCheckbox("Filtering", filter);
-        gd.addDialogListener(this);
+        //gd.addDialogListener(this);
         gd.showDialog();
-        volMinUnit = gd.getNextNumber();
+        //volMinUnit = gd.getNextNumber();
         volMin = (int) gd.getNextNumber();
-        volMaxUnit = gd.getNextNumber();
+        //volMaxUnit = gd.getNextNumber();
         volMax = (int) gd.getNextNumber();
         crit = gd.getNextChoiceIndex();
         threshold_method = gd.getNextChoiceIndex();
         step = (int) gd.getNextNumber();
         start = gd.getNextBoolean();
         filter = gd.getNextBoolean();
-        if (volMinUnit != 0) {
-            volMin = (int) Math.floor(volMinUnit / volUnit);
-        }
-        if (volMaxUnit != 0) {
-            volMax = (int) Math.floor(volMaxUnit / volUnit);
-        }
-        if (volMax < 0) {
-            volMax = Integer.MAX_VALUE;
-        }
+//        if (volMinUnit != 0) {
+//            volMin = (int) Math.floor(volMinUnit / volUnit);
+//        }
+//        if (volMaxUnit != 0) {
+//            volMax = (int) Math.floor(volMaxUnit / volUnit);
+//        }
+//        if (volMax < 0) {
+//            volMax = Integer.MAX_VALUE;
+//        }
         if (volMax < volMin) {
             volMax = volMin + 1;
-            volMaxUnit = volMinUnit + volUnit;
+            //volMaxUnit = volMinUnit + volUnit;
         }
-        gd.addDialogListener(this);
+        //gd.addDialogListener(this);
 
         return gd.wasOKed();
     }

@@ -41,11 +41,13 @@ public class Binary_Close implements PlugInFilter {
         return null;
     }
 
+    @Override
     public int setup(String arg, ImagePlus imp) {
         plus = imp;
-        return PlugInFilter.DOES_8G + PlugInFilter.DOES_16 + PlugInFilter.STACK_REQUIRED;
+        return PlugInFilter.DOES_8G + PlugInFilter.DOES_16;
     }
 
+    @Override
     public void run(ImageProcessor ip) {
         IJ.showStatus("binaryClose");
         GenericDialog gd = new GenericDialog("BinaryClose");
