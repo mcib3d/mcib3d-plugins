@@ -78,7 +78,7 @@ public class SeedSpots_Plus implements PlugIn {
         names[nbima] = "Automatic";
 
         if (nbima == 0) {
-            IJ.log("Imag required :");
+            IJ.log("Image required :");
             return;
         }
         // only spots
@@ -173,6 +173,7 @@ public class SeedSpots_Plus implements PlugIn {
             Prefs.set("SeedSpots_volMin.int", volumeMin);
             Prefs.set("SeedSpots_volMax.int", volumeMax);
 
+            IJ.log("Initial.....");
             spotPlus = WindowManager.getImage(spot + 1);
             spotStack = spotPlus.getImageStack();
             spot3DImage = ImageHandler.wrap(spotPlus);
@@ -192,10 +193,13 @@ public class SeedSpots_Plus implements PlugIn {
             //int w = spotStack.getWidth();
             //int h = spotStack.getHeight();
             //fishImage = new IntImage3D(w, h, nbs);
+            IJ.log("Spot segmentation.....");
             this.Segmentation();
+            IJ.log("Finished");
             if (segPlus != null) {
                 segPlus.show();
             }
+            IJ.log("Finished");
         }
     }
 
@@ -212,37 +216,48 @@ public class SeedSpots_Plus implements PlugIn {
         seg.setWatershed(watershed);
         seg.setVolumeMin(volumeMin);
         seg.setVolumeMax(volumeMax);
+        IJ.log("Spot Image: "+seg.getRawImage().getTitle()+"   Seed Image : "+seg.getSeeds().getTitle());
+        IJ.log("Vol min: "+seg.getVolumeMin()+"   Vol max: "+seg.getVolumeMax());
         switch (local_method) {
             case 0:
                 seg.setMethodLocal(Segment3DSpots.LOCAL_CONSTANT);
+                IJ.log("LOCAL_CONSTANT");
                 break;
             case 1:
                 seg.setMethodLocal(Segment3DSpots.LOCAL_MEAN);
                 seg.setRadiusLocalMean(rad0, rad1, rad2, we);
+                IJ.log("LOCAL_MEAN");
                 break;
             case 2:
                 seg.setMethodLocal(Segment3DSpots.LOCAL_GAUSS);
                 seg.setGaussPc(sdpc);
                 seg.setGaussMaxr(radmax);
+                IJ.log("LOCAL_GAUSS");
                 break;
         }
         switch (spot_method) {
             case 0:
                 seg.setMethodSeg(Segment3DSpots.SEG_CLASSICAL);
+                IJ.log("SEG_CLASSICAL");
                 break;
             case 1:
                 seg.setMethodSeg(Segment3DSpots.SEG_MAX);
+                IJ.log("SEG_MAX");
                 break;
             case 2:
                 seg.setMethodSeg(Segment3DSpots.SEG_BLOCK);
+                IJ.log("SEG_BLOCK");
                 break;
         }
         // big label (more than 2^16 objects)
         seg.bigLabel = bigLabel;
         seg.segmentAll();
+        int size = seg.getObjects().size();
+        IJ.log("Number of labelled objects: "+size);
         // output        
         if ((output == 0) || (output == 2)) {
-            segPlus = new ImagePlus("seg", seg.getLabelImage().getImageStack());
+            //segPlus = new ImagePlus("seg", seg.getLabelImage().getImageStack());
+            segPlus = new ImagePlus("seg", seg.getIndexObjImage().getImageStack());
             if (spotCalib != null) {
                 segPlus.setCalibration(spotCalib);
             }
