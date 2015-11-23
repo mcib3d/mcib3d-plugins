@@ -257,7 +257,7 @@ public class SeedSpots_Plus implements PlugIn {
         // output        
         if ((output == 0) || (output == 2)) {
             //segPlus = new ImagePlus("seg", seg.getLabelImage().getImageStack());
-            segPlus = new ImagePlus("seg", seg.getIndexObjImage().getImageStack());
+            segPlus = new ImagePlus("seg", seg.getLabelImage().getImageStack());
             if (spotCalib != null) {
                 segPlus.setCalibration(spotCalib);
             }
