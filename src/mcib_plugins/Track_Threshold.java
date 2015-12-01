@@ -55,6 +55,7 @@ public class Track_Threshold implements PlugInFilter, DialogListener {
     double volMaxUnit = 1;
     double volMinUnit = 1;
     double volUnit = 1;
+    double minTh = 0;
     String unit = "pix";
     boolean filter = true;
     Calibration cal;
@@ -129,7 +130,8 @@ public class Track_Threshold implements PlugInFilter, DialogListener {
         }
         IJ.log("Threshold method " + methods[threshold_method]);
         IJ.log("Criteria method " + criteria[crit]);
-        int thmin = 0;
+        int thmin = (int) minTh;
+        // is starts at mean selected, use mean, maybe remove in new version
         if (start) {
             thmin = (int) ImageHandler.wrap(timedup).getMean();
             IJ.log("Mean=" + thmin);
@@ -170,6 +172,7 @@ public class Track_Threshold implements PlugInFilter, DialogListener {
         gd.addNumericField("Min_vol_pix", volMin, 0, 10, "");
         //gd.addNumericField("Max_vol", volMaxUnit, 5, 10, unit);
         gd.addNumericField("Max_vol_pix", volMax, 0, 10, "");
+        gd.addNumericField("Min_threshold", minTh, 0, 10, "");
         gd.addChoice("Criteria method", criteria, criteria[crit]);
         gd.addChoice("Threshold method", methods, methods[threshold_method]);
         gd.addNumericField("Value method", step, 1, 10, "");
@@ -181,6 +184,7 @@ public class Track_Threshold implements PlugInFilter, DialogListener {
         volMin = (int) gd.getNextNumber();
         //volMaxUnit = gd.getNextNumber();
         volMax = (int) gd.getNextNumber();
+        minTh = (int) gd.getNextNumber();
         crit = gd.getNextChoiceIndex();
         threshold_method = gd.getNextChoiceIndex();
         step = (int) gd.getNextNumber();

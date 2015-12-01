@@ -5,6 +5,7 @@
  */
 package mcib_plugins.tools;
 
+import ij.IJ;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
@@ -108,13 +109,18 @@ public class ResultsFrame extends JFrame implements ActionListener {
                 model.writeDataSelected(file.getAbsolutePath(), sels);
             }
         } else if (ae.getActionCommand().equalsIgnoreCase("show objects")) {
+
             int[] sels = tableResults.getSelectedRows();
             int[] rows = new int[sels.length];
+            IJ.log("Showing " + sels.length + " selected objects ");
             int c = 0;
             for (int i : sels) {
                 int row = tableResults.convertRowIndexToModel(i);
-                rows[c++] = Integer.parseInt(model.getValueAt(row, 1).toString()) - 1;
+                int nb = Integer.parseInt(model.getValueAt(row, 1).toString()) - 1;
+                rows[c++] = nb;
+                //IJ.log("Selecting object "+nb);          
             }
+
             manager.selectByNumbers(rows);
         } else if (ae.getActionCommand().equalsIgnoreCase("show objects 1")) {
             int[] sels = tableResults.getSelectedRows();

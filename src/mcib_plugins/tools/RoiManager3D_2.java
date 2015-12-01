@@ -62,9 +62,12 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.media.j3d.View;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
+import javax.swing.ListSelectionModel;
 import javax.vecmath.Color3f;
 import mcib3d.geom.Object3D;
 import mcib3d.geom.Object3DSurface;
@@ -1315,14 +1318,14 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         }
 
         // image is coming from OC3D
-        if (title.indexOf("Objects map of") >= 0) {
+        if (title.contains("Objects map of")) {
             title = title.replaceFirst("Objects map of", "Surface map of");
             contours = WindowManager.getImage(title);
             if (contours != null) {
                 IJ.log("Contours found : " + title);
             }
         } // image is coming from 3D segment
-        else if (title.indexOf("-3Dseg") >= 0) {
+        else if (title.contains("-3Dseg")) {
             title = title.replace("-3Dseg", "-3Dsurf");
             contours = WindowManager.getImage(title);
             if (contours != null) {
@@ -1390,7 +1393,12 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         Roi roi = plus.getRoi();
         boolean excludeXY = Prefs.get("RoiManager3D-Options_ExcludeXY.boolean", false);
         boolean excludeZ = Prefs.get("RoiManager3D-Options_ExcludeZ.boolean", false);
-        ImageInt seg = ImageInt.wrap(plus);
+        ImageInt seg;
+        if (plus.getBitDepth() < 32) {
+            seg = ImageInt.wrap(plus);
+        } else {
+            seg = null;
+        }
         while (it.hasNext()) {
             // Object3D
             objList = (ArrayList<Voxel3D>) it.next();
@@ -1432,14 +1440,14 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     public void addObjects3D(Object3D[] objs) {
-        for (int i = 0; i < objs.length; i++) {
-            addObject3D(objs[i]);
+        for (Object3D obj : objs) {
+            addObject3D(obj);
         }
     }
 
     public void addObjects3D(ArrayList<Object3D> objs) {
-        for (int i = 0; i < objs.size(); i++) {
-            addObject3D(objs.get(i));
+        for (Object3D obj : objs) {
+            addObject3D(obj);
         }
     }
 
@@ -2518,11 +2526,11 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
      * @return The image value
      */
     ImagePlus getImage() {
-        //ImagePlus imp = WindowManager.getCurrentImage();
-        ImagePlus imp = IJ.getImage();
+        ImagePlus imp = WindowManager.getCurrentImage();
+        //ImagePlus imp = IJ.getImage();
         //IJ.log("Current image  : "+imp);
         if (imp == null) {
-            IJ.log("There are no images open.");
+            //IJ.log("There are no images open.");
             return null;
         } else {
             return imp;
@@ -2531,7 +2539,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
     ImageHandler getImage3D() {
         ImagePlus imp = getImage();
-
+        if (imp == null) {
+            return null;
+        }
         return ImageHandler.wrap(imp);
     }
 
@@ -2619,11 +2629,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
         this.registerActiveImage();
 
-        if (imp == null) {
-            error("There are no images open.");
-            return;
-        }
-
+//        if (imp == null) {
+//            IJ.log("There are no images open.");
+//            return;
+//        }
         int zmin = imp.getNSlices() + 1;
         int zmax = -1;
 
@@ -2648,22 +2657,28 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         currentZmin = zmin;
         currentZmax = zmax;
 
+        //IJ.log("Computing rois "+zmin+" "+zmax);
         for (int zz = zmin; zz <= zmax; zz++) {
-            IJ.showStatus("Computing Roi " + zz);
+            //IJ.showStatus("Computing Roi " + zz);
             ByteProcessor mask = new ByteProcessor(imp.getWidth(), imp.getHeight());
+            boolean ok = false;
             for (int i = 0; i < indexes.length; i++) {
                 obj = objects3D.getObject(indexes[i]);
-                obj.draw(mask, zz, 255);
+                ok |= obj.draw(mask, zz, 255);
             }
+            if (!ok) {
+                arrayRois[zz] = null;
+                //IJ.log("No draw for " + zz);
+            } else {
+                mask.setThreshold(1, 255, ImageProcessor.NO_LUT_UPDATE);
+                ImagePlus maskPlus = new ImagePlus("mask " + zz, mask);
+                //maskPlus.show("mask_" + zz);
+                ThresholdToSelection tts = new ThresholdToSelection();
+                tts.setup("", maskPlus);
+                tts.run(mask);
 
-            mask.setThreshold(1, 255, ImageProcessor.NO_LUT_UPDATE);
-            ImagePlus maskPlus = new ImagePlus("mask " + zz, mask);
-
-            ThresholdToSelection tts = new ThresholdToSelection();
-            tts.setup("", maskPlus);
-            tts.run(mask);
-
-            arrayRois[zz] = maskPlus.getRoi();
+                arrayRois[zz] = maskPlus.getRoi();
+            }
         }
 
         int middle = (int) (0.5 * zmin + 0.5 * zmax);
@@ -2783,55 +2798,72 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public void mouseWheelMoved(MouseWheelEvent mwe) {
         if (live) {
             this.updateRois();
         }
     }
 
+    @Override
     public void transformationStarted(View view) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public void transformationUpdated(View view) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    /**
+     *
+     * @param view
+     */
+    @Override
     public void transformationFinished(View view) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public void contentAdded(Content c) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public void contentRemoved(Content c) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public void contentChanged(Content c) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public void contentSelected(Content c) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public void canvasResized() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    @Override
     public void universeClosed() {
         universe = null;
     }
 
+    @Override
     public void adjustmentValueChanged(AdjustmentEvent ae) {
         //if (live) {
+        //IJ.log("Adjustement value changed");
         this.updateRois();
         //}
     }
 
     // run plugin
+    @Override
     public void run(String arg) {
     }
 
@@ -2874,10 +2906,21 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     public void selectByNumbers(int[] se) {
+        IJ.log("Selecting " + se.length + " objects");
+        //list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        list.clearSelection();
         int[] sel = se;
         if (sel.length > 0) {
-            list.setSelectedIndices(sel);
+            for (int c = 0; c < sel.length; c++) {
+                int i = sel[c];
+                IJ.log(c + " " + i + " " + model.getElementAt(i) + " " + sel.length);
+                list.addSelectionInterval(i, i);
+                list.updateUI();
+            }
+
+            //list.setSelectedIndices(sel);
         }
+        //list.ensureIndexIsVisible(list.getSelectedIndex());
     }
 
     @Override
