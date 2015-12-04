@@ -92,6 +92,7 @@ public class RoiManager3D_Options implements PlugIn {
         boolean useFloatSegment = Prefs.get("RoiManager3D-Options_Seg32.boolean", false);
         boolean excludeXY = Prefs.get("RoiManager3D-Options_ExcludeXY.boolean", false);
         boolean excludeZ = Prefs.get("RoiManager3D-Options_ExcludeZ.boolean", false);
+        boolean sync3Dviewer = Prefs.get("RoiManager3D-Options_sync3DViewer.boolean", false);
 
         GenericDialog gd = new GenericDialog("RoiManager3D Set Measurements");
         gd.addMessage("Measurements :", Font.decode("dialog bold 14"));
@@ -100,6 +101,7 @@ public class RoiManager3D_Options implements PlugIn {
         gd.addCheckbox("Use 32-bits image for segmentation (nb objects > 65 535)", useFloatSegment);
         gd.addCheckbox("Exclude_objects_on_edges_XY", excludeXY);
         gd.addCheckbox("Exclude_objects_on_edges_Z", excludeZ);
+        gd.addCheckbox("Sync with selected 3D viewer", sync3Dviewer);
         gd.addMessage("Split options : ");
         gd.addNumericField("Distance_between_centers (pixel)", splitDist, 0);
         gd.addMessage("Surf. contact options : ");
@@ -137,6 +139,8 @@ public class RoiManager3D_Options implements PlugIn {
         Prefs.set("RoiManager3D-Options_Seg32.boolean", gd.getNextBoolean());
         Prefs.set("RoiManager3D-Options_ExcludeXY.boolean", gd.getNextBoolean());
         Prefs.set("RoiManager3D-Options_ExcludeZ.boolean", gd.getNextBoolean());
+        Prefs.set("RoiManager3D-Options_sync3DViewer.boolean", gd.getNextBoolean());
+        
         Prefs.set("RoiManager3D-Options_splitDist.double", gd.getNextNumber());
         Prefs.set("RoiManager3D-Options_surfDist.double", gd.getNextNumber());
 

@@ -62,12 +62,9 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.media.j3d.View;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
-import javax.swing.ListSelectionModel;
 import javax.vecmath.Color3f;
 import mcib3d.geom.Object3D;
 import mcib3d.geom.Object3DSurface;
@@ -141,6 +138,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         }
 
         this.getUniverse();
+
+        universe.addUniverseListener(this);
 
         new DropTarget(list, DnDConstants.ACTION_COPY_OR_MOVE, this);
     }
@@ -1481,6 +1480,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     void buildHash() {
+        hashNames.clear();
         for (int i = 0; i < model.getSize(); i++) {
             hashNames.put((String) (model.get(i)), i);
         }
@@ -1787,6 +1787,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         if (showUniverse) {
             universe.show();
             showUniverse = false;
+            universe.getCanvas().addNotify();
         }
 
         if (Recorder.record) {
@@ -2807,12 +2808,12 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
     @Override
     public void transformationStarted(View view) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void transformationUpdated(View view) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -2821,32 +2822,36 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
      */
     @Override
     public void transformationFinished(View view) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void contentAdded(Content c) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void contentRemoved(Content c) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void contentChanged(Content c) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void contentSelected(Content c) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if ((c == null) || (!Prefs.get("RoiManager3D-Options_sync3DViewer.boolean", false))) {
+            return;
+        }
+       // IJ.log("Selected content " + c.getName());
+        selectByName(c.getName());
     }
 
     @Override
     public void canvasResized() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -2883,8 +2888,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     public void selectByName(String name) {
-        int sel = hashNames.get(name);
-        if (sel >= 0) {
+        Integer sel = hashNames.get(name);
+        if ((sel != null) && (sel >= 0)) {
             list.setSelectedIndex(sel);
         }
     }
