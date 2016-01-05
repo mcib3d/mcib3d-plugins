@@ -3,18 +3,11 @@ package mcib_plugins;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
 import ij.measure.Calibration;
 import ij.plugin.Duplicator;
 import ij.plugin.filter.PlugInFilter;
-import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
-import java.awt.AWTEvent;
-import java.awt.TextField;
-import java.text.NumberFormat;
-import java.util.Locale;
-import java.util.Vector;
 import mcib3d.image3d.ImageHandler;
 import mcib3d.image3d.IterativeThresholding.TrackThreshold;
 import mcib3d.image3d.processing.FastFilters3D;
@@ -48,15 +41,11 @@ import mcib3d.image3d.processing.FastFilters3D;
  *
  * @author thomas
  */
-public class Track_Threshold implements PlugInFilter, DialogListener {
+public class Track_Threshold implements PlugInFilter {
 
     int volMax = 10000;
     int volMin = 100;
-    double volMaxUnit = 1;
-    double volMinUnit = 1;
-    double volUnit = 1;
     double minTh = 0;
-    String unit = "pix";
     boolean filter = true;
     Calibration cal;
     private int step = 1;
@@ -75,16 +64,7 @@ public class Track_Threshold implements PlugInFilter, DialogListener {
     public void run(ImageProcessor ip) {
 
         ImagePlus plus = IJ.getImage();
-        cal = plus.getCalibration();
-
-        // TEST
-        //ImageInt im = ImageInt.wrap(plus);
-        if (cal != null) {
-            volUnit = cal.pixelWidth * cal.pixelHeight * cal.pixelDepth;
-            volMinUnit = volMin * volUnit;
-            volMaxUnit = volMax * volUnit;
-            unit = cal.getUnits();
-        }
+        
         if (plus.getBitDepth() == 8) {
             step = 1;
         } else {
@@ -168,21 +148,16 @@ public class Track_Threshold implements PlugInFilter, DialogListener {
         methods = new String[]{"STEP", "KMEANS", "VOLUME"};
         criteria = new String[]{"ELONGATION", "VOLUME", "MSER"};
         GenericDialog gd = new GenericDialog("sizes");
-        //gd.addNumericField("Min_vol", volMinUnit, 5, 10, unit);
         gd.addNumericField("Min_vol_pix", volMin, 0, 10, "");
-        //gd.addNumericField("Max_vol", volMaxUnit, 5, 10, unit);
         gd.addNumericField("Max_vol_pix", volMax, 0, 10, "");
         gd.addNumericField("Min_threshold", minTh, 0, 10, "");
-        gd.addChoice("Criteria method", criteria, criteria[crit]);
-        gd.addChoice("Threshold method", methods, methods[threshold_method]);
-        gd.addNumericField("Value method", step, 1, 10, "");
+        gd.addChoice("Criteria_method", criteria, criteria[crit]);
+        gd.addChoice("Threshold_method", methods, methods[threshold_method]);
+        gd.addNumericField("Value_method", step, 1, 10, "");
         gd.addCheckbox("Starts at mean", start);
         gd.addCheckbox("Filtering", filter);
-        //gd.addDialogListener(this);
         gd.showDialog();
-        //volMinUnit = gd.getNextNumber();
         volMin = (int) gd.getNextNumber();
-        //volMaxUnit = gd.getNextNumber();
         volMax = (int) gd.getNextNumber();
         minTh = (int) gd.getNextNumber();
         crit = gd.getNextChoiceIndex();
@@ -190,76 +165,13 @@ public class Track_Threshold implements PlugInFilter, DialogListener {
         step = (int) gd.getNextNumber();
         start = gd.getNextBoolean();
         filter = gd.getNextBoolean();
-//        if (volMinUnit != 0) {
-//            volMin = (int) Math.floor(volMinUnit / volUnit);
-//        }
-//        if (volMaxUnit != 0) {
-//            volMax = (int) Math.floor(volMaxUnit / volUnit);
-//        }
-//        if (volMax < 0) {
-//            volMax = Integer.MAX_VALUE;
-//        }
+
         if (volMax < volMin) {
-            volMax = volMin + 1;
-            //volMaxUnit = volMinUnit + volUnit;
+            int vtemp = volMax;
+            volMax = volMin;
+            volMin = volMax;
         }
-        //gd.addDialogListener(this);
 
         return gd.wasOKed();
-    }
-
-    @Override
-    public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
-        Vector fields = gd.getNumericFields();
-        //IJ.log("" + volMin + " " + volMinUnit + " " + volMax + " " + volMaxUnit + " " + volUnit);
-        NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
-        nf.setMaximumFractionDigits(3);
-
-        try {
-            if ((e != null) && (!gd.invalidNumber())) {
-                switch (fields.indexOf(e.getSource())) {
-                    //////// MIN
-                    case 0:
-                        double v0 = Double.parseDouble(((TextField) fields.elementAt(0)).getText());
-                        if (v0 != volMinUnit) {
-                            ((TextField) fields.elementAt(1)).setText(Integer.toString((int) Math.round(v0 / volUnit)));
-                            volMinUnit = v0;
-                            volMin = (int) Math.round(v0 / volUnit);
-                        }
-                        break;
-                    case 1:
-                        int v1 = Integer.parseInt(((TextField) fields.elementAt(1)).getText());
-                        if (v1 != volMin) {
-                            ((TextField) fields.elementAt(0)).setText("" + v1 * volUnit);
-                            volMin = v1;
-                            volMinUnit = v1 * volUnit;
-                        }
-                        break;
-                    //////// MAX
-                    case 2:
-                        double v2 = Double.parseDouble(((TextField) fields.elementAt(2)).getText());
-                        if (v2 != volMinUnit) {
-                            ((TextField) fields.elementAt(3)).setText(Integer.toString((int) Math.round(v2 / volUnit)));
-                            volMaxUnit = v2;
-                            volMax = (int) Math.round(v2 / volUnit);
-                        }
-                        break;
-                    case 3:
-                        int v3 = Integer.parseInt(((TextField) fields.elementAt(3)).getText());
-                        if (v3 != volMax) {
-                            ((TextField) fields.elementAt(2)).setText("" + v3 * volUnit);
-                            volMax = v3;
-                            volMaxUnit = v3 * volUnit;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-            if (!gd.invalidNumber());
-        } catch (NumberFormatException nfe) {
-            IJ.log(nfe.getMessage());
-        }
-        return true;
     }
 }
