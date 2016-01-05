@@ -1,5 +1,6 @@
 package mcib_plugins;
 
+import ij.IJ;
 import mcib_plugins.analysis.simpleMeasure;
 import ij.ImagePlus;
 import ij.measure.ResultsTable;
@@ -42,7 +43,7 @@ import mcib3d.image3d.ImageLabeller;
 public class Simple_MeasureGeometrical implements PlugInFilter {
 
     ImagePlus myPlus;
-    String[] keysBase_s = new String[]{"label", "Volume(pix)", "Volume(unit)", "Surface(pix)", "Surface(unit)"};
+    String[] keysBase_s = new String[]{"Value", "Volume(pix)", "Volume(unit)", "Surface(pix)", "Surface(unit)"};
 
     @Override
     public int setup(String arg, ImagePlus imp) {
@@ -52,9 +53,11 @@ public class Simple_MeasureGeometrical implements PlugInFilter {
 
     @Override
     public void run(ImageProcessor ip) {
+        String title = myPlus.getTitle();
         ImageInt img = ImageInt.wrap(myPlus);
         ImagePlus seg;
         if (img.isBinary(0)) {
+            IJ.log("Labelling image.");
             ImageLabeller label = new ImageLabeller();
             seg = label.getLabels(img).getImagePlus();
             seg.show("Labels");
@@ -74,9 +77,10 @@ public class Simple_MeasureGeometrical implements PlugInFilter {
             for (int k = 0; k < keysBase_s.length; k++) {
                 rt.setValue(keysBase_s[k], row, m[k]);
             }
+            rt.setLabel(title, row);
             row++;
         }
         rt.updateResults();
-        rt.show("Results");    
+        rt.show("Results");
     }
 }

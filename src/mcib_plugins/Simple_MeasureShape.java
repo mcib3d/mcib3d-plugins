@@ -42,7 +42,7 @@ import mcib3d.image3d.ImageLabeller;
 public class Simple_MeasureShape implements PlugInFilter {
 
     ImagePlus myPlus;
-    String[] keysBase_s = new String[]{"label", "Compactness", "Sphericity","Elongatio","Flatness","Spareness"};
+    String[] keysBase_s = new String[]{"Value", "Compactness", "Sphericity", "Elongatio", "Flatness", "Spareness"};
 
     @Override
     public int setup(String arg, ImagePlus imp) {
@@ -52,6 +52,7 @@ public class Simple_MeasureShape implements PlugInFilter {
 
     @Override
     public void run(ImageProcessor ip) {
+        String title = myPlus.getTitle();
         ImageInt img = ImageInt.wrap(myPlus);
         ImagePlus seg;
         if (img.isBinary(0)) {
@@ -74,9 +75,10 @@ public class Simple_MeasureShape implements PlugInFilter {
             for (int k = 0; k < keysBase_s.length; k++) {
                 rt.setValue(keysBase_s[k], row, m[k]);
             }
+            rt.setLabel(title, row);
             row++;
         }
         rt.updateResults();
-        rt.show("Results");    
+        rt.show("Results");
     }
 }

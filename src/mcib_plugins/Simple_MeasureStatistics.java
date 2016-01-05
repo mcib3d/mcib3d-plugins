@@ -46,17 +46,20 @@ public class Simple_MeasureStatistics implements PlugInFilter {
     ImagePlus myPlus;
     int imaSpots;
     int imaSignal;
-    String[] keys_s = new String[]{"average", "standardDeviation", "minimum", "maximum", "integratedDensity"};
+    String[] keys_s = new String[]{"Value","Average", "StandardDeviation", "Minimum", "Maximum", "IntegratedDensity"};
     boolean debug = false;
     boolean multithread = false;
 
+    @Override
     public int setup(String arg, ImagePlus imp) {
         return PlugInFilter.DOES_16 + PlugInFilter.DOES_8G + PlugInFilter.STACK_REQUIRED;
     }
 
+    @Override
     public void run(ImageProcessor ip) {
         if (Dialogue()) {
             myPlus = WindowManager.getImage(imaSpots);
+            String title = myPlus.getTitle();
             ImageInt img = ImageInt.wrap(myPlus);
             ImagePlus seg;
             if (img.isBinary(0)) {
@@ -71,7 +74,10 @@ public class Simple_MeasureStatistics implements PlugInFilter {
             if (rt == null) {
                 rt = new ResultsTable();
             }
-            ArrayList<double[]> res = mes.getMeasuresStats(WindowManager.getImage(imaSignal));
+            ImagePlus plusSignal = WindowManager.getImage(imaSignal);
+            title = title.concat(":");
+            title = title.concat(plusSignal.getTitle());
+            ArrayList<double[]> res = mes.getMeasuresStats(plusSignal);
             int row = rt.getCounter();
             for (Iterator<double[]> it = res.iterator(); it.hasNext();) {
                 rt.incrementCounter();
@@ -79,6 +85,7 @@ public class Simple_MeasureStatistics implements PlugInFilter {
                 for (int k = 0; k < keys_s.length; k++) {
                     rt.setValue(keys_s[k], row, m[k]);
                 }
+                rt.setLabel(title, row);
                 row++;
             }
             rt.updateResults();

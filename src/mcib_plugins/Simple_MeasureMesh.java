@@ -40,13 +40,13 @@ import mcib_plugins.analysis.simpleMeasure;
  *
  * @author thomas
  */
-public class Simple_MeasureMesh implements PlugInFilter{
+public class Simple_MeasureMesh implements PlugInFilter {
 
     ImagePlus myPlus;
     boolean debug = false;
     boolean multithread = false;
-    
-    String[] keysBase_s = new String[]{"label","SurfaceArea", "SurfaceAreaSmooth"};
+
+    String[] keysBase_s = new String[]{"Value", "SurfaceArea", "SurfaceAreaSmooth"};
 
     @Override
     public int setup(String arg, ImagePlus imp) {
@@ -56,23 +56,24 @@ public class Simple_MeasureMesh implements PlugInFilter{
 
     @Override
     public void run(ImageProcessor ip) {
-         ImageInt img = ImageInt.wrap(myPlus);
+        String title = myPlus.getTitle();
+        ImageInt img = ImageInt.wrap(myPlus);
         ImagePlus seg;
         if (img.isBinary(0)) {
             ImageLabeller label = new ImageLabeller();
             seg = label.getLabels(img).getImagePlus();
-             seg.show("Labels");
+            seg.show("Labels");
         } else {
             seg = myPlus;
         }
-         simpleMeasure mes = new simpleMeasure(seg);
+        simpleMeasure mes = new simpleMeasure(seg);
         ResultsTable rt = ResultsTable.getResultsTable();
         if (rt == null) {
             rt = new ResultsTable();
         }
         IJ.log("Creating meshes");
         ArrayList<double[]> res = mes.getMeshSurfaces();
-         IJ.log("Measuring meshes ...");
+        IJ.log("Measuring meshes ...");
         int row = rt.getCounter();
         for (Iterator<double[]> it = res.iterator(); it.hasNext();) {
             rt.incrementCounter();
@@ -80,9 +81,10 @@ public class Simple_MeasureMesh implements PlugInFilter{
             for (int k = 0; k < keysBase_s.length; k++) {
                 rt.setValue(keysBase_s[k], row, m[k]);
             }
+            rt.setLabel(title, row);
             row++;
         }
         rt.updateResults();
         rt.show("Results");
-    }   
+    }
 }
