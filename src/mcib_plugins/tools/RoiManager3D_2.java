@@ -1505,9 +1505,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         }
 
         for (int i = le - 1; i > 0; i--) {
-            delete(indexes[i], null);
+            delete(indexes[i]);
         }
-
+        buildHash();
         list.updateUI();
 
         if (Recorder.record) {
@@ -1554,7 +1554,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             obj2.setCalibration(cal);
             obj2.setValue(val0);
             obj2.setName(obj0.getName() + "-split2");
-            delete(i0, (String) model.get(i0));
+            delete(i0);
             addObject3D(obj1);
             addObject3D(obj2);
             buildHash();
@@ -1660,16 +1660,18 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                     delete = true;
                 }
             }
-            String name = (String) model.get(i);
             if (delete) {
                 if (erase) {
                     fill3D(0, 0, 0);
-                    delete(i, name);
+                    delete(i);
                 } else {
-                    delete(i, name);
+                    delete(i);
                 }
             }
         }
+        
+         buildHash();
+         
         //updateShowAll();
         if (Recorder.record) {
             if (!erase) {
@@ -1691,13 +1693,13 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         return true;
     }
 
-    void delete(int i, String name) {
+    void delete(int i) {
         //roimanager.getROIs().remove(name);
         //list.remove(i);
         model.remove(i);
         objects3D.removeObject(i);
         // rebuild hash
-        buildHash();
+        //buildHash();
         // 3D
         //delete3DViewer(name);
     }
