@@ -1,0 +1,145 @@
+
+public ArrayList<Voxel3D> segmentSpotBlock(int xdep, int ydep, int zdep, int lcThreshold, int val) {
+        boolean changement = true;
+        int xfin = xdep + 1;
+        int yfin = ydep + 1;
+        int zfin = zdep + 1;
+        int sens = 1;
+        int value = val;
+        if (labelImage == null) {
+            this.createLabelImage();
+        }
+        // pixel already segmented ?
+        if (labelImage.getPixel(xdep, ydep, zdep) > 0) {
+            return null;
+        }
+        labelImage.putPixel(xdep, ydep, zdep, value);
+        ArrayList<Voxel3D> object = new ArrayList();
+        object.add(new Voxel3D(xdep, ydep, zdep, value));
+        int volume = 1;
+        int i;
+        int j;
+        int k;
+        int l;
+        int m;
+        int n;
+        int sx = rawImage.getSizex();
+        int sy = rawImage.getSizey();
+        int sz = rawImage.getSizez();
+
+        IntImage3D original = rawImage;
+
+        ArrayList<Voxel3D> neigh;
+        Iterator it;
+        Voxel3D tmpneigh;
+        int pixelCenter;
+        int waterne = 0, water = 0;
+        boolean ok = true;
+
+        //int ite = 0;
+        while (changement) {
+            //IJ.log("Ite " + ite + " " + xdep + " " + xfin);
+            //ite++;
+            changement = false;
+            for (k = sens == 1 ? zdep : zfin; ((sens == 1 && k <= zfin) || (sens == -1 && k >= zdep)); k += sens) {
+                for (j = sens == 1 ? ydep : yfin; ((sens == 1 && j <= yfin) || (sens == -1 && j >= ydep)); j += sens) {
+                    for (i = sens == 1 ? xdep : xfin; ((sens == 1 && i <= xfin) || (sens == -1 && i >= xdep)); i += sens) {
+                        if (labelImage.getPixel(i, j, k) == value) {
+                            pixelCenter = original.getPixel(i, j, k);
+                            if (WATERSHED) {
+                                water = watershedImage.getPixel(i, j, k);
+                            }
+                            // create neighbors list
+                            neigh = new ArrayList();
+                            for (n = k - 1; n < k + 2; n++) {
+                                for (m = j - 1; m < j + 2; m++) {
+                                    for (l = i - 1; l < i + 2; l++) {
+                                        if ((l >= 0) && (l < sx) && (m >= 0) && (m < sy) && (n >= 0) && (n < sz)) {
+                                            if (WATERSHED) {
+                                                waterne = watershedImage.getPixel(l, m, n);
+                                            }
+                                            if ((labelImage.getPixel(l, m, n) == 0) && (original.getPixel(l, m, n) >= lcThreshold) && (waterne == water)) {
+                                                neigh.add(new Voxel3D(l, m, n, original.getPixel(l, m, n)));
+                                            }
+                                        }
+                                    } //l
+                                } // m
+                            } //n
+
+                            // analyse list                           
+                            ok = true;
+                            // empty
+                            if (neigh.isEmpty()) {
+                                ok = false;
+                            }
+                            // test 1 neighbor
+                            if (neigh.size() == 1) {
+                                ok = false;
+                            }
+                            // test all neighbors
+                            it = neigh.iterator();
+                            while (it.hasNext() && ok) {
+                                tmpneigh = (Voxel3D) it.next();
+                                // BLOCK
+                                if (tmpneigh.getValue() > pixelCenter) {
+                                    ok = false;
+                                    break;
+                                }
+                            }
+
+                            if (ok) {
+                                changement = true;
+                                it = neigh.iterator();
+                                while (it.hasNext()) {
+                                    tmpneigh = (Voxel3D) it.next();
+                                    l = (int) tmpneigh.getX();
+                                    m = (int) tmpneigh.getY();
+                                    n = (int) tmpneigh.getZ();
+                                    labelImage.putPixel(l, m, n, value);
+                                    object.add(new Voxel3D(l, m, n, value));
+                                    volume++;
+                                    if (volume > volMax) {
+                                        IJ.log("VOL :" + volume);
+                                        return null;
+                                    }
+                                    // update min-max
+                                    if (l < xdep) {
+                                        xdep--;
+                                    }
+                                    if (l > xfin) {
+                                        xfin++;
+                                    }
+                                    if (m < ydep) {
+                                        ydep--;
+                                    }
+                                    if (m > yfin) {
+                                        yfin++;
+                                    }
+                                    if (n < zdep) {
+                                        zdep--;
+                                    }
+                                    if (n > zfin) {
+                                        zfin++;
+                                    }
+                                }
+                            } // BLOCKING
+                            // else {
+                            //     it = neigh.iterator();
+                            //     while ((it != null) && (it.hasNext())) {
+                            //         tmpneigh = (Voxel3D) it.next();
+                            //         l = (int) tmpneigh.getX();
+                            //         m = (int) tmpneigh.getY();
+                            //         n = (int) tmpneigh.getZ();
+                            // 0 do not change 1 exclude from future seg
+                            //labelImage.putPixel(l, m, n, 0);
+                            //    }
+                            //}
+                        } // labelimage==value
+                    } //i
+                } // j
+            }// k
+            sens *= -1;
+        }//while      
+
+        return object;
+    }
