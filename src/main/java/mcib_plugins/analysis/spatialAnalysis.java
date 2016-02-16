@@ -16,6 +16,7 @@ import mcib3d.geom.Point3D;
 import mcib3d.image3d.ImageHandler;
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.ImageLabeller;
+import mcib3d.image3d.ImageShort;
 import mcib3d.utils.ArrayUtil;
 import mcib3d.utils.CDFTools;
 
@@ -399,7 +400,7 @@ public class spatialAnalysis {
         poprandom.setCalibration(calibration);
         poprandom.setMask(mask);
         poprandom.createRandomPopulation(pop.getNbObjects(), distHardCore);
-        randomPop = maskHandler.createSameDimensions();
+        randomPop = new ImageShort("Random", maskHandler.sizeX,maskHandler.sizeY,maskHandler.sizeZ);
         randomPop.setCalibration(calibration);
         poprandom.draw(randomPop);
         //randomPop.show("random");
