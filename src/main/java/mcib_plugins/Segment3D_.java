@@ -3,6 +3,7 @@ package mcib_plugins;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
+import ij.measure.Calibration;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import mcib3d.image3d.ImageInt;
@@ -84,10 +85,17 @@ public class Segment3D_ implements PlugInFilter {
         if (max > 0) {
             labeler.setMaxsize(max);
         }
+        Calibration cal = myPlus.getCalibration();
         ImageInt img = ImageInt.wrap(myPlus);
         ImageInt bin = img.thresholdAboveInclusive(low);
+        if (cal != null) {
+            bin.setCalibration(cal);
+        }
         bin.show("Bin");
         ImageInt res = labeler.getLabels(bin);
+        if (cal != null) {
+            res.setCalibration(cal);
+        }
         res.show("Seg");
         IJ.log("Nb obj total =" + labeler.getNbObjectsTotal(bin));
         IJ.log("Nb obj in range size =" + labeler.getNbObjectsinSizeRange(bin));
