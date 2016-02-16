@@ -16,12 +16,14 @@ public class Hysteresis_Thresholding implements PlugInFilter {
 
     ImagePlus plus = null;
 
+    @Override
     public int setup(String arg, ImagePlus imp) {
         plus = imp;
 
         return PlugInFilter.DOES_8G + PlugInFilter.DOES_16;
     }
 
+    @Override
     public void run(ImageProcessor ip) {
         GenericDialog gd = new GenericDialog("Hysteresis Thresholding (ImageScience)");
         gd.addNumericField("High Threshold:", 128, 1);

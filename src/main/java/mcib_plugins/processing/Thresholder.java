@@ -39,8 +39,8 @@ public class Thresholder {
 		messenger.status("Applying hard thresholding...");
 		final double[] array = new double[dims.x];
 		final Coordinates coords = new Coordinates();
-		progressor.steps(dims.c*dims.t*dims.z);
-		progressor.start();
+		//progressor.set(dims.c*dims.t*dims.z);
+		//progressor.start();
 		image.axes(Axes.X);
 		
 		// Threshold:
@@ -54,7 +54,7 @@ public class Thresholder {
 							else array[x] = BELOW;
 						image.set(coords,array);
 					}
-					progressor.step();
+					//progressor.step();
 				}
 			}
 		}
@@ -62,7 +62,7 @@ public class Thresholder {
 		// Finish up:
 		image.name(image.name() + " hard thresholded");
 		messenger.status("");
-		progressor.stop();
+		//progressor.stop();
 		timer.stop();
 	}
 	
@@ -94,8 +94,8 @@ public class Thresholder {
 		final Candidates cands = new Candidates();
 		image.axes(Axes.X);
 		
-		progressor.steps(3*dims.c*dims.t*dims.z*dims.y);
-		progressor.start();
+		//progressor.set((long) 3*dims.c*dims.t*dims.z*dims.y);
+		//progressor.start();
 		
 		// Classify and expand:
 		if (dims.z == 1) { // 2D case
@@ -112,7 +112,7 @@ public class Thresholder {
 							else if (array[coords.x] >= low) marray[mcoords.x] = CAND;
 							else marray[mcoords.x] = OFF;
 						mcoords.x=0; map.set(mcoords,marray);
-						progressor.step();
+						//progressor.step();
 					}
 				}
 			}
@@ -139,7 +139,7 @@ public class Thresholder {
 								}
 							}
 						}
-						progressor.step();
+						//progressor.step();
 					}
 				}
 			}
@@ -153,7 +153,7 @@ public class Thresholder {
 							if (marray[mcoords.x] == ON) array[coords.x] = ABOVE;
 							else array[coords.x] = BELOW;
 						coords.x=0; image.set(coords,array);
-						progressor.step();
+						//progressor.step();
 					}
 				}
 			}
@@ -173,7 +173,7 @@ public class Thresholder {
 								else if (array[coords.x] >= low) marray[mcoords.x] = CAND;
 								else marray[mcoords.x] = OFF;
 							mcoords.x=0; map.set(mcoords,marray);
-							progressor.step();
+							//progressor.step();
 						}
 					}
 				}
@@ -222,7 +222,7 @@ public class Thresholder {
 										++cand.x; ++cand.y; if (map.get(cand)==CAND) { cands.push(cand); map.set(cand,QUEUED); }
 									}
 								}
-							progressor.step();
+							//progressor.step();
 						}
 					}
 				}
@@ -238,7 +238,7 @@ public class Thresholder {
 								if (marray[mcoords.x] == ON) array[coords.x] = ABOVE;
 								else array[coords.x] = BELOW;
 							coords.x=0; image.set(coords,array);
-							progressor.step();
+							//progressor.step();
 						}
 					}
 				}
@@ -248,7 +248,7 @@ public class Thresholder {
 		// Finish up:
 		image.name(image.name() + " hysteresis thresholded");
 		messenger.status("");
-		progressor.stop();
+		//progressor.stop();
 		timer.stop();
 	}
         
@@ -272,8 +272,8 @@ public class Thresholder {
 		final Candidates cands = new Candidates();
 		image.axes(Axes.X);
 		
-		progressor.steps(3*dims.c*dims.t*dims.z*dims.y);
-		progressor.start();
+		//progressor.set(3*dims.c*dims.t*dims.z*dims.y);
+		//progressor.start();
 		
 		// Classify and expand:
 		if (dims.z == 1) { // 2D case
@@ -290,7 +290,7 @@ public class Thresholder {
 							else if (array[coords.x] >= low) marray[mcoords.x] = CAND;
 							else marray[mcoords.x] = OFF;
 						mcoords.x=0; map.set(mcoords,marray);
-						progressor.step();
+						//progressor.step();
 					}
 				}
 			}
@@ -316,7 +316,7 @@ public class Thresholder {
 								}
 							}
 						}
-						progressor.step();
+						//progressor.step();
 					}
 				}
 			}
@@ -330,7 +330,7 @@ public class Thresholder {
 							if (marray[mcoords.x] == ON) array[coords.x] = ABOVE;
 							else array[coords.x] = BELOW;
 						coords.x=0; image.set(coords,array);
-						progressor.step();
+						//progressor.step();
 					}
 				}
 			}
@@ -350,7 +350,7 @@ public class Thresholder {
 								else if (array[coords.x] >= low) marray[mcoords.x] = CAND;
 								else marray[mcoords.x] = OFF;
 							mcoords.x=0; map.set(mcoords,marray);
-							progressor.step();
+							//progressor.step();
 						}
 					}
 				}
@@ -382,7 +382,7 @@ public class Thresholder {
                                                                                 ++cand.x;
 									}
 								}
-							progressor.step();
+							//progressor.step();
 						}
 					}
 				}
@@ -398,7 +398,7 @@ public class Thresholder {
 								if (marray[mcoords.x] == ON) array[coords.x] = ABOVE;
 								else array[coords.x] = BELOW;
 							coords.x=0; image.set(coords,array);
-							progressor.step();
+							//progressor.step();
 						}
 					}
 				}
@@ -408,7 +408,7 @@ public class Thresholder {
 		// Finish up:
 		image.name(image.name() + " hysteresis thresholded");
 		messenger.status("");
-		progressor.stop();
+		//progressor.stop();
 		timer.stop();
 	}
 	
