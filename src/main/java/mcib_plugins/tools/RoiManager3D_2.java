@@ -758,8 +758,6 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jButtonDeselect1 = new javax.swing.JButton();
-        buttonSave1 = new javax.swing.JButton();
         jPanel = new javax.swing.JPanel();
         jScrollPane = new javax.swing.JScrollPane();
         list = new javax.swing.JList();
@@ -789,16 +787,6 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         jSeparator4 = new javax.swing.JSeparator();
         jSeparator5 = new javax.swing.JSeparator();
         buttonConfig = new javax.swing.JButton();
-
-        jButtonDeselect1.setText("Deselect");
-
-        buttonSave1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/filesave.png"))); // NOI18N
-        buttonSave1.setToolTipText("Save objects");
-        buttonSave1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                buttonSave1ActionPerformed(evt);
-            }
-        });
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -883,7 +871,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             }
         });
 
-        buttonLoad.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/fileopen.png"))); // NOI18N
+        buttonLoad.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/fileopen.png")));
         buttonLoad.setToolTipText("Load objects");
         buttonLoad.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -933,7 +921,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             }
         });
 
-        buttonSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/filesave.png"))); // NOI18N
+        buttonSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/filesave.png")));
         buttonSave.setToolTipText("Save objects");
         buttonSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1102,11 +1090,11 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                             .addComponent(buttonLiveRoi)
                             .addComponent(buttonLabel))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(buttonSave, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(buttonLoad)
-                            .addComponent(buttonAbout, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(buttonConfig, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(buttonSave, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(buttonAbout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(buttonConfig, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(buttonLoad, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addGap(9, 9, 9))
                     .addComponent(jScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -1208,10 +1196,6 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         listVoxels();
     }//GEN-LAST:event_buttonListVoxelsActionPerformed
 
-    private void buttonLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonLoadActionPerformed
-        loadObjects();
-    }//GEN-LAST:event_buttonLoadActionPerformed
-
     private void buttonLiveRoiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonLiveRoiActionPerformed
         live = !live;
         if (live) {
@@ -1252,13 +1236,13 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         fill3D();
     }//GEN-LAST:event_buttonFillStackActionPerformed
 
-    private void buttonSave1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSave1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_buttonSave1ActionPerformed
-
     private void buttonConfigActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonConfigActionPerformed
         IJ.run("3D Manager Options");
     }//GEN-LAST:event_buttonConfigActionPerformed
+
+    private void buttonLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonLoadActionPerformed
+        loadObjects();
+    }//GEN-LAST:event_buttonLoadActionPerformed
 
     /**
      * @param args the command line arguments
@@ -1808,6 +1792,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 CustomTriangleMesh tm = new CustomTriangleMesh(l);
                 tm.setColor(col);
                 Content surface = universe.addCustomMesh(tm, name);
+                surface.toggleLock();
                 System.out.println("Added obj " + surface.toString());
             } // already exists
             else {
@@ -2764,11 +2749,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     private javax.swing.JButton buttonQuantif;
     private javax.swing.JButton buttonRename;
     private javax.swing.JButton buttonSave;
-    private javax.swing.JButton buttonSave1;
     private javax.swing.JButton buttonSegmentation3D;
     private javax.swing.JButton buttonSelectAll;
     private javax.swing.JButton buttonSplit;
-    private javax.swing.JButton jButtonDeselect1;
     public javax.swing.JPanel jPanel;
     private javax.swing.JScrollPane jScrollPane;
     private javax.swing.JSeparator jSeparator3;
