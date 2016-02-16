@@ -1,10 +1,7 @@
 package mcib_plugins.processing;
 
-import imageware.Access;
-import imageware.Buffer;
 import imageware.Builder;
 import imageware.ImageWare;
-import imageware.Process;
 
 public class LoG3D
 {

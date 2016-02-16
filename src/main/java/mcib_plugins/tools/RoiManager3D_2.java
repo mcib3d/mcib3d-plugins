@@ -883,7 +883,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             }
         });
 
-        buttonLoad.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/fileopen.png"))); // NOI18N
+        buttonLoad.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/fileopen.png"))); // NOI18N
         buttonLoad.setToolTipText("Load objects");
         buttonLoad.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -933,7 +933,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             }
         });
 
-        buttonSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/filesave.png"))); // NOI18N
+        buttonSave.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/filesave.png"))); // NOI18N
         buttonSave.setToolTipText("Save objects");
         buttonSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -948,7 +948,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             }
         });
 
-        buttonAbout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/help_about.png"))); // NOI18N
+        buttonAbout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/help_about.png"))); // NOI18N
         buttonAbout.setToolTipText("About");
         buttonAbout.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -977,7 +977,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             }
         });
 
-        buttonConfig.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/config.png"))); // NOI18N
+        buttonConfig.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icons/config.png"))); // NOI18N
         buttonConfig.setToolTipText("Settings");
         buttonConfig.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1789,7 +1789,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         if (showUniverse) {
             universe.show();
             showUniverse = false;
-            universe.getCanvas().addNotify();
+            //universe.getCanvas().addNotify();
         }
 
         if (Recorder.record) {

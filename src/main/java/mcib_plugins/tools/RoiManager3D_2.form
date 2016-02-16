@@ -326,7 +326,7 @@
         <Component class="javax.swing.JButton" name="buttonLoad">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/resources/fileopen.png"/>
+              <Image iconType="3" name="/icons/fileopen.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" value="Load objects"/>
           </Properties>
@@ -385,7 +385,7 @@
         <Component class="javax.swing.JButton" name="buttonSave">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/resources/filesave.png"/>
+              <Image iconType="3" name="/icons/filesave.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" value="Save objects"/>
           </Properties>
@@ -404,7 +404,7 @@
         <Component class="javax.swing.JButton" name="buttonAbout">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/resources/help_about.png"/>
+              <Image iconType="3" name="/icons/help_about.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" value="About"/>
           </Properties>
@@ -445,7 +445,7 @@
         <Component class="javax.swing.JButton" name="buttonConfig">
           <Properties>
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-              <Image iconType="3" name="/resources/config.png"/>
+              <Image iconType="3" name="/icons/config.png"/>
             </Property>
             <Property name="toolTipText" type="java.lang.String" value="Settings"/>
           </Properties>
