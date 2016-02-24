@@ -45,6 +45,10 @@ public class spatialAnalysis {
     //private double sdi_K;
     ImageHandler randomPop;
 
+    private Color ColorAVG = Color.red;
+    private Color ColorENV = Color.green;
+    private Color ColorOBS = Color.blue;
+
     int nbBins = 1000;
 
     public spatialAnalysis(int numPoints, int numRandomSamples, double distHardCore, double env) {
@@ -335,19 +339,19 @@ public class spatialAnalysis {
         plot.setLimits(0, plotmaxX, 0, plotmaxY);
 
         // enveloppe  for e.g 10 % at 5 and 95 %
-        plot.setColor(Color.green);
+        plot.setColor(ColorENV);
         plot.addPoints(xEvals0.getArray(), samplespc5.getArray(), Plot.LINE);
 
         // high envxEvals.getMaximum
-        plot.setColor(Color.green);
+        plot.setColor(ColorENV);
         plot.addPoints(xEvals0.getArray(), samplespc95.getArray(), Plot.LINE);
 
         // average
-        plot.setColor(Color.red);
+        plot.setColor(ColorAVG);
         plot.addPoints(xEvals.getArray(), averageCD.getArray(), Plot.LINE);
 
         // observed
-        plot.setColor(Color.blue);
+        plot.setColor(ColorOBS);
         plot.addPoints(observedDistances.getArray(), observedCD.getArray(), Plot.LINE);
 
         return plot;
@@ -400,7 +404,7 @@ public class spatialAnalysis {
         poprandom.setCalibration(calibration);
         poprandom.setMask(mask);
         poprandom.createRandomPopulation(pop.getNbObjects(), distHardCore);
-        randomPop = new ImageShort("Random", maskHandler.sizeX,maskHandler.sizeY,maskHandler.sizeZ);
+        randomPop = new ImageShort("Random", maskHandler.sizeX, maskHandler.sizeY, maskHandler.sizeZ);
         randomPop.setCalibration(calibration);
         poprandom.draw(randomPop);
         //randomPop.show("random");
@@ -460,5 +464,11 @@ public class spatialAnalysis {
         }
 
         return evaluationPoints;
+    }
+
+    public void setColorsPlot(Color avg, Color env, Color obs) {
+        ColorAVG = avg;
+        ColorENV = env;
+        ColorOBS = obs;
     }
 }

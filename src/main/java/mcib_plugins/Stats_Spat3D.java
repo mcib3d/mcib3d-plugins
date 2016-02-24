@@ -10,6 +10,7 @@ import ij.measure.Calibration;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
+import java.awt.Color;
 import mcib3d.geom.Point3D;
 import mcib_plugins.analysis.spatialAnalysis;
 
@@ -85,6 +86,7 @@ public class Stats_Spat3D implements PlugInFilter {
         calibration = imp.getCalibration();
 
         spatialAnalysis spa = new spatialAnalysis(numPoints, numRandomSamples, distHardCore, env);
+        spa.setColorsPlot(Color.DARK_GRAY, Color.LIGHT_GRAY, Color.MAGENTA);
         spa.process(imp, WindowManager.getImage(imamask + 1), functions, true, show, save);
         spa.getRandomSample().show("Random Sample");
     }
@@ -130,18 +132,22 @@ public class Stats_Spat3D implements PlugInFilter {
     }
 
     private void createMask(ImagePlus plus) {
-        ByteProcessor mask = new ByteProcessor(plus.getWidth(), plus.getHeight());
+        ImageProcessor mask = new ByteProcessor(plus.getWidth(), plus.getHeight());
         Roi roi = plus.getRoi();
         if (roi == null) {
             return;
         }
-        for (int x = 0; x < plus.getWidth(); x++) {
-            for (int y = 0; y < plus.getHeight(); y++) {
-                if (roi.contains(x, y)) {
-                    mask.putPixel(x, y, 255);
-                }
-            }
-        }
+        ImageProcessor ma = roi.getMask();
+        
+        mask.insert(ma, roi.getBounds().x, roi.getBounds().y);
+
+//        for (int x = 0; x < plus.getWidth(); x++) {
+//            for (int y = 0; y < plus.getHeight(); y++) {
+//                if (roi.contains(x, y)) {
+//                    mask.putPixel(x, y, 255);
+//                }
+//            }
+//        }
         ImagePlus plusMask = new ImagePlus("mask", mask);
         if (plus.getCalibration() != null) {
             plusMask.setCalibration(plus.getCalibration());
