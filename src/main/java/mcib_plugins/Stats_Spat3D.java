@@ -140,14 +140,7 @@ public class Stats_Spat3D implements PlugInFilter {
         ImageProcessor ma = roi.getMask();
         
         mask.insert(ma, roi.getBounds().x, roi.getBounds().y);
-
-//        for (int x = 0; x < plus.getWidth(); x++) {
-//            for (int y = 0; y < plus.getHeight(); y++) {
-//                if (roi.contains(x, y)) {
-//                    mask.putPixel(x, y, 255);
-//                }
-//            }
-//        }
+        
         ImagePlus plusMask = new ImagePlus("mask", mask);
         if (plus.getCalibration() != null) {
             plusMask.setCalibration(plus.getCalibration());
