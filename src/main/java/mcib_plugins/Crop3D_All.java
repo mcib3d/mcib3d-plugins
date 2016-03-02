@@ -46,7 +46,8 @@ public class Crop3D_All implements PlugInFilter {
                 IJ.error("RoiManager empty ! ");
                 return;
             }
-            List list = roimanager.getList();
+            //List list = roimanager.  getList();
+            //roimanager.
             Roi[] rois = roimanager.getRoisAsArray();
             ImageInt ima = ImageInt.wrap(imp);
             String s;
@@ -57,9 +58,9 @@ public class Crop3D_All implements PlugInFilter {
             FileSaver fs;
 
             for (int i = 0; i < nb; i++) {
-                s = list.getItem(i);
-                slice = roimanager.getSliceNumber(s);
+                //s = list.getItem(i);
                 roi = rois[i];
+                slice = roimanager.getSliceNumber(roi.getName());                
                 x = roi.getBounds().x;
                 y = roi.getBounds().y;
 
