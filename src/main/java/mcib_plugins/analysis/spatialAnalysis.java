@@ -122,25 +122,21 @@ public class spatialAnalysis {
         }
 
         // plot
-        Plot plotF = null;
+        Plot plotF;
         if (show || save) {
             plotF = createPlot(xEvalsF, sampleDistancesF, observedDistancesF, observedCDF, averageCDF, "F");
-        }
-
-        if (show) {
             plotF.draw();
-        }
-        if (save) {
-            PlotWindow plotW = plotF.show();
-            if (plotW != null) {
-                try {
-                    plotW.getResultsTable().saveAs(IJ.getDirectory("home") + "StatsPlot-F.csv");
-                } catch (IOException ex) {
-                    Logger.getLogger(spatialAnalysis.class.getName()).log(Level.SEVERE, null, ex);
+            if (save) {
+                PlotWindow plotW = plotF.show();
+                if (plotW != null) {
+                    try {
+                        plotW.getResultsTable().saveAs(IJ.getDirectory("home") + "StatsPlot-F.csv");
+                    } catch (IOException ex) {
+                        Logger.getLogger(spatialAnalysis.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
         }
-
         IJ.log("--- F Function ---");
         sdi_F = CDFTools.SDI(observedDistancesF, sampleDistancesF, averageCDF, xEvalsF);
         IJ.log("SDI F=" + sdi_F);

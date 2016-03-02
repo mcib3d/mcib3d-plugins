@@ -37,6 +37,8 @@ public class Stats_Spat3D implements PlugInFilter {
     String functions;
     boolean show;
     boolean save;
+    int indexcol = 0;
+    Color colorDraw = null;
 
     /**
      * Description of the Method
@@ -86,21 +88,29 @@ public class Stats_Spat3D implements PlugInFilter {
         calibration = imp.getCalibration();
 
         spatialAnalysis spa = new spatialAnalysis(numPoints, numRandomSamples, distHardCore, env);
-        spa.setColorsPlot(Color.DARK_GRAY, Color.LIGHT_GRAY, Color.MAGENTA);
+        spa.setColorsPlot(Color.DARK_GRAY, Color.LIGHT_GRAY, colorDraw);
         spa.process(imp, WindowManager.getImage(imamask + 1), functions, true, show, save);
         spa.getRandomSample().show("Random Sample");
     }
 
     private boolean Dialogue() {
+        numPoints = (int) Prefs.getInt("Analysis_F_numPoints.int", numPoints);
+        numRandomSamples = (int) Prefs.getInt("Analysis_F_numRandom.int", numRandomSamples);
+        distHardCore = Prefs.getDouble("Analysis_F_hardCore.double", distHardCore);
+        env = Prefs.getDouble("Analysis_F_env.double", env);
+        indexcol = Prefs.getInt("Analysis_F_env.int", indexcol);
+        String[] colors = {"Red", "Green", "Blue", "Cyan", "Magenta", "Yellow", "Orange", "Pink", "Black"};
         GenericDialog gd = new GenericDialog("Spatial Statistics");
         gd.addMessage("Choose stat functions to evaluate");
         gd.addCheckboxGroup(1, 3, new String[]{"F", "G", "H"}, new boolean[]{true, true, true});
         gd.addNumericField("Nb_points (F function)", Prefs.get("Analysis_F_numPoints.double", numPoints), 0);
         gd.addNumericField("Samples", numRandomSamples, 0);
         gd.addNumericField("Distance hardcore (unit)", distHardCore, 3);
-        gd.addNumericField("Error %", 5, 0);
+        gd.addNumericField("Error %", env * 100, 0);
         gd.addChoice("Spots", names, names[0]);
         gd.addChoice("Mask", names, names[1]);
+        gd.addMessage("Plot options");
+        gd.addChoice("Draw_color:", colors, colors[indexcol]);
         gd.addCheckbox("Show plots", true);
         gd.addCheckbox("Save plots", true);
         gd.showDialog();
@@ -124,9 +134,46 @@ public class Stats_Spat3D implements PlugInFilter {
         env = gd.getNextNumber() / 100.0;
         imaspots = gd.getNextChoiceIndex();
         imamask = gd.getNextChoiceIndex();
+        indexcol = gd.getNextChoiceIndex();
+
         show = gd.getNextBoolean();
         save = gd.getNextBoolean();
-        Prefs.set("Analysis_F_numPoints.double", numPoints);
+        Prefs.set("Analysis_F_numPoints.int", numPoints);
+        Prefs.set("Analysis_F_numRandom.int", numRandomSamples);
+        Prefs.set("Analysis_F_hardCore.double", distHardCore);
+        Prefs.set("Analysis_F_env.double", env);
+        Prefs.set("Analysis_F_env.int", indexcol);
+
+        Prefs.savePreferences();
+
+        switch (indexcol) {
+            case 0:
+                colorDraw = Color.red;
+                break;
+            case 1:
+                colorDraw = Color.green;
+                break;
+            case 2:
+                colorDraw = Color.blue;
+                break;
+            case 3:
+                colorDraw = Color.cyan;
+                break;
+            case 4:
+                colorDraw = Color.magenta;
+                break;
+            case 5:
+                colorDraw = Color.yellow;
+                break;
+            case 6:
+                colorDraw = Color.orange;
+                break;
+            case 7:
+                colorDraw = Color.pink;
+                break;
+            default:
+                colorDraw = Color.black;
+        }
 
         return (gd.wasOKed());
     }
@@ -138,9 +185,9 @@ public class Stats_Spat3D implements PlugInFilter {
             return;
         }
         ImageProcessor ma = roi.getMask();
-        
+
         mask.insert(ma, roi.getBounds().x, roi.getBounds().y);
-        
+
         ImagePlus plusMask = new ImagePlus("mask", mask);
         if (plus.getCalibration() != null) {
             plusMask.setCalibration(plus.getCalibration());
