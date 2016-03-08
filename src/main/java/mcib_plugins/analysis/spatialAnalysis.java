@@ -92,7 +92,7 @@ public class spatialAnalysis {
 
         for (int i = 0; i < numRandomSamples; i++) {
             if (verbose) {
-                IJ.showStatus("Random population F " + i);
+                IJ.showStatus("Random population F " + (i+1));
             }
             Objects3DPopulation poprandom = new Objects3DPopulation();
             poprandom.setCalibration(calibration);
@@ -109,7 +109,7 @@ public class spatialAnalysis {
 
         for (int i = 0; i < numRandomSamples; i++) {
             if (verbose) {
-                IJ.showStatus("Random population F " + i);
+                IJ.showStatus("Random population F " + (i+1));
             }
             Objects3DPopulation poprandom = new Objects3DPopulation();
             poprandom.setCalibration(calibration);
@@ -163,7 +163,7 @@ public class spatialAnalysis {
         sampleDistancesG = new ArrayUtil[numRandomSamples];
         for (int i = 0; i < numRandomSamples; i++) {
             if (verbose) {
-                IJ.showStatus("Random population G " + i);
+                IJ.showStatus("Random population G " + (i+1));
             }
             Objects3DPopulation poprandom = new Objects3DPopulation();
             poprandom.setCalibration(calibration);
@@ -181,7 +181,7 @@ public class spatialAnalysis {
         // G function
         for (int i = 0; i < numRandomSamples; i++) {
             if (verbose) {
-                IJ.showStatus("Random population G " + i);
+                IJ.showStatus("Random population G " + (i+1));
             }
             Objects3DPopulation poprandom = new Objects3DPopulation();
             poprandom.setCalibration(calibration);
@@ -241,7 +241,7 @@ public class spatialAnalysis {
         sampleDistancesH = new ArrayUtil[numRandomSamples];
         for (int i = 0; i < numRandomSamples; i++) {
             if (verbose) {
-                IJ.showStatus("Random population H " + i);
+                IJ.showStatus("Random population H " + (i+1));
             }
             Objects3DPopulation poprandom = new Objects3DPopulation();
             poprandom.setCalibration(calibration);
@@ -258,7 +258,7 @@ public class spatialAnalysis {
         // H function
         for (int i = 0; i < numRandomSamples; i++) {
             if (verbose) {
-                IJ.showStatus("Random population H " + i);
+                IJ.showStatus("Random population H " + (i+1));
             }
             Objects3DPopulation poprandom = new Objects3DPopulation();
             poprandom.setCalibration(calibration);
