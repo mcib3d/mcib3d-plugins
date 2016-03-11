@@ -57,12 +57,13 @@ public class SeedSpots_Plus implements PlugIn {
     // volumes (pix)
     int volumeMin = 1;
     int volumeMax = 1000000;
-    String[] local_methods = {"Constant", "Local Mean", "Gaussian fit"};
+    String[] local_methods = {"Constant", "Diff", "Local Mean", "Gaussian fit"};
     String[] spot_methods = {"Classical", "Maximum", "Block"};
     String[] outputs = {"Label Image", "Roi Manager 3D", "Both"};
     // DB
     private boolean debug = true;
     private boolean bigLabel;
+    private int diff = 0;
 
     @Override
     public void run(String arg) {
@@ -93,6 +94,7 @@ public class SeedSpots_Plus implements PlugIn {
         // get Preferences
         seeds_threshold = (int) Prefs.get("SeedSpots_GlobalBackground.int", seeds_threshold);
         local_background = (int) Prefs.get("SeedSpots_LocalBackground.int", local_background);
+        diff = (int) Prefs.get("SeedSpots_Diff.int", diff);
         rad0 = (float) Prefs.get("SeedSpots_Rad0.real", rad0);
         rad1 = (float) Prefs.get("SeedSpots_Rad1.real", rad1);
         rad2 = (float) Prefs.get("SeedSpots_Rad2.real", rad2);
@@ -117,6 +119,7 @@ public class SeedSpots_Plus implements PlugIn {
         dia.addNumericField("Seeds_threshold", seeds_threshold, 0);
         dia.addNumericField("Local_Background (0=auto)", local_background, 0);
         dia.addChoice("Local_Threshold method", local_methods, local_methods[local_method]);
+        dia.addNumericField("Local_diff", diff, 0);
         dia.addMessage("Local_parameters (local mean)");
         dia.addNumericField("Radius_0", rad0, 2);
         dia.addNumericField("Radius_1", rad1, 2);
@@ -139,6 +142,7 @@ public class SeedSpots_Plus implements PlugIn {
         if (dia.wasOKed()) {
             seeds_threshold = (int) dia.getNextNumber();
             local_background = (int) dia.getNextNumber();
+            diff = (int) dia.getNextNumber();
             rad0 = (float) dia.getNextNumber();
             rad1 = (float) dia.getNextNumber();
             rad2 = (float) dia.getNextNumber();
@@ -160,6 +164,7 @@ public class SeedSpots_Plus implements PlugIn {
             // set Preferences
             Prefs.set("SeedSpots_GlobalBackground.int", seeds_threshold);
             Prefs.set("SeedSpots_LocalBackground.int", local_background);
+            Prefs.set("SeedSpots_Diff.int", diff);
             Prefs.set("SeedSpots_Rad0.real", rad0);
             Prefs.set("SeedSpots_Rad1.real", rad1);
             Prefs.set("SeedSpots_Rad2.real", rad2);
@@ -189,10 +194,6 @@ public class SeedSpots_Plus implements PlugIn {
                 spotCalib = spotPlus.getCalibration();
             }
 
-            //int nbs = spotStack.getSize();
-            //int w = spotStack.getWidth();
-            //int h = spotStack.getHeight();
-            //fishImage = new IntImage3D(w, h, nbs);
             IJ.log("Spot segmentation.....");
             this.Segmentation();
             IJ.log("Finished");
@@ -216,44 +217,42 @@ public class SeedSpots_Plus implements PlugIn {
         seg.setWatershed(watershed);
         seg.setVolumeMin(volumeMin);
         seg.setVolumeMax(volumeMax);
-        IJ.log("Spot Image: "+seg.getRawImage().getTitle()+"   Seed Image : "+seg.getSeeds().getTitle());
-        IJ.log("Vol min: "+seg.getVolumeMin()+"   Vol max: "+seg.getVolumeMax());
+        IJ.log("Spot Image: " + seg.getRawImage().getTitle() + "   Seed Image : " + seg.getSeeds().getTitle());
+        IJ.log("Vol min: " + seg.getVolumeMin() + "   Vol max: " + seg.getVolumeMax());
         switch (local_method) {
             case 0:
                 seg.setMethodLocal(Segment3DSpots.LOCAL_CONSTANT);
-                IJ.log("LOCAL_CONSTANT");
                 break;
             case 1:
-                seg.setMethodLocal(Segment3DSpots.LOCAL_MEAN);
-                seg.setRadiusLocalMean(rad0, rad1, rad2, we);
-                IJ.log("LOCAL_MEAN");
+                seg.setMethodLocal(Segment3DSpots.LOCAL_DIFF);
+                seg.setLocalDiff(diff);
                 break;
             case 2:
+                seg.setMethodLocal(Segment3DSpots.LOCAL_MEAN);
+                seg.setRadiusLocalMean(rad0, rad1, rad2, we);
+                break;
+            case 3:
                 seg.setMethodLocal(Segment3DSpots.LOCAL_GAUSS);
                 seg.setGaussPc(sdpc);
                 seg.setGaussMaxr(radmax);
-                IJ.log("LOCAL_GAUSS");
                 break;
         }
         switch (spot_method) {
             case 0:
                 seg.setMethodSeg(Segment3DSpots.SEG_CLASSICAL);
-                IJ.log("SEG_CLASSICAL");
                 break;
             case 1:
                 seg.setMethodSeg(Segment3DSpots.SEG_MAX);
-                IJ.log("SEG_MAX");
                 break;
             case 2:
                 seg.setMethodSeg(Segment3DSpots.SEG_BLOCK);
-                IJ.log("SEG_BLOCK");
                 break;
         }
         // big label (more than 2^16 objects)
         seg.bigLabel = bigLabel;
         seg.segmentAll();
         int size = seg.getObjects().size();
-        IJ.log("Number of labelled objects: "+size);
+        IJ.log("Number of labelled objects: " + size);
         // output        
         if ((output == 0) || (output == 2)) {
             //segPlus = new ImagePlus("seg", seg.getLabelImage().getImageStack());
