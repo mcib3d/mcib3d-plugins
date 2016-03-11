@@ -5,8 +5,8 @@
  */
 package mcib_plugins;
 
-import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
@@ -28,7 +28,7 @@ public class MaximaFinder3D_ implements PlugInFilter {
     public int setup(String arg, ImagePlus imp) {
         plus = imp;
 
-        return PlugInFilter.DOES_16;
+        return PlugInFilter.DOES_16 + PlugInFilter.DOES_32 + PlugInFilter.DOES_8G;
     }
 
     @Override
@@ -36,11 +36,15 @@ public class MaximaFinder3D_ implements PlugInFilter {
         if (dialog()) {
             ImageInt img = ImageInt.wrap(plus);
             MaximaFinder test = new MaximaFinder(img, noise);
+            test.setRadii(rxy, rz);
             test.getPeaks().show();
         }
     }
 
     private boolean dialog() {
+        rxy = (float) Prefs.get("mcib3d.maximafinder.radxy.double", rxy);
+        rz = (float) Prefs.get("mcib3d.maximafinder.radz.double", rz);
+        noise = (float) Prefs.get("mcib3d.maximafinder.noise.double", noise);
         GenericDialog dia = new GenericDialog("Maxima Finder");
         dia.addNumericField("RadiusXY", rxy, 2, 5, "pixel");
         dia.addNumericField("RadiusZ", rz, 2, 5, "pixel");
@@ -49,6 +53,10 @@ public class MaximaFinder3D_ implements PlugInFilter {
         rxy = (float) dia.getNextNumber();
         rz = (float) dia.getNextNumber();
         noise = (float) dia.getNextNumber();
+
+        Prefs.set("mcib3d.maximafinder.radxy.double", rxy);
+        Prefs.set("mcib3d.maximafinder.radz.double", rz);
+        Prefs.set("mcib3d.maximafinder.noise.double", noise);
 
         return dia.wasOKed();
 
