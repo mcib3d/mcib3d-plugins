@@ -12,6 +12,7 @@ import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 import java.awt.Color;
 import mcib3d.geom.Point3D;
+import mcib3d.utils.ThreadUtil;
 import mcib_plugins.analysis.spatialAnalysis;
 
 /**
@@ -27,7 +28,7 @@ public class Stats_Spat3D implements PlugInFilter {
     int numPoints = 10000;
     int numRandomSamples = 100;
     double distHardCore = 0;
-   // double stepKFunction = 0.5d;
+    // double stepKFunction = 0.5d;
     // double maxCoeffKFunction = 0.5d;
     int imaspots = 0;
     int imamask = 1;
@@ -39,6 +40,7 @@ public class Stats_Spat3D implements PlugInFilter {
     boolean save;
     int indexcol = 0;
     Color colorDraw = null;
+    private int nbcpus;
 
     /**
      * Description of the Method
@@ -87,8 +89,8 @@ public class Stats_Spat3D implements PlugInFilter {
         }
         imp = WindowManager.getImage(imaspots + 1);
         calibration = imp.getCalibration();
-
         spatialAnalysis spa = new spatialAnalysis(numPoints, numRandomSamples, distHardCore, env / 100.0);
+        spa.setMultiThread(nbcpus);
         spa.setColorsPlot(Color.DARK_GRAY, Color.LIGHT_GRAY, colorDraw);
         spa.process(imp, WindowManager.getImage(imamask + 1), functions, true, show, save);
         spa.getRandomSample().show("Random Sample");
@@ -103,13 +105,14 @@ public class Stats_Spat3D implements PlugInFilter {
         String[] colors = {"Red", "Green", "Blue", "Cyan", "Magenta", "Yellow", "Orange", "Pink", "Black"};
         GenericDialog gd = new GenericDialog("Spatial Statistics");
         gd.addMessage("Choose stat functions to evaluate");
-        gd.addCheckboxGroup(1, 3, new String[]{"F", "G", "H"}, new boolean[]{true, true, true});
+        gd.addCheckboxGroup(1, 3, new String[]{"F", "G", "H"}, new boolean[]{true, true, false});
         gd.addNumericField("Nb_points (F function)", Prefs.get("Analysis_F_numPoints.double", numPoints), 0);
         gd.addNumericField("Samples", numRandomSamples, 0);
         gd.addNumericField("Distance hardcore (" + imp.getCalibration().getUnits() + ")", distHardCore, 3);
         gd.addNumericField("Error %", env, 0);
         gd.addChoice("Spots", names, names[0]);
         gd.addChoice("Mask", names, names[1]);
+        gd.addSlider("MultiThread", 1, ThreadUtil.getNbCpus(), ThreadUtil.getNbCpus());
         gd.addMessage("Plot options");
         gd.addChoice("Draw_color:", colors, colors[indexcol]);
         gd.addCheckbox("Show plots", true);
@@ -135,8 +138,8 @@ public class Stats_Spat3D implements PlugInFilter {
         env = (int) gd.getNextNumber();
         imaspots = gd.getNextChoiceIndex();
         imamask = gd.getNextChoiceIndex();
+        nbcpus = (int) gd.getNextNumber();
         indexcol = gd.getNextChoiceIndex();
-
         show = gd.getNextBoolean();
         save = gd.getNextBoolean();
 

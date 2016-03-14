@@ -7,6 +7,7 @@ import ij.gui.PlotWindow;
 import ij.measure.Calibration;
 import java.awt.Color;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mcib3d.geom.Object3D;
@@ -19,6 +20,7 @@ import mcib3d.image3d.ImageLabeller;
 import mcib3d.image3d.ImageShort;
 import mcib3d.utils.ArrayUtil;
 import mcib3d.utils.CDFTools;
+import mcib3d.utils.ThreadUtil;
 
 /**
  * Description of the Class
@@ -51,11 +53,17 @@ public class spatialAnalysis {
 
     int nbBins = 1000;
 
+    int nbCpus = 1;
+
     public spatialAnalysis(int numPoints, int numRandomSamples, double distHardCore, double env) {
         this.numEvaluationPoints = numPoints;
         this.numRandomSamples = numRandomSamples;
         this.distHardCore = distHardCore;
         this.env = env;
+    }
+
+    public void setMultiThread(int nb) {
+        nbCpus = nb;
     }
 
     public void process(ImagePlus plusSpots, ImagePlus plusMask, String functions, boolean verbose, boolean show, boolean save) {
@@ -70,7 +78,8 @@ public class spatialAnalysis {
         process(plusSpots, plusMask, "FGH", verbose, show, save);
     }
 
-    private void processF(Objects3DPopulation pop, Object3D mask, boolean verbose, boolean show, boolean save) {
+    @Deprecated
+    private void processFMonoThread(Objects3DPopulation pop, Object3D mask, boolean verbose, boolean show, boolean save) {
         Calibration calibration = mask.getCalibration();
         int nbspots = pop.getNbObjects();
         ArrayUtil distances;
@@ -92,7 +101,7 @@ public class spatialAnalysis {
 
         for (int i = 0; i < numRandomSamples; i++) {
             if (verbose) {
-                IJ.showStatus("Random population F " + (i+1));
+                IJ.showStatus("Random population F " + (i + 1));
             }
             Objects3DPopulation poprandom = new Objects3DPopulation();
             poprandom.setCalibration(calibration);
@@ -109,7 +118,7 @@ public class spatialAnalysis {
 
         for (int i = 0; i < numRandomSamples; i++) {
             if (verbose) {
-                IJ.showStatus("Random population F " + (i+1));
+                IJ.showStatus("Random population F " + (i + 1));
             }
             Objects3DPopulation poprandom = new Objects3DPopulation();
             poprandom.setCalibration(calibration);
@@ -142,7 +151,109 @@ public class spatialAnalysis {
         IJ.log("SDI F=" + sdi_F);
     }
 
-    private void processG(Objects3DPopulation pop, Object3D mask, boolean verbose, boolean show, boolean save) {
+    private void processF(Objects3DPopulation pop, Object3D mask, final boolean verbose, boolean show, boolean save) {
+        final Calibration calibration = mask.getCalibration();
+        final int nbspots = pop.getNbObjects();
+
+        // F
+        final Point3D[] evaluationPoints;
+        ArrayUtil observedDistancesF;
+        final ArrayUtil[] sampleDistancesF;
+        ArrayUtil xEvalsF;
+        ArrayUtil observedCDF;
+        ArrayUtil averageCDF;
+
+        evaluationPoints = createEvaluationPoints(numEvaluationPoints, pop);
+        observedDistancesF = pop.computeDistances(evaluationPoints);
+        observedDistancesF.sort();
+        observedCDF = CDFTools.cdf(observedDistancesF);
+        xEvalsF = new ArrayUtil(numRandomSamples * numEvaluationPoints);
+        sampleDistancesF = new ArrayUtil[numRandomSamples];
+
+        // PARALLEL 
+        final Object3D mask2 = mask;
+        final AtomicInteger ai = new AtomicInteger(0);
+        final int n_cpus = nbCpus == 0 ? ThreadUtil.getNbCpus() : nbCpus;
+        Thread[] threads = ThreadUtil.createThreadArray(n_cpus);
+        final int dec = (int) Math.ceil((double) numRandomSamples / (double) n_cpus);
+        for (int ithread = 0; ithread < threads.length; ithread++) {
+            threads[ithread] = new Thread() {
+                @Override
+                public void run() {
+                    ArrayUtil distances2;
+                    for (int k = ai.getAndIncrement(); k < n_cpus; k = ai.getAndIncrement()) {
+                        for (int i = dec * k; ((i < (dec * (k + 1))) && (i < numRandomSamples)); i++) {
+                            if (verbose) {
+                                IJ.showStatus("Random population F " + (i + 1) + " by processor " + (k + 1));
+                            }
+                            Objects3DPopulation poprandom = new Objects3DPopulation();
+                            poprandom.setCalibration(calibration);
+                            poprandom.setMask(mask2);
+                            poprandom.createRandomPopulation(nbspots, distHardCore);
+                            poprandom.createKDTreeCenters();
+                            distances2 = poprandom.computeDistances(evaluationPoints);
+                            distances2.sort();
+                            sampleDistancesF[i] = distances2;
+                        }
+                    }
+                }
+            };
+        }
+        ThreadUtil.startAndJoin(threads);
+        for (int i = 0; i < numRandomSamples; i++) {
+            xEvalsF.insertValues(i * numEvaluationPoints, sampleDistancesF[i]);
+        }
+        xEvalsF.sort();
+        averageCDF = CDFTools.cdfAverage(sampleDistancesF, xEvalsF);
+        ai.set(0);
+        for (int ithread = 0; ithread < threads.length; ithread++) {
+            threads[ithread] = new Thread() {
+                @Override
+                public void run() {
+                    ArrayUtil distances2;
+                    for (int k = ai.getAndIncrement(); k < n_cpus; k = ai.getAndIncrement()) {
+                        for (int i = dec * k; ((i < (dec * (k + 1))) && (i < numRandomSamples)); i++) {
+                            if (verbose) {
+                                IJ.showStatus("Random population F " + (i + 1) + " by processor " + (k + 1));
+                            }
+                            Objects3DPopulation poprandom = new Objects3DPopulation();
+                            poprandom.setCalibration(calibration);
+                            poprandom.setMask(mask2);
+                            poprandom.createRandomPopulation(nbspots, distHardCore);
+                            poprandom.createKDTreeCenters();
+                            distances2 = poprandom.computeDistances(evaluationPoints);
+                            distances2.sort();
+                            sampleDistancesF[i] = distances2;
+                        }
+                    }
+                }
+            };
+        }
+        ThreadUtil.startAndJoin(threads);
+
+        // plot
+        Plot plotF;
+        if (show || save) {
+            plotF = createPlot(xEvalsF, sampleDistancesF, observedDistancesF, observedCDF, averageCDF, "F");
+            plotF.draw();
+            if (save) {
+                PlotWindow plotW = plotF.show();
+                if (plotW != null) {
+                    try {
+                        plotW.getResultsTable().saveAs(IJ.getDirectory("home") + "StatsPlot-F.csv");
+                    } catch (IOException ex) {
+                        Logger.getLogger(spatialAnalysis.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        }
+        IJ.log("--- F Function ---");
+        sdi_F = CDFTools.SDI(observedDistancesF, sampleDistancesF, averageCDF, xEvalsF);
+        IJ.log("SDI F=" + sdi_F);
+    }
+
+    @Deprecated
+    private void processGMonoThread(Objects3DPopulation pop, Object3D mask, boolean verbose, boolean show, boolean save) {
         Calibration calibration = mask.getCalibration();
         int nbspots = pop.getNbObjects();
         ArrayUtil distances;
@@ -163,7 +274,7 @@ public class spatialAnalysis {
         sampleDistancesG = new ArrayUtil[numRandomSamples];
         for (int i = 0; i < numRandomSamples; i++) {
             if (verbose) {
-                IJ.showStatus("Random population G " + (i+1));
+                IJ.showStatus("Random population G " + (i + 1));
             }
             Objects3DPopulation poprandom = new Objects3DPopulation();
             poprandom.setCalibration(calibration);
@@ -181,7 +292,7 @@ public class spatialAnalysis {
         // G function
         for (int i = 0; i < numRandomSamples; i++) {
             if (verbose) {
-                IJ.showStatus("Random population G " + (i+1));
+                IJ.showStatus("Random population G " + (i + 1));
             }
             Objects3DPopulation poprandom = new Objects3DPopulation();
             poprandom.setCalibration(calibration);
@@ -196,7 +307,7 @@ public class spatialAnalysis {
         // plot
         Plot plotG = null;
         if (show || save) {
-            plotG = createPlot(xEvalsG, sampleDistancesG, observedDistancesG, observedCDG, averageCDG, "G");;
+            plotG = createPlot(xEvalsG, sampleDistancesG, observedDistancesG, observedCDG, averageCDG, "G");
         }
 
         if (show) {
@@ -219,7 +330,116 @@ public class spatialAnalysis {
         IJ.log("SDI G=" + sdi_G);
     }
 
-    private void processH(Objects3DPopulation pop, Object3D mask, boolean verbose, boolean show, boolean save) {
+    private void processG(Objects3DPopulation pop, Object3D mask, final boolean verbose, boolean show, boolean save) {
+        final Calibration calibration = mask.getCalibration();
+        final int nbspots = pop.getNbObjects();
+        //ArrayUtil distances;
+
+        // G
+        ArrayUtil observedDistancesG;
+        ArrayUtil observedCDG;
+        observedDistancesG = pop.distancesAllClosestCenter();
+        observedDistancesG.sort();
+        observedCDG = CDFTools.cdf(observedDistancesG);
+
+        //G 
+        ArrayUtil xEvalsG;
+        final ArrayUtil[] sampleDistancesG;
+        ArrayUtil averageCDG;
+
+        xEvalsG = new ArrayUtil(numRandomSamples * nbspots);
+        sampleDistancesG = new ArrayUtil[numRandomSamples];
+
+        // PARALLEL 
+        final Object3D mask2 = mask;
+        final AtomicInteger ai = new AtomicInteger(0);
+        final int n_cpus = nbCpus == 0 ? ThreadUtil.getNbCpus() : nbCpus;
+        Thread[] threads = ThreadUtil.createThreadArray(n_cpus);
+        final int dec = (int) Math.ceil((double) numRandomSamples / (double) n_cpus);
+        for (int ithread = 0; ithread < threads.length; ithread++) {
+            threads[ithread] = new Thread() {
+                @Override
+                public void run() {
+                    ArrayUtil distances2;
+                    //image.setShowStatus(show);
+                    for (int k = ai.getAndIncrement(); k < n_cpus; k = ai.getAndIncrement()) {
+                        for (int i = dec * k; ((i < (dec * (k + 1))) && (i < numRandomSamples)); i++) {
+                            if (verbose) {
+                                IJ.showStatus("Random population G " + (i + 1) + " by processor " + (k + 1));
+                            }
+                            Objects3DPopulation poprandom = new Objects3DPopulation();
+                            poprandom.setCalibration(calibration);
+                            poprandom.setMask(mask2);
+                            poprandom.createRandomPopulation(nbspots, distHardCore);
+                            distances2 = poprandom.distancesAllClosestCenter();
+                            distances2.sort();
+                            sampleDistancesG[i] = distances2;
+                        }
+                    }
+                }
+            };
+        }
+        ThreadUtil.startAndJoin(threads);
+        for (int i = 0; i < numRandomSamples; i++) {
+            xEvalsG.insertValues(i * nbspots, sampleDistancesG[i]);
+        }
+        xEvalsG.sort();
+        averageCDG = CDFTools.cdfAverage(sampleDistancesG, xEvalsG);
+
+        ai.set(0);
+        for (int ithread = 0; ithread < threads.length; ithread++) {
+            threads[ithread] = new Thread() {
+                @Override
+                public void run() {
+                    ArrayUtil distances2;
+                    //image.setShowStatus(show);
+                    for (int k = ai.getAndIncrement(); k < n_cpus; k = ai.getAndIncrement()) {
+                        for (int i = dec * k; ((i < (dec * (k + 1))) && (i < numRandomSamples)); i++) {
+                            if (verbose) {
+                                IJ.showStatus("Random population G " + (i + 1) + " by processor " + (k + 1));
+                            }
+                            Objects3DPopulation poprandom = new Objects3DPopulation();
+                            poprandom.setCalibration(calibration);
+                            poprandom.setMask(mask2);
+                            poprandom.createRandomPopulation(nbspots, distHardCore);
+                            distances2 = poprandom.distancesAllClosestCenter();
+                            distances2.sort();
+                            sampleDistancesG[i] = distances2;
+                        }
+                    }
+                }
+            };
+        }
+        ThreadUtil.startAndJoin(threads);
+
+        // plot
+        Plot plotG = null;
+        if (show || save) {
+            plotG = createPlot(xEvalsG, sampleDistancesG, observedDistancesG, observedCDG, averageCDG, "G");
+        }
+
+        if (show) {
+            plotG.draw();
+        }
+        if (save) {
+            PlotWindow plotW = plotG.show();
+            if (plotW != null) {
+                try {
+                    plotW.getResultsTable().saveAs(IJ.getDirectory("home") + "StatsPlot-G.csv");
+                } catch (IOException ex) {
+                    Logger.getLogger(spatialAnalysis.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+        }
+
+        IJ.log("--- G Function ---");
+        sdi_G = CDFTools.SDI(observedDistancesG, sampleDistancesG, averageCDG, xEvalsG);
+        IJ.log("SDI G=" + sdi_G);
+    }
+
+    @Deprecated
+    private void processHMonoThread(Objects3DPopulation pop, Object3D mask, boolean verbose, boolean show, boolean save) {
         Calibration calibration = mask.getCalibration();
         int nbspots = pop.getNbObjects();
         ArrayUtil distances;
@@ -241,7 +461,7 @@ public class spatialAnalysis {
         sampleDistancesH = new ArrayUtil[numRandomSamples];
         for (int i = 0; i < numRandomSamples; i++) {
             if (verbose) {
-                IJ.showStatus("Random population H " + (i+1));
+                IJ.showStatus("Random population H " + (i + 1));
             }
             Objects3DPopulation poprandom = new Objects3DPopulation();
             poprandom.setCalibration(calibration);
@@ -258,7 +478,7 @@ public class spatialAnalysis {
         // H function
         for (int i = 0; i < numRandomSamples; i++) {
             if (verbose) {
-                IJ.showStatus("Random population H " + (i+1));
+                IJ.showStatus("Random population H " + (i + 1));
             }
             Objects3DPopulation poprandom = new Objects3DPopulation();
             poprandom.setCalibration(calibration);
@@ -268,6 +488,114 @@ public class spatialAnalysis {
             distances.sort();
             sampleDistancesH[i] = distances;
         }
+
+        // plot
+        Plot plotH = null;
+        if (show || save) {
+            plotH = createPlot(xEvalsH, sampleDistancesH, observedDistancesH, observedCDH, averageCDH, "H");
+        }
+
+        if (show) {
+            plotH.draw();
+        }
+        if (save) {
+            PlotWindow plotW = plotH.show();
+            if (plotW != null) {
+                try {
+                    plotW.getResultsTable().saveAs(IJ.getDirectory("home") + "StatsPlot-H.csv");
+                } catch (IOException ex) {
+                    Logger.getLogger(spatialAnalysis.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+        }
+
+        IJ.log("--- H Function ---");
+        sdi_H = CDFTools.SDI(observedDistancesH, sampleDistancesH, averageCDH, xEvalsH);
+        IJ.log("SDI H=" + sdi_H);
+    }
+
+    private void processH(Objects3DPopulation pop, Object3D mask, final boolean verbose, boolean show, boolean save) {
+        final Calibration calibration = mask.getCalibration();
+        final int nbspots = pop.getNbObjects();
+        //ArrayUtil distances;
+
+        // H
+        ArrayUtil observedDistancesH;
+        ArrayUtil observedCDH;
+
+        observedDistancesH = pop.distancesAllCenter();
+        observedDistancesH.sort();
+        observedCDH = CDFTools.cdf(observedDistancesH);
+
+        // H
+        ArrayUtil xEvalsH;
+        final ArrayUtil[] sampleDistancesH;
+        ArrayUtil averageCDH;
+
+        xEvalsH = new ArrayUtil(numRandomSamples * nbspots);
+        sampleDistancesH = new ArrayUtil[numRandomSamples];
+
+        // PARALLEL 
+        final Object3D mask2 = mask;
+        final AtomicInteger ai = new AtomicInteger(0);
+        final int n_cpus = nbCpus == 0 ? ThreadUtil.getNbCpus() : nbCpus;
+        Thread[] threads = ThreadUtil.createThreadArray(n_cpus);
+        final int dec = (int) Math.ceil((double) numRandomSamples / (double) n_cpus);
+        for (int ithread = 0; ithread < threads.length; ithread++) {
+            threads[ithread] = new Thread() {
+                @Override
+                public void run() {
+                    ArrayUtil distances2;
+                    //image.setShowStatus(show);
+                    for (int k = ai.getAndIncrement(); k < n_cpus; k = ai.getAndIncrement()) {
+                        for (int i = dec * k; ((i < (dec * (k + 1))) && (i < numRandomSamples)); i++) {
+                            if (verbose) {
+                                IJ.showStatus("Random population H " + (i + 1) + " by processor " + (k + 1));
+                            }
+                            Objects3DPopulation poprandom = new Objects3DPopulation();
+                            poprandom.setCalibration(calibration);
+                            poprandom.setMask(mask2);
+                            poprandom.createRandomPopulation(nbspots, distHardCore);
+                            distances2 = poprandom.distancesAllCenter();
+                            distances2.sort();
+                            sampleDistancesH[i] = distances2;
+                        }
+                    }
+                }
+            };
+        }
+        ThreadUtil.startAndJoin(threads);
+        for (int i = 0; i < numRandomSamples; i++) {
+            xEvalsH.insertValues(i * nbspots, sampleDistancesH[i]);
+        }
+        xEvalsH.sort();
+        averageCDH = CDFTools.cdfAverage(sampleDistancesH, xEvalsH);
+        ai.set(0);
+        for (int ithread = 0; ithread < threads.length; ithread++) {
+            threads[ithread] = new Thread() {
+                @Override
+                public void run() {
+                    ArrayUtil distances2;
+                    //image.setShowStatus(show);
+                    for (int k = ai.getAndIncrement(); k < n_cpus; k = ai.getAndIncrement()) {
+                        for (int i = dec * k; ((i < (dec * (k + 1))) && (i < numRandomSamples)); i++) {
+                            if (verbose) {
+                                IJ.showStatus("Random population H " + (i + 1) + " by processor " + (k + 1));
+                            }
+                            Objects3DPopulation poprandom = new Objects3DPopulation();
+                            poprandom.setCalibration(calibration);
+                            poprandom.setMask(mask2);
+                            poprandom.createRandomPopulation(nbspots, distHardCore);
+                            distances2 = poprandom.distancesAllCenter();
+                            distances2.sort();
+                            sampleDistancesH[i] = distances2;
+                        }
+                    }
+                }
+            };
+        }
+        ThreadUtil.startAndJoin(threads);
 
         // plot
         Plot plotH = null;
