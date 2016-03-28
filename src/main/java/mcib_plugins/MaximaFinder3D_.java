@@ -8,10 +8,15 @@ package mcib_plugins;
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.gui.GenericDialog;
+import ij.measure.ResultsTable;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
+import java.util.ArrayList;
+import mcib3d.geom.Objects3DPopulation;
+import mcib3d.geom.Voxel3D;
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.processing.MaximaFinder;
+import mcib_plugins.tools.RoiManager3D_2;
 
 /**
  *
@@ -37,7 +42,21 @@ public class MaximaFinder3D_ implements PlugInFilter {
             ImageInt img = ImageInt.wrap(plus);
             MaximaFinder test = new MaximaFinder(img, noise);
             test.setRadii(rxy, rz);
-            test.getPeaks().show();
+            test.getImagePeaks().show();
+            // list
+            ArrayList<Voxel3D> list = test.getListPeaks();
+            ResultsTable rt = ResultsTable.getResultsTable();
+            if (rt == null) {
+                rt = new ResultsTable();
+            }
+            rt.reset();
+            for (Voxel3D V : list) {
+                rt.incrementCounter();
+                rt.addValue("X", V.getX());
+                rt.addValue("Y", V.getY());
+                rt.addValue("Z", V.getZ());
+            }
+            rt.show("Results");
         }
     }
 

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>upmc.mcib</groupId>
-    <artifactId>MCIB-PLUGINS</artifactId>
-    <version>3.7-SNAPSHOT</version>
+    <groupId>com.github.mcib3d</groupId>
+    <artifactId>mcib3d-plugins</artifactId>
+    <version>3.73</version>
     <packaging>jar</packaging>
     <build>
         <plugins>
@@ -19,11 +19,6 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>mcib</groupId>
-            <artifactId>mcib-core</artifactId>
-            <version>3.2.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>sc.fiji</groupId>
             <artifactId>imagescience</artifactId>
             <version>3.0.0</version>
@@ -35,6 +30,17 @@
             <version>2.0.1-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>net.imagej</groupId>
+            <artifactId>ij</artifactId>
+            <version>1.50g</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+		<groupId>com.github.mcib3d</groupId>
+		<artifactId>mcib3d-core</artifactId>
+		<version>3.73</version>
+	</dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
