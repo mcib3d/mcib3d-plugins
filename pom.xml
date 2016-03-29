@@ -37,10 +37,10 @@
             <type>jar</type>
         </dependency>
         <dependency>
-		<groupId>com.github.mcib3d</groupId>
-		<artifactId>mcib3d-core</artifactId>
-		<version>3.73</version>
-	</dependency>
+			<groupId>com.github.mcib3d</groupId>
+			<artifactId>mcib3d-core</artifactId>
+			<version>master-SNAPSHOT</version>
+		</dependency>
     </dependencies>
     <repositories>
 		<repository>
