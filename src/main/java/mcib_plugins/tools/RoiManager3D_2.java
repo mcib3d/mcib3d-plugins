@@ -92,7 +92,6 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     private ImagePlus currentImage;
     private Roi[] arrayRois = null;
     boolean canceled;
-    boolean macro;
     boolean live = true;
 
     private ResultsFrame tableResultsMeasure = null;
@@ -1604,15 +1603,14 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         if (count == 0) {
             return false;
         }
-
         int index[] = list.getSelectedIndices();
 
         if ((index.length == 0) || (index.length == list.getModel().getSize())) {
             String msg = "Delete all items on the list?";
 
             canceled = false;
-            macro = IJ.isMacro();
-            if (!IJ.macroRunning() && !macro) {
+
+            if (!IJ.macroRunning() && !IJ.isMacro()) {
                 YesNoCancelDialog d = new YesNoCancelDialog(this, "ROIManager3D", msg);
                 if (d.cancelPressed()) {
                     canceled = true;
@@ -1631,9 +1629,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         boolean delete;
 
         // check if really want to erase
-        if ((erase) && (!IJ.macroRunning()) && !macro) {
+        if ((erase) && !IJ.macroRunning() && !IJ.isMacro()) {
             if (!IJ.showMessageWithCancel("Erase ?", "Erase will delete the objects in the current image, are you sure ?")) {
-                erase = false;
                 return false;
             }
         }
@@ -1647,15 +1644,13 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             if (delete) {
                 if (erase) {
                     fill3D(0, 0, 0);
-                    delete(i);
-                } else {
-                    delete(i);
                 }
+                delete(i);
             }
         }
-        
-         buildHash();
-         
+
+        buildHash();
+
         //updateShowAll();
         if (Recorder.record) {
             if (!erase) {
@@ -1669,9 +1664,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         buildHash();
 
         // update rois to nothing
-        if (!IJ.macroRunning() && !macro) {
-            computeRois();
-            updateRois();
+        if (!IJ.macroRunning() && !IJ.isMacro()) {
+            //computeRois();
+            // updateRois();
         }
 
         return true;
@@ -2830,7 +2825,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         if ((c == null) || (!Prefs.get("RoiManager3D-Options_sync3DViewer.boolean", false))) {
             return;
         }
-       // IJ.log("Selected content " + c.getName());
+        // IJ.log("Selected content " + c.getName());
         selectByName(c.getName());
     }
 
