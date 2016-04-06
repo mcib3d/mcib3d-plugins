@@ -25,7 +25,7 @@ public class Stats_Spat3D implements PlugInFilter {
 
     ImagePlus imp;
     Calibration calibration;
-    int numPoints = 10000;
+    int numEvaluationPointsF = 10000;
     int numRandomSamples = 100;
     double distHardCore = 0;
     // double stepKFunction = 0.5d;
@@ -89,15 +89,15 @@ public class Stats_Spat3D implements PlugInFilter {
         }
         imp = WindowManager.getImage(imaspots + 1);
         calibration = imp.getCalibration();
-        spatialAnalysis spa = new spatialAnalysis(numPoints, numRandomSamples, distHardCore, env / 100.0);
+        spatialAnalysis spa = new spatialAnalysis(numEvaluationPointsF, numRandomSamples, distHardCore, env / 100.0);
         spa.setMultiThread(nbcpus);
         spa.setColorsPlot(Color.DARK_GRAY, Color.LIGHT_GRAY, colorDraw);
         spa.process(imp, WindowManager.getImage(imamask + 1), functions, true, show, save);
-        spa.getRandomSample().show("Random Sample");
+        spa.getRandomSample().show("Random Sample");    
     }
 
     private boolean Dialogue() {
-        numPoints = (int) Prefs.get("Analysis_F_numPoints.double", numPoints);
+        numEvaluationPointsF = (int) Prefs.get("Analysis_F_numPoints.double", numEvaluationPointsF);
         numRandomSamples = (int) Prefs.get("Analysis_F_numRandom.double", numRandomSamples);
         distHardCore = Prefs.get("Analysis_F_hardCore.double", distHardCore);
         env = (int) Prefs.get("Analysis_F_env.double", env);
@@ -106,7 +106,7 @@ public class Stats_Spat3D implements PlugInFilter {
         GenericDialog gd = new GenericDialog("Spatial Statistics");
         gd.addMessage("Choose stat functions to evaluate");
         gd.addCheckboxGroup(1, 3, new String[]{"F", "G", "H"}, new boolean[]{true, true, false});
-        gd.addNumericField("Nb_points (F function)", Prefs.get("Analysis_F_numPoints.double", numPoints), 0);
+        gd.addNumericField("Nb_points (F function)", Prefs.get("Analysis_F_numPoints.double", numEvaluationPointsF), 0);
         gd.addNumericField("Samples", numRandomSamples, 0);
         gd.addNumericField("Distance hardcore (" + imp.getCalibration().getUnits() + ")", distHardCore, 3);
         gd.addNumericField("Error %", env, 0);
@@ -132,7 +132,7 @@ public class Stats_Spat3D implements PlugInFilter {
             IJ.log("Choose at least one function");
             return false;
         }
-        numPoints = (int) gd.getNextNumber();
+        numEvaluationPointsF = (int) gd.getNextNumber();
         numRandomSamples = (int) gd.getNextNumber();
         distHardCore = gd.getNextNumber();
         env = (int) gd.getNextNumber();
@@ -143,7 +143,7 @@ public class Stats_Spat3D implements PlugInFilter {
         show = gd.getNextBoolean();
         save = gd.getNextBoolean();
 
-        Prefs.set("Analysis_F_numPoints.double", numPoints);
+        Prefs.set("Analysis_F_numPoints.double", numEvaluationPointsF);
         Prefs.set("Analysis_F_numRandom.double", numRandomSamples);
         Prefs.set("Analysis_F_hardCore.double", distHardCore);
         Prefs.set("Analysis_F_env.double", env);
