@@ -100,7 +100,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     private ResultsFrame tableResultsDistance = null;
     private ResultsFrame tableResultsVoxels = null;
 
-    private double version = mcib3d.utils.AboutMCIB.VERSION;
+    private double version = mcib3d.utils.AboutMCIB.getVERSION();
     private boolean multi = false;
     private Image3DUniverse universe = null;
     private boolean showUniverse = true;

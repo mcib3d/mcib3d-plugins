@@ -2,11 +2,15 @@ package mcib_plugins;
 
 //import fish.FishImage3D;
 //import fish.FishObject;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.measure.Calibration;
 import ij.plugin.PlugIn;
+import mcib3d.geom.Object3DVoxels;
+import mcib3d.geom.ObjectCreator3D;
+import mcib3d.geom.Objects3DPopulation;
 import mcib3d.image3d.ImageFloat;
 import mcib3d.image3d.ImageHandler;
 import mcib3d.image3d.ImageInt;
@@ -57,7 +61,24 @@ public class Watershed_Voronoi3D implements PlugIn {
         IJ.log("Computing watershed");
         Watershed3D water = new Watershed3D(edt16, imgSeeds, 0, 0);
         water.setAnim(anim);
-        water.getWatershedImage3D().show("Voronoi");
+        ImageInt voronoi = water.getWatershedImage3D();
+        voronoi.show("VoronoiZones");
+        // lines
+        Object3DVoxels zero = new Object3DVoxels(voronoi, 0);
+        Objects3DPopulation pop = new Objects3DPopulation(voronoi);
+        ObjectCreator3D draw = new ObjectCreator3D(seedPlus.getWidth(), seedPlus.getHeight(), seedPlus.getNSlices());
+        draw.getImageHandler().fill(1);
+        zero.draw(draw, 0);
+        for (int o = 0; o < pop.getNbObjects(); o++) {
+            Object3DVoxels obj = (Object3DVoxels) pop.getObject(o);
+            obj.computeContours();
+            if (seedPlus.getNSlices() > 1)
+                obj.drawContours(draw, 0);
+            else {
+                obj.drawContoursXY(draw, 0, 0);
+            }
+        }
+        draw.getImageHandler().show("VoronoiLines");
         IJ.log("Finished in " + (System.currentTimeMillis() - t) + " ms.");
     }
 }

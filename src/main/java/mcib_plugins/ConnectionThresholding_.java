@@ -236,7 +236,7 @@ public class ConnectionThresholding_ extends PlugInFrame implements PlugIn, Meas
 		if (IJ.isMacOSX()) {
 			setResizable(false);
 		}
-		show();
+		this.setVisible(true);
 
 		thread = new Thread(this, "Hysteresis_");
 		//thread.setPriority(thread.getPriority()-1);

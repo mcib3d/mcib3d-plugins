@@ -131,9 +131,9 @@ public class Track_Threshold implements PlugInFilter {
             threshold_method = TrackThreshold.THRESHOLD_METHOD_STEP;
         }
         TT.setMethodThreshold(tmethod);
-        int cri = TrackThreshold.CRITERIA_METHOD_MIN_ELONGATIO;
+        int cri = TrackThreshold.CRITERIA_METHOD_MIN_ELONGATION;
         if (crit == 0) {
-            cri = TrackThreshold.CRITERIA_METHOD_MIN_ELONGATIO;
+            cri = TrackThreshold.CRITERIA_METHOD_MIN_ELONGATION;
         } else if (crit == 1) {
             cri = TrackThreshold.CRITERIA_METHOD_MAX_VOLUME;
         } else if (crit == 2) {
