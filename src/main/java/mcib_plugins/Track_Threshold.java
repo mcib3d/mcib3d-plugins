@@ -148,13 +148,21 @@ public class Track_Threshold implements PlugInFilter {
         }
         TT.setMethodThreshold(tmethod);
         int cri = TrackThreshold.CRITERIA_METHOD_MIN_ELONGATION;
-        if (crit == 0) {
-            cri = TrackThreshold.CRITERIA_METHOD_MIN_ELONGATION;
-        } else if (crit == 1) {
-            cri = TrackThreshold.CRITERIA_METHOD_MAX_VOLUME;
-        } else if (crit == 2) {
-            cri = TrackThreshold.CRITERIA_METHOD_MSER;
+        switch (crit) {
+            case 0:
+                cri = TrackThreshold.CRITERIA_METHOD_MIN_ELONGATION;
+                break;
+            case 1:
+                cri = TrackThreshold.CRITERIA_METHOD_MAX_COMPACITY;
+                break;
+            case 2:
+                cri = TrackThreshold.CRITERIA_METHOD_MAX_VOLUME;
+                break;
+            case 3:
+                cri = TrackThreshold.CRITERIA_METHOD_MSER;
+                break;
         }
+
         TT.setCriteriaMethod(cri);
         ImagePlus res = TT.segment(timedup, true);
         if (res != null) res.show();
@@ -163,7 +171,7 @@ public class Track_Threshold implements PlugInFilter {
 
     private boolean dialogue() {
         methods = new String[]{"STEP", "KMEANS", "VOLUME"};
-        criteria = new String[]{"ELONGATION", "VOLUME", "MSER"};
+        criteria = new String[]{"ELONGATION", "COMPACTNESS", "VOLUME", "MSER"};
         GenericDialog gd = new GenericDialog("sizes");
         gd.addNumericField("Min_vol_pix", volMin, 0, 10, "");
         gd.addNumericField("Max_vol_pix", volMax, 0, 10, "");
@@ -193,9 +201,9 @@ public class Track_Threshold implements PlugInFilter {
     }
 
     private ArrayList<Point3D> computeMarkers(ImageInt markImage) {
-        if(markImage.isBinary()) {
-            ImageLabeller labeller=new ImageLabeller();
-            markImage=labeller.getLabels(markImage);
+        if (markImage.isBinary()) {
+            ImageLabeller labeller = new ImageLabeller();
+            markImage = labeller.getLabels(markImage);
         }
         ArrayList<Point3D> point3Ds = new ArrayList<Point3D>();
         Objects3DPopulation objects3DPopulation = new Objects3DPopulation(markImage);
