@@ -2060,10 +2060,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             }
             if (Prefs.get("RoiManager3D-Options_BB.boolean", true)) {
                 data[i][h++] = obj.getXmin();
-                data[i][h++] = obj.getXmax();
                 data[i][h++] = obj.getYmin();
-                data[i][h++] = obj.getYmax();
                 data[i][h++] = obj.getZmin();
+                data[i][h++] = obj.getXmax();
+                data[i][h++] = obj.getYmax();
                 data[i][h++] = obj.getZmax();
                 data[i][h++] = obj.getVolumeBoundingBoxPixel();
                 data[i][h++] = obj.getRatioBox();
