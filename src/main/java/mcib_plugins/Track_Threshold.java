@@ -3,39 +3,47 @@ package mcib_plugins;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.measure.Calibration;
 import ij.plugin.Duplicator;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
+import mcib3d.geom.Object3D;
+import mcib3d.geom.Objects3DPopulation;
+import mcib3d.geom.Point3D;
 import mcib3d.image3d.ImageHandler;
+import mcib3d.image3d.ImageInt;
+import mcib3d.image3d.ImageLabeller;
 import mcib3d.image3d.IterativeThresholding.TrackThreshold;
 import mcib3d.image3d.processing.FastFilters3D;
+
+import java.util.ArrayList;
 
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+
 /**
- *
- **
+ * *
  * /**
  * Copyright (C) 2008- 2012 Thomas Boudier and others
- *
- *
- *
+ * <p>
+ * <p>
+ * <p>
  * This file is part of mcib3d
- *
+ * <p>
  * mcib3d is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 3 of the License, or (at your option) any later
  * version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  *
@@ -64,7 +72,14 @@ public class Track_Threshold implements PlugInFilter {
     public void run(ImageProcessor ip) {
 
         ImagePlus plus = IJ.getImage();
-        
+        ArrayList<Point3D> point3Ds = null;
+
+        ImagePlus seeds = WindowManager.getImage("markers");
+        if (seeds == null) IJ.log("No image with name \"markers\" found. Not using markers.");
+        else {
+            point3Ds = computeMarkers(ImageInt.wrap(seeds));
+        }
+
         if (plus.getBitDepth() == 8) {
             step = 1;
         } else {
@@ -118,6 +133,7 @@ public class Track_Threshold implements PlugInFilter {
         }
 
         TrackThreshold TT = new TrackThreshold(volMin, volMax, step, step, thmin);
+        TT.setMarkers(point3Ds);
         // 8-bits switch to step method
         int tmethod = TrackThreshold.THRESHOLD_METHOD_STEP;
         if (threshold_method == 0) {
@@ -141,7 +157,8 @@ public class Track_Threshold implements PlugInFilter {
         }
         TT.setCriteriaMethod(cri);
         ImagePlus res = TT.segment(timedup, true);
-        res.show();
+        if (res != null) res.show();
+        else IJ.log("NO OBJECTS FOUND !");
     }
 
     private boolean dialogue() {
@@ -173,5 +190,18 @@ public class Track_Threshold implements PlugInFilter {
         }
 
         return gd.wasOKed();
+    }
+
+    private ArrayList<Point3D> computeMarkers(ImageInt markImage) {
+        if(markImage.isBinary()) {
+            ImageLabeller labeller=new ImageLabeller();
+            markImage=labeller.getLabels(markImage);
+        }
+        ArrayList<Point3D> point3Ds = new ArrayList<Point3D>();
+        Objects3DPopulation objects3DPopulation = new Objects3DPopulation(markImage);
+        for (Object3D object3D : objects3DPopulation.getObjectsList()) {
+            point3Ds.add(object3D.getCenterAsPoint());
+        }
+        return point3Ds;
     }
 }
