@@ -14,7 +14,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.text.NumberFormat;
 import java.util.List;
-import javax.vecmath.Color3f;
+import org.scijava.vecmath.Color3f;
 import mcib3d.geom.GeomTransform3D;
 import mcib3d.geom.Object3DSurface;
 import mcib3d.geom.ObjectCreator3D;
