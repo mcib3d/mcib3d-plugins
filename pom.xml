@@ -38,6 +38,17 @@
         </dependency>
         <!-- MCIB3D GITHUB VERSION - USE THIS ONE
         <dependency>
+            <groupId>org.scijava</groupId>
+            <artifactId>j3dcore</artifactId>
+            <version>1.6.0-scijava-2</version>
+        </dependency>
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>3D_Viewer</artifactId>
+			<version>4.0.1</version>
+			<type>jar</type>
+        </dependency>
+        <dependency>
 			<groupId>com.github.mcib3d</groupId>
 			<artifactId>mcib3d-core</artifactId>
 			<version>master-SNAPSHOT</version>
