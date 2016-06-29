@@ -36,11 +36,13 @@
             <version>1.50g</version>
             <type>jar</type>
         </dependency>
+        <!-- MCIB3D GITHUB VERSION - USE THIS ONE
         <dependency>
 			<groupId>com.github.mcib3d</groupId>
 			<artifactId>mcib3d-core</artifactId>
 			<version>master-SNAPSHOT</version>
 		</dependency>
+       -->
     </dependencies>
     <repositories>
 		<repository>
