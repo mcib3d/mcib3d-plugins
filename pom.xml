@@ -5,6 +5,7 @@
     <artifactId>mcib3d-plugins</artifactId>
     <version>master-SNAPSHOT</version>
     <packaging>jar</packaging>
+
     <build>
         <plugins>
             <plugin>
@@ -17,6 +18,7 @@
             </plugin>
         </plugins>
     </build>
+
     <dependencies>
         <dependency>
             <groupId>sc.fiji</groupId>
@@ -36,7 +38,6 @@
             <version>1.50g</version>
             <type>jar</type>
         </dependency>
-        <!-- MCIB3D GITHUB VERSION - USE THIS ONE
         <dependency>
             <groupId>org.scijava</groupId>
             <artifactId>j3dcore</artifactId>
@@ -53,8 +54,8 @@
 			<artifactId>mcib3d-core</artifactId>
 			<version>master-SNAPSHOT</version>
 		</dependency>
-       -->
     </dependencies>
+
     <repositories>
 		<repository>
 			<id>jitpack.io</id>

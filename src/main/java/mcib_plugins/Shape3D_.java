@@ -19,6 +19,7 @@ import mcib3d.geom.GeomTransform3D;
 import mcib3d.geom.Object3DSurface;
 import mcib3d.geom.ObjectCreator3D;
 import mcib3d.geom.Vector3D;
+import org.scijava.vecmath.Point3f;
 
 /**
  * Description of the Class
