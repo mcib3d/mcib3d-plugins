@@ -43,7 +43,7 @@ public class Convex_Hull3D implements PlugInFilter {
             }
         }
         // no need calibration for computing hull
-        ImageInt ima = ImageInt.wrap(imp);
+        ImageInt ima = ImageInt.wrap(imp.duplicate());
         ima.setScale(1, 1, "pix");
         //drawing of hulls
         ObjectCreator3D hulls = new ObjectCreator3D(ima.sizeX, ima.sizeY, ima.sizeZ);
@@ -58,7 +58,7 @@ public class Convex_Hull3D implements PlugInFilter {
             NumberFormat nf = NumberFormat.getInstance();
             nf.setMaximumFractionDigits(3);
             if (obj.getVolumePixels() > 0) {
-                IJ.log("\nProcessing obj " + val);
+                IJ.log("Processing obj " + val);
                 Object3D objC = obj.getConvexObject();
                 objC.draw(hulls, val);
             }
@@ -68,8 +68,10 @@ public class Convex_Hull3D implements PlugInFilter {
             imageHandler.setCalibration(cal);
         }
         ImagePlus plus = imageHandler.getImagePlus();
+        plus.setCalibration(cal);
         plus.setSlice(plus.getStackSize() / 2);
         plus.setDisplayRange(0, valmax);
+        plus.setTitle("convex_Hull");
         plus.show();
     }
 
