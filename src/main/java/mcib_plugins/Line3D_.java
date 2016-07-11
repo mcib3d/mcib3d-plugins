@@ -10,15 +10,17 @@ import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 import ij3d.Content;
 import ij3d.Image3DUniverse;
-import java.awt.Color;
-import java.awt.Font;
-import java.util.ArrayList;
-import java.util.List;
+import mcib3d.geom.ObjectCreator3D;
+import mcib3d.image3d.ImageHandler;
+import mcib3d.utils.ArrayUtil;
 import org.scijava.vecmath.Color3f;
 import org.scijava.vecmath.Point3f;
-import mcib3d.geom.ObjectCreator3D;
-import mcib3d.image3d.legacy.IntImage3D;
-import mcib3d.utils.ArrayUtil;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
+
+//import mcib3d.image3d.legacy.IntImage3D;
 
 /**
  * Description of the Class
@@ -140,11 +142,13 @@ public class Line3D_ implements PlugIn {
             viewer3d = gd.getNextBoolean();
             ObjectCreator3D obj;
             int r = (int) (rad);
-            
+
             // profile
             if (profile) {
-                IntImage3D ima3d = new IntImage3D(stack);
-                double[] line3d = ima3d.getLinePixelValue(x0, y0, z0, x1, y1, z1, false);
+                //IntImage3D ima3d = new IntImage3D(stack);
+                ImageHandler ima3d = ImageHandler.wrap(stack);
+                //double[] line3d = ima3d.getLinePixelValue(x0, y0, z0, x1, y1, z1, false);
+                double[] line3d = ima3d.extractLine(x0, y0, z0, x1, y1, z1, false);
                 ArrayUtil lineutil = new ArrayUtil(line3d);
                 lineutil.getPlot().show();
             }
@@ -160,7 +164,7 @@ public class Line3D_ implements PlugIn {
 
                 ImagePlus plusLine = new ImagePlus("Line3D", obj.getStack());
                 plusLine.setCalibration(cal);
-                plusLine.show("3D Profile of "+title);
+                plusLine.show("3D Profile of " + title);
             } // OVERWRITE
             else if (display == 1) {
                 if (stack == null) {
@@ -199,7 +203,7 @@ public class Line3D_ implements PlugIn {
                 }
                 Content cpoints = universe.addPointMesh(line, new Color3f(foreground.getRed() / 255.0f, foreground.getGreen() / 255.0f, foreground.getBlue() / 255.0f), 8, "point" + l);
                 cpoints.setVisible(true);
-            }            
+            }
         }
     }
 }

@@ -52,7 +52,7 @@
         <dependency>
 			<groupId>com.github.mcib3d</groupId>
 			<artifactId>mcib3d-core</artifactId>
-			<version>3.81</version>
+			<version>3.8.2</version>
 		</dependency>
     </dependencies>
 
