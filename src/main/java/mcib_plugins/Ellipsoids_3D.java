@@ -195,7 +195,7 @@ public class Ellipsoids_3D implements PlugInFilter {
                 row++;
             }
         }
-        rt.show("Ellipsoid");
+        rt.show("Results");
 
         ImagePlus plus = new ImagePlus("Ellipsoids", ellipsoid.getStack());
         if (cal != null) {
