@@ -54,6 +54,7 @@ public class Track_Threshold implements PlugInFilter {
     int volMax = 10000;
     int volMin = 100;
     double minTh = 0;
+    int minCont = 100;
     boolean filter = true;
     Calibration cal;
     private int step = 1;
@@ -132,7 +133,7 @@ public class Track_Threshold implements PlugInFilter {
             IJ.log("Mean=" + thmin);
         }
 
-        TrackThreshold TT = new TrackThreshold(volMin, volMax, step, step, thmin);
+        TrackThreshold TT = new TrackThreshold(volMin, volMax, minCont, step, step, thmin);
         TT.setMarkers(point3Ds);
         // 8-bits switch to step method
         int tmethod = TrackThreshold.THRESHOLD_METHOD_STEP;
@@ -176,6 +177,7 @@ public class Track_Threshold implements PlugInFilter {
         gd.addNumericField("Min_vol_pix", volMin, 0, 10, "");
         gd.addNumericField("Max_vol_pix", volMax, 0, 10, "");
         gd.addNumericField("Min_threshold", minTh, 0, 10, "");
+        gd.addNumericField("Min_contrast (exp)", minCont, 0, 10, "");
         gd.addChoice("Criteria_method", criteria, criteria[crit]);
         gd.addChoice("Threshold_method", methods, methods[threshold_method]);
         gd.addNumericField("Value_method", step, 1, 10, "");
@@ -185,6 +187,7 @@ public class Track_Threshold implements PlugInFilter {
         volMin = (int) gd.getNextNumber();
         volMax = (int) gd.getNextNumber();
         minTh = (int) gd.getNextNumber();
+        minCont = (int) gd.getNextNumber();
         crit = gd.getNextChoiceIndex();
         threshold_method = gd.getNextChoiceIndex();
         step = (int) gd.getNextNumber();
