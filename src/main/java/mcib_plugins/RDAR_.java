@@ -12,7 +12,7 @@ import mcib3d.image3d.ImageHandler;
  * Created by thomasb on 19/7/16.
  */
 public class RDAR_ implements PlugInFilter {
-    ImagePlus imagePlus;
+    private ImagePlus imagePlus;
 
     @Override
     public int setup(String arg, ImagePlus imp) {
