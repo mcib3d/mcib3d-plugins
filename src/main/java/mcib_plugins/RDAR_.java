@@ -23,8 +23,17 @@ public class RDAR_ implements PlugInFilter {
     @Override
     public void run(ImageProcessor ip) {
         Object3DVoxels object3DVoxels = new Object3DVoxels(ImageHandler.wrap(imagePlus));
-        int rad = (int) object3DVoxels.getDistCenterMean();
-        RDAR rdar = new RDAR(object3DVoxels, rad, rad, rad);
+        double r1 = object3DVoxels.getRadiusMoments(2);
+        double rad1 = r1;
+        double rad2 = Double.NaN;
+        if (!Double.isNaN(object3DVoxels.getMainElongation())) {
+            rad2 = rad1 / object3DVoxels.getMainElongation();
+        }
+        double rad3 = Double.NaN;
+        if (!Double.isNaN(object3DVoxels.getMedianElongation())) {
+            rad3 = rad2 / object3DVoxels.getMedianElongation();
+        }
+        RDAR rdar = new RDAR(object3DVoxels, (int) rad1, (int) rad2, (int) rad3);
         IJ.log("Nb " + rdar.getPartsInNumber(100) + " " + rdar.getPartsOutNumber(100));
 
         // drawing
