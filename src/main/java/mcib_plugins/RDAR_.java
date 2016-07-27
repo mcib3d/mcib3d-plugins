@@ -2,17 +2,27 @@ package mcib_plugins;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.GenericDialog;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
+import mcib3d.geom.Object3D;
 import mcib3d.geom.Object3DVoxels;
+import mcib3d.geom.Objects3DPopulation;
 import mcib3d.geom.RDAR;
 import mcib3d.image3d.ImageHandler;
+import mcib3d.image3d.ImageInt;
+import mcib3d.image3d.ImageShort;
 
 /**
  * Created by thomasb on 19/7/16.
  */
 public class RDAR_ implements PlugInFilter {
     private ImagePlus imagePlus;
+    private int radiusX = 10;
+    private int radiusY = 10;
+    private int radiusZ = 10;
+    private int minVolume = 100;
+    private boolean autoRadius = true;
 
     @Override
     public int setup(String arg, ImagePlus imp) {
@@ -22,28 +32,79 @@ public class RDAR_ implements PlugInFilter {
 
     @Override
     public void run(ImageProcessor ip) {
-        Object3DVoxels object3DVoxels = new Object3DVoxels(ImageHandler.wrap(imagePlus));
-        double r1 = object3DVoxels.getRadiusMoments(2);
-        double rad1 = r1;
-        double rad2 = Double.NaN;
-        if (!Double.isNaN(object3DVoxels.getMainElongation())) {
-            rad2 = rad1 / object3DVoxels.getMainElongation();
+        if (dialog()) {
+            ImageInt imageInt = ImageInt.wrap(imagePlus);
+            Objects3DPopulation objects3DPopulation = new Objects3DPopulation(imageInt);
+            // drawing
+            ImageHandler drawIn = new ImageShort("Parts inside", imagePlus.getWidth(), imagePlus.getHeight(), imagePlus.getImageStackSize());
+            drawIn.setCalibration(imageInt.getCalibration());
+            ImageHandler drawOut = new ImageShort("Parts outside", imagePlus.getWidth(), imagePlus.getHeight(), imagePlus.getImageStackSize());
+            drawOut.setCalibration(imageInt.getCalibration());
+            ImageHandler drawEll = new ImageShort("Ellipsoid", imagePlus.getWidth(), imagePlus.getHeight(), imagePlus.getImageStackSize());
+            drawEll.setCalibration(imageInt.getCalibration());
+            for (Object3D object3D : objects3DPopulation.getObjectsList()) {
+                processObject(object3D, drawIn, drawOut, drawEll);
+            }
+            drawIn.show();
+            drawOut.show();
+            drawEll.show();
         }
-        double rad3 = Double.NaN;
-        if (!Double.isNaN(object3DVoxels.getMedianElongation())) {
-            rad3 = rad2 / object3DVoxels.getMedianElongation();
-        }
-        RDAR rdar = new RDAR(object3DVoxels, (int) rad1, (int) rad2, (int) rad3);
-        IJ.log("Nb " + rdar.getPartsInNumber(100) + " " + rdar.getPartsOutNumber(100));
+    }
 
-        // drawing
-        ImageHandler imageHandler = ImageHandler.wrap(imagePlus.duplicate());
-        imageHandler.fill(0);
-        //object3DVoxels.draw(imageHandler, 255);
-        if (rdar.getPartsIn(100) != null)
-            for (Object3DVoxels part : rdar.getPartsIn(100)) part.draw(imageHandler, 200);
-        if (rdar.getPartsOut(100) != null)
-            for (Object3DVoxels part : rdar.getPartsOut(100)) part.draw(imageHandler, 150);
-        imageHandler.show("draw");
+    private void processObject(Object3D object3D, ImageHandler drawIn, ImageHandler drawOut, ImageHandler drawEll) {
+        double resXY = object3D.getResXY();
+        double resZ = object3D.getResZ();
+        IJ.log("Analysing object " + object3D.getValue());
+        Object3DVoxels object3DVoxels = object3D.getObject3DVoxels();
+        if (autoRadius) {
+            double rad1 = object3DVoxels.getRadiusMoments(2);
+            double rad2 = Double.NaN;
+            if (!Double.isNaN(object3DVoxels.getMainElongation())) {
+                rad2 = rad1 / object3DVoxels.getMainElongation();
+            }
+            double rad3 = Double.NaN;
+            if (!Double.isNaN(object3DVoxels.getMedianElongation())) {
+                rad3 = rad2 / object3DVoxels.getMedianElongation();
+            }
+            radiusX = (int) Math.round(rad1 / resXY);
+            radiusY = (int) Math.round(rad2 / resXY);
+            radiusZ = (int) Math.round(rad3 / resZ);
+
+            IJ.log("Ellipsoid radii(pix)=" + radiusX + "," + radiusY + "," + radiusZ);
+        }
+
+        RDAR rdar = new RDAR(object3DVoxels, radiusX, radiusY, radiusZ);
+        IJ.log("Nb parts in : " + rdar.getPartsInNumber(minVolume) + ", nb parts out : " + rdar.getPartsOutNumber(minVolume));
+
+
+        rdar.getEllipsoid().draw(drawEll, 1);
+        int c = object3DVoxels.getValue();
+        if (rdar.getPartsIn(minVolume) != null)
+            for (Object3DVoxels part : rdar.getPartsIn(minVolume)) part.draw(drawIn, c);
+        c = object3DVoxels.getValue();
+        if (rdar.getPartsOut(minVolume) != null)
+            for (Object3DVoxels part : rdar.getPartsOut(minVolume)) part.draw(drawOut, c);
+        drawIn.show("Parts_In");
+        drawOut.show("Parts_Out");
+        drawEll.show("Ellipsoid");
+        IJ.log("");
+    }
+
+    private boolean dialog() {
+        GenericDialog genericDialog = new GenericDialog("RDAR");
+        genericDialog.addNumericField("Radius_X", radiusX, 1, 10, "pix");
+        genericDialog.addNumericField("Radius_Y", radiusY, 1, 10, "pix");
+        genericDialog.addNumericField("Radius_Z", radiusZ, 1, 10, "pix");
+        genericDialog.addCheckbox("Fit ellipsoid", autoRadius);
+        genericDialog.addNumericField("Min volume parts", minVolume, 1, 10, "pix");
+        genericDialog.showDialog();
+        autoRadius = genericDialog.getNextBoolean();
+        radiusX = (int) genericDialog.getNextNumber();
+        radiusY = (int) genericDialog.getNextNumber();
+        radiusZ = (int) genericDialog.getNextNumber();
+        minVolume = (int) genericDialog.getNextNumber();
+
+        return genericDialog.wasOKed();
+
     }
 }
