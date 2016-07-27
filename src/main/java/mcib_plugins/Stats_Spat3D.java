@@ -5,15 +5,13 @@ import ij.ImagePlus;
 import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
-import ij.process.ShortProcessor;
-import java.awt.Color;
 import mcib3d.geom.Point3D;
 import mcib3d.utils.ThreadUtil;
 import mcib_plugins.analysis.spatialAnalysis;
+import java.awt.*;
 
 /**
  * Description of the Class
@@ -34,12 +32,12 @@ public class Stats_Spat3D implements PlugInFilter {
     int imamask = 1;
     String[] names;
     Point3D[] evaluationPoints;
-    private int env = 5;
     String functions;
     boolean show;
     boolean save;
     int indexcol = 0;
     Color colorDraw = null;
+    private int env = 5;
     private int nbcpus;
 
     /**
@@ -63,25 +61,25 @@ public class Stats_Spat3D implements PlugInFilter {
     @Override
     public void run(ImageProcessor ip) {
 
-        int nbima = WindowManager.getImageCount();
-        names = new String[nbima];
+        int nbIma = WindowManager.getImageCount();
+        names = new String[nbIma];
 
-        if (nbima < 2) {
+        if (nbIma < 2) {
             // try to extract mask roi
             ImagePlus plus = IJ.getImage();
             if ((plus != null) && (plus.getStackSize() == 1)) {
                 IJ.log("Creating mask");
-                createMask(plus);
+                spatialAnalysis.createMask(plus);
             }
-            nbima = WindowManager.getImageCount();
-            names = new String[nbima];
-            if (nbima < 2) {
+            nbIma = WindowManager.getImageCount();
+            names = new String[nbIma];
+            if (nbIma < 2) {
                 IJ.showMessage("Needs 2 images");
                 return;
             }
         }
 
-        for (int i = 0; i < nbima; i++) {
+        for (int i = 0; i < nbIma; i++) {
             names[i] = WindowManager.getImage(i + 1).getShortTitle();
         }
         if (!Dialogue()) {
@@ -92,8 +90,8 @@ public class Stats_Spat3D implements PlugInFilter {
         spatialAnalysis spa = new spatialAnalysis(numEvaluationPointsF, numRandomSamples, distHardCore, env / 100.0);
         spa.setMultiThread(nbcpus);
         spa.setColorsPlot(Color.DARK_GRAY, Color.LIGHT_GRAY, colorDraw);
-        spa.process(imp, WindowManager.getImage(imamask + 1), functions, true, show, save);
-        spa.getRandomSample().show("Random Sample");    
+        if (spa.process(imp, WindowManager.getImage(imamask + 1), functions, true, show, save))
+            spa.getRandomSample().show("Random Sample");
     }
 
     private boolean Dialogue() {
@@ -181,21 +179,5 @@ public class Stats_Spat3D implements PlugInFilter {
         return (gd.wasOKed());
     }
 
-    private void createMask(ImagePlus plus) {
-        ImageProcessor mask = new ShortProcessor(plus.getWidth(), plus.getHeight());
-        Roi roi = plus.getRoi();
-        if (roi == null) {
-            return;
-        }
-        ImageProcessor ma = roi.getMask();
 
-        mask.insert(ma, roi.getBounds().x, roi.getBounds().y);
-
-        ImagePlus plusMask = new ImagePlus("mask", mask);
-        if (plus.getCalibration() != null) {
-            plusMask.setCalibration(plus.getCalibration());
-        }
-        plusMask.show();
-        IJ.log("Mask created");
-    }
 }
