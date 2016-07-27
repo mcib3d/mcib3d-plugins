@@ -17,7 +17,6 @@ import mcib3d.utils.ThreadUtil;
 import mcib3d.utils.exceptionPrinter;
 
 /**
- *
  * @author jean
  */
 public class Binary_Close implements PlugInFilter {
@@ -31,6 +30,7 @@ public class Binary_Close implements PlugInFilter {
         try {
             float radXY = Math.max(radiusXY, 1);
             float radZ = Math.max(radiusZ, 0);
+            if (input.sizeZ == 1) radZ = 0;
             if (debug) {
                 IJ.log("binaryClose: radius XY" + radXY + " radZ:" + radZ);
             }
