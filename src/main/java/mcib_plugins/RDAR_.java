@@ -13,6 +13,8 @@ import mcib3d.image3d.ImageHandler;
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.ImageShort;
 
+import java.util.ArrayList;
+
 /**
  * Created by thomasb on 19/7/16.
  */
@@ -75,6 +77,15 @@ public class RDAR_ implements PlugInFilter {
 
         RDAR rdar = new RDAR(object3DVoxels, radiusX, radiusY, radiusZ);
         IJ.log("Nb parts in : " + rdar.getPartsInNumber(minVolume) + ", nb parts out : " + rdar.getPartsOutNumber(minVolume));
+        // volume
+        ArrayList<Object3DVoxels> list = rdar.getPartsIn(minVolume);
+        int vol = 0;
+        for (Object3DVoxels object3DVoxels1 : list) vol += object3DVoxels.getVolumePixels();
+        IJ.log("Volume In : " + vol);
+        list = rdar.getPartsOut(minVolume);
+        vol = 0;
+        for (Object3DVoxels object3DVoxels1 : list) vol += object3DVoxels.getVolumePixels();
+        IJ.log("Volume Out : " + vol);
 
 
         rdar.getEllipsoid().draw(drawEll, 1);
