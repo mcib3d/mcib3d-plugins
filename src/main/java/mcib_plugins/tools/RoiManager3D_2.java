@@ -4,20 +4,8 @@
  */
 package mcib_plugins.tools;
 
-import customnode.CustomTriangleMesh;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.Macro;
-import ij.Prefs;
-import ij.WindowManager;
-import ij.gui.GenericDialog;
-import ij.gui.MessageDialog;
-import ij.gui.Overlay;
-import ij.gui.Roi;
-import ij.gui.TextRoi;
-import ij.gui.Toolbar;
-import ij.gui.YesNoCancelDialog;
+import ij.*;
+import ij.gui.*;
 import ij.io.OpenDialog;
 import ij.macro.ExtensionDescriptor;
 import ij.macro.Functions;
@@ -30,31 +18,21 @@ import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
-import ij3d.Content;
-import ij3d.Image3DUniverse;
-import ij3d.UniverseListener;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Font;
-import java.awt.Scrollbar;
+import ij3d.*;
+import mcib3d.geom.*;
+import mcib3d.image3d.*;
+import mcib3d.utils.AboutMCIB;
+import mcib3d.utils.CheckInstall;
+import org.scijava.java3d.View;
+import org.scijava.vecmath.Color3f;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetDragEvent;
-import java.awt.dnd.DropTargetDropEvent;
-import java.awt.dnd.DropTargetEvent;
-import java.awt.dnd.DropTargetListener;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.dnd.*;
+import java.awt.event.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -62,50 +40,63 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import org.scijava.java3d.View;
-import javax.swing.DefaultListModel;
-import javax.swing.JFrame;
-import org.scijava.vecmath.Color3f;
-import mcib3d.geom.Object3D;
-import mcib3d.geom.Object3DSurface;
-import mcib3d.geom.Object3DVoxels;
-import mcib3d.geom.Objects3DPopulation;
-import mcib3d.geom.Point3D;
-import mcib3d.geom.Vector3D;
-import mcib3d.geom.Voxel3D;
-import mcib3d.image3d.ImageHandler;
-import mcib3d.image3d.ImageInt;
-import mcib3d.image3d.ImageLabeller;
-import mcib3d.image3d.Segment3DSpots;
-import mcib3d.utils.AboutMCIB;
-import mcib3d.utils.CheckInstall;
+import java.util.List;
 
 /**
- *
  * @author thomas
  */
 public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener, AdjustmentListener, MacroExtension, UniverseListener, DropTargetListener, WindowListener {
 
+    public javax.swing.JPanel jPanel;
+    public javax.swing.JList list;
     protected Objects3DPopulation objects3D;
     protected DefaultListModel model = new DefaultListModel();
+    boolean canceled;
+    boolean live = true;
     private HashMap<String, Integer> hashNames;
     private ImagePlus currentImage;
     private Roi[] arrayRois = null;
-    boolean canceled;
-    boolean live = true;
-
     private ResultsFrame tableResultsMeasure = null;
     private ResultsFrame tableResultsQuantif = null;
     private ResultsFrame tableResultsColoc = null;
     private ResultsFrame tableResultsDistance = null;
     private ResultsFrame tableResultsVoxels = null;
-
     private double version = mcib3d.utils.AboutMCIB.getVERSION();
     private boolean multi = false;
     private Image3DUniverse universe = null;
     private boolean showUniverse = true;
     private int currentZmin = 0;
     private int currentZmax = 0;
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton button3Dviewer;
+    private javax.swing.JButton buttonAbout;
+    private javax.swing.JButton buttonAddImage;
+    private javax.swing.JButton buttonAngles;
+    private javax.swing.JButton buttonColoc;
+    private javax.swing.JButton buttonConfig;
+    private javax.swing.JButton buttonDelete;
+    private javax.swing.JButton buttonDeselect;
+    private javax.swing.JButton buttonDistances;
+    private javax.swing.JButton buttonErase;
+    private javax.swing.JButton buttonFillStack;
+    private javax.swing.JButton buttonLabel;
+    private javax.swing.JButton buttonListVoxels;
+    private javax.swing.JToggleButton buttonLiveRoi;
+    private javax.swing.JButton buttonLoad;
+    private javax.swing.JButton buttonMeasure;
+    private javax.swing.JButton buttonMerge;
+    private javax.swing.JButton buttonQuantif;
+    private javax.swing.JButton buttonRename;
+
+    ////////////// HANDLE MACROS EXTENSIONS (end)
+    private javax.swing.JButton buttonSave;
+    private javax.swing.JButton buttonSegmentation3D;
+    private javax.swing.JButton buttonSelectAll;
+    private javax.swing.JButton buttonSplit;
+    private javax.swing.JScrollPane jScrollPane;
+    private javax.swing.JSeparator jSeparator3;
+    private javax.swing.JSeparator jSeparator4;
+    private javax.swing.JSeparator jSeparator5;
 
     /**
      * Creates new form RoiManager3D_2
@@ -144,6 +135,48 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /*
+         * Set the Nimbus look and feel
+         */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /*
+         * If Nimbus (introduced in Java SE 6) is not available, stay with the
+         * default look and feel. For details see
+         * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(RoiManager3D_2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(RoiManager3D_2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(RoiManager3D_2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(RoiManager3D_2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /*
+         * Create and display the form
+         */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new RoiManager3D_2().setVisible(true);
+            }
+        });
+    }
+
+    /**
      * Gets the extensionFunctions attribute of the RoiManager3D_ object
      *
      * @return The extensionFunctions value
@@ -168,58 +201,58 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         int[] argClosestK = {ARG_NUMBER, ARG_NUMBER, ARG_STRING, ARG_OUTPUT + ARG_NUMBER};
 
         ExtensionDescriptor[] extensions = {
-            ExtensionDescriptor.newDescriptor("Manager3D_Close", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_AddImage", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_Delete", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_Reset", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_Erase", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_Rename", this, argRename),
-            ExtensionDescriptor.newDescriptor("Manager3D_Merge", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_FillStack", this, argCol),
-            ExtensionDescriptor.newDescriptor("Manager3D_Fill3DViewer", this, argViewer),
-            ExtensionDescriptor.newDescriptor("Manager3D_Split", this, argCount),
-            ExtensionDescriptor.newDescriptor("Manager3D_Measure", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_List", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_Quantif", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_Distance", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_Coloc", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_Angle", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_Select", this, argSel),
-            ExtensionDescriptor.newDescriptor("Manager3D_SelectAll", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_GetName", this, argName),
-            ExtensionDescriptor.newDescriptor("Manager3D_SelectFor", this, argCol),
-            ExtensionDescriptor.newDescriptor("Manager3D_MultiSelect", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_MonoSelect", this),
-            //ExtensionDescriptor.newDescriptor("Manager3D_3DViewerSelect", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_DeselectAll", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_Count", this, argCount),
-            ExtensionDescriptor.newDescriptor("Manager3D_Segment", this, argSeg),
-            ExtensionDescriptor.newDescriptor("Manager3D_ShowRoi", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_Dist2", this, argDist2),
-            ExtensionDescriptor.newDescriptor("Manager3D_Coloc2", this, argColoc),
-            ExtensionDescriptor.newDescriptor("Manager3D_Measure3D", this, argMeasure3D),
-            ExtensionDescriptor.newDescriptor("Manager3D_Quantif3D", this, argMeasure3D),
-            ExtensionDescriptor.newDescriptor("Manager3D_RadiusBorderVoxel", this, argBorder3D),
-            ExtensionDescriptor.newDescriptor("Manager3D_Centroid3D", this, argCentroid3D),
-            ExtensionDescriptor.newDescriptor("Manager3D_MassCenter3D", this, argCentroid3D),
-            ExtensionDescriptor.newDescriptor("Manager3D_Label", this),
-            ExtensionDescriptor.newDescriptor("Manager3D_Load", this, argRename),
-            ExtensionDescriptor.newDescriptor("Manager3D_Save", this, argRename),
-            ExtensionDescriptor.newDescriptor("Manager3D_SaveMeasure", this, argRename),
-            ExtensionDescriptor.newDescriptor("Manager3D_SaveQuantif", this, argRename),
-            ExtensionDescriptor.newDescriptor("Manager3D_Bounding3D", this, argBounding3D),
-            ExtensionDescriptor.newDescriptor("Manager3D_Closest", this, argMeasure3D),
-            ExtensionDescriptor.newDescriptor("Manager3D_ClosestK", this, argClosestK),
-            // new 19/06/2013
-            ExtensionDescriptor.newDescriptor("Manager3D_Feret1", this, argCentroid3D),
-            ExtensionDescriptor.newDescriptor("Manager3D_Feret2", this, argCentroid3D),
-            ExtensionDescriptor.newDescriptor("Manager3D_BorderVoxel", this, argColoc),
-            // close results windows
-            ExtensionDescriptor.newDescriptor("Manager3D_CloseResult", this, argRename),
-            ExtensionDescriptor.newDescriptor("Manager3D_SaveResult", this, argSaveResult),
-            // test transform universe
-            ExtensionDescriptor.newDescriptor("Manager3D_Rotate", this, argCol),
-            ExtensionDescriptor.newDescriptor("Manager3D_LoadView3D", this, argRename),};
+                ExtensionDescriptor.newDescriptor("Manager3D_Close", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_AddImage", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_Delete", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_Reset", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_Erase", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_Rename", this, argRename),
+                ExtensionDescriptor.newDescriptor("Manager3D_Merge", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_FillStack", this, argCol),
+                ExtensionDescriptor.newDescriptor("Manager3D_Fill3DViewer", this, argViewer),
+                ExtensionDescriptor.newDescriptor("Manager3D_Split", this, argCount),
+                ExtensionDescriptor.newDescriptor("Manager3D_Measure", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_List", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_Quantif", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_Distance", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_Coloc", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_Angle", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_Select", this, argSel),
+                ExtensionDescriptor.newDescriptor("Manager3D_SelectAll", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_GetName", this, argName),
+                ExtensionDescriptor.newDescriptor("Manager3D_SelectFor", this, argCol),
+                ExtensionDescriptor.newDescriptor("Manager3D_MultiSelect", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_MonoSelect", this),
+                //ExtensionDescriptor.newDescriptor("Manager3D_3DViewerSelect", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_DeselectAll", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_Count", this, argCount),
+                ExtensionDescriptor.newDescriptor("Manager3D_Segment", this, argSeg),
+                ExtensionDescriptor.newDescriptor("Manager3D_ShowRoi", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_Dist2", this, argDist2),
+                ExtensionDescriptor.newDescriptor("Manager3D_Coloc2", this, argColoc),
+                ExtensionDescriptor.newDescriptor("Manager3D_Measure3D", this, argMeasure3D),
+                ExtensionDescriptor.newDescriptor("Manager3D_Quantif3D", this, argMeasure3D),
+                ExtensionDescriptor.newDescriptor("Manager3D_RadiusBorderVoxel", this, argBorder3D),
+                ExtensionDescriptor.newDescriptor("Manager3D_Centroid3D", this, argCentroid3D),
+                ExtensionDescriptor.newDescriptor("Manager3D_MassCenter3D", this, argCentroid3D),
+                ExtensionDescriptor.newDescriptor("Manager3D_Label", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_Load", this, argRename),
+                ExtensionDescriptor.newDescriptor("Manager3D_Save", this, argRename),
+                ExtensionDescriptor.newDescriptor("Manager3D_SaveMeasure", this, argRename),
+                ExtensionDescriptor.newDescriptor("Manager3D_SaveQuantif", this, argRename),
+                ExtensionDescriptor.newDescriptor("Manager3D_Bounding3D", this, argBounding3D),
+                ExtensionDescriptor.newDescriptor("Manager3D_Closest", this, argMeasure3D),
+                ExtensionDescriptor.newDescriptor("Manager3D_ClosestK", this, argClosestK),
+                // new 19/06/2013
+                ExtensionDescriptor.newDescriptor("Manager3D_Feret1", this, argCentroid3D),
+                ExtensionDescriptor.newDescriptor("Manager3D_Feret2", this, argCentroid3D),
+                ExtensionDescriptor.newDescriptor("Manager3D_BorderVoxel", this, argColoc),
+                // close results windows
+                ExtensionDescriptor.newDescriptor("Manager3D_CloseResult", this, argRename),
+                ExtensionDescriptor.newDescriptor("Manager3D_SaveResult", this, argSaveResult),
+                // test transform universe
+                ExtensionDescriptor.newDescriptor("Manager3D_Rotate", this, argCol),
+                ExtensionDescriptor.newDescriptor("Manager3D_LoadView3D", this, argRename),};
         return extensions;
     }
 
@@ -672,7 +705,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     private void handleRadiusBorderVoxel(Object[] args) {
-        // object1 
+        // object1
         Double D = (Double) args[0];
         int i = D.intValue();
         // object 2
@@ -735,7 +768,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     private void handleBounding3D(Object[] args) {
-        // object1 
+        // object1
         Double D = (Double) args[0];
         int i = D.intValue();
         Object3D obj = objects3D.getObject(i);
@@ -747,7 +780,6 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         ((Double[]) args[6])[0] = new Double(obj.getZmax());
     }
 
-    ////////////// HANDLE MACROS EXTENSIONS (end)
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -791,9 +823,15 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         setResizable(false);
 
         list.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
+            String[] strings = {"Item 1", "Item 2", "Item 3", "Item 4", "Item 5"};
+
+            public int getSize() {
+                return strings.length;
+            }
+
+            public Object getElementAt(int i) {
+                return strings[i];
+            }
         });
         list.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseReleased(java.awt.event.MouseEvent evt) {
@@ -975,141 +1013,141 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         javax.swing.GroupLayout jPanelLayout = new javax.swing.GroupLayout(jPanel);
         jPanel.setLayout(jPanelLayout);
         jPanelLayout.setHorizontalGroup(
-            jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addGroup(jPanelLayout.createSequentialGroup()
-                                .addComponent(buttonMerge, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(buttonSplit))
-                            .addGroup(jPanelLayout.createSequentialGroup()
-                                .addComponent(buttonRename)
-                                .addGap(0, 0, 0)
-                                .addComponent(buttonDelete)
-                                .addGap(0, 0, 0)
-                                .addComponent(buttonErase, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addComponent(jSeparator3)
-                            .addGroup(jPanelLayout.createSequentialGroup()
-                                .addComponent(buttonSegmentation3D)
-                                .addGap(0, 0, 0)
-                                .addComponent(buttonAddImage)))
-                        .addContainerGap(24, Short.MAX_VALUE))
-                    .addGroup(jPanelLayout.createSequentialGroup()
-                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addGroup(jPanelLayout.createSequentialGroup()
-                                    .addComponent(buttonDistances)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(buttonAngles))
-                                .addComponent(jSeparator4)
-                                .addComponent(jSeparator5)
-                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanelLayout.createSequentialGroup()
-                                    .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                        .addComponent(buttonColoc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(buttonMeasure, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                    .addGap(0, 0, 0)
-                                    .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(buttonListVoxels, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
-                                        .addComponent(buttonQuantif, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                                .addGroup(jPanelLayout.createSequentialGroup()
-                                    .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                        .addComponent(buttonSelectAll, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addComponent(button3Dviewer, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                    .addGap(0, 0, Short.MAX_VALUE)
-                                    .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(buttonFillStack)
-                                        .addComponent(buttonDeselect)))
-                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanelLayout.createSequentialGroup()
-                                    .addComponent(buttonLoad, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(buttonSave, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGroup(jPanelLayout.createSequentialGroup()
-                                    .addComponent(buttonConfig, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(buttonAbout, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(jPanelLayout.createSequentialGroup()
-                                .addGap(45, 45, 45)
-                                .addComponent(buttonLiveRoi)
+                jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(buttonLabel)))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelLayout.createSequentialGroup()
+                                                .addGap(0, 0, Short.MAX_VALUE)
+                                                .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                                        .addGroup(jPanelLayout.createSequentialGroup()
+                                                                .addComponent(buttonMerge, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                                .addComponent(buttonSplit))
+                                                        .addGroup(jPanelLayout.createSequentialGroup()
+                                                                .addComponent(buttonRename)
+                                                                .addGap(0, 0, 0)
+                                                                .addComponent(buttonDelete)
+                                                                .addGap(0, 0, 0)
+                                                                .addComponent(buttonErase, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                                        .addComponent(jSeparator3)
+                                                        .addGroup(jPanelLayout.createSequentialGroup()
+                                                                .addComponent(buttonSegmentation3D)
+                                                                .addGap(0, 0, 0)
+                                                                .addComponent(buttonAddImage)))
+                                                .addContainerGap(24, Short.MAX_VALUE))
+                                        .addGroup(jPanelLayout.createSequentialGroup()
+                                                .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                                                .addGroup(jPanelLayout.createSequentialGroup()
+                                                                        .addComponent(buttonDistances)
+                                                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                                        .addComponent(buttonAngles))
+                                                                .addComponent(jSeparator4)
+                                                                .addComponent(jSeparator5)
+                                                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanelLayout.createSequentialGroup()
+                                                                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                                                .addComponent(buttonColoc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                                                .addComponent(buttonMeasure, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                                                        .addGap(0, 0, 0)
+                                                                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                .addComponent(buttonListVoxels, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                                                                                .addComponent(buttonQuantif, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                                                .addGroup(jPanelLayout.createSequentialGroup()
+                                                                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                                                                .addComponent(buttonSelectAll, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                                                .addComponent(button3Dviewer, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                                                        .addGap(0, 0, Short.MAX_VALUE)
+                                                                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                .addComponent(buttonFillStack)
+                                                                                .addComponent(buttonDeselect)))
+                                                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanelLayout.createSequentialGroup()
+                                                                        .addComponent(buttonLoad, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                        .addComponent(buttonSave, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                .addGroup(jPanelLayout.createSequentialGroup()
+                                                                        .addComponent(buttonConfig, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                        .addComponent(buttonAbout, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                        .addGroup(jPanelLayout.createSequentialGroup()
+                                                                .addGap(45, 45, 45)
+                                                                .addComponent(buttonLiveRoi)
+                                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(buttonLabel)))
+                                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         jPanelLayout.setVerticalGroup(
-            jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(jPanelLayout.createSequentialGroup()
-                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(buttonSegmentation3D)
-                            .addComponent(buttonAddImage))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(buttonRename)
-                            .addComponent(buttonDelete)
-                            .addComponent(buttonErase))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(buttonMerge)
-                            .addComponent(buttonSplit))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(buttonMeasure)
-                            .addComponent(buttonQuantif))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(buttonDistances)
-                            .addComponent(buttonAngles))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(buttonColoc)
-                            .addComponent(buttonListVoxels))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jSeparator5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(button3Dviewer)
-                            .addComponent(buttonFillStack))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(buttonSelectAll)
-                            .addComponent(buttonDeselect))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(buttonLiveRoi)
-                            .addComponent(buttonLabel))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(buttonSave, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(buttonAbout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(buttonConfig, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(buttonLoad, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(9, 9, 9))
-                    .addComponent(jScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanelLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addGroup(jPanelLayout.createSequentialGroup()
+                                                .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(buttonSegmentation3D)
+                                                        .addComponent(buttonAddImage))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(buttonRename)
+                                                        .addComponent(buttonDelete)
+                                                        .addComponent(buttonErase))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(buttonMerge)
+                                                        .addComponent(buttonSplit))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(buttonMeasure)
+                                                        .addComponent(buttonQuantif))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(buttonDistances)
+                                                        .addComponent(buttonAngles))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(buttonColoc)
+                                                        .addComponent(buttonListVoxels))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addComponent(jSeparator5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(button3Dviewer)
+                                                        .addComponent(buttonFillStack))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(buttonSelectAll)
+                                                        .addComponent(buttonDeselect))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(buttonLiveRoi)
+                                                        .addComponent(buttonLabel))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                .addGroup(jPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                        .addComponent(buttonSave, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(buttonAbout, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(buttonConfig, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(buttonLoad, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                                .addGap(9, 9, 9))
+                                        .addComponent(jScrollPane, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 402, Short.MAX_VALUE)
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(jPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 402, Short.MAX_VALUE)
+                                .addContainerGap())
         );
 
         pack();
@@ -1244,48 +1282,6 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }//GEN-LAST:event_buttonLoadActionPerformed
 
     /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /*
-         * Set the Nimbus look and feel
-         */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /*
-         * If Nimbus (introduced in Java SE 6) is not available, stay with the
-         * default look and feel. For details see
-         * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(RoiManager3D_2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(RoiManager3D_2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(RoiManager3D_2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(RoiManager3D_2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /*
-         * Create and display the form
-         */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new RoiManager3D_2().setVisible(true);
-            }
-        });
-    }
-
-    /**
      * Adds a feature to the Image attribute of the RoiManager3D_ object
      */
     void addImage() {
@@ -1294,7 +1290,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         String title = plus.getTitle();
         objects3D.setCalibration(plus.getCalibration());
 
-        // cannot add RGB 
+        // cannot add RGB
         if (plus.getBitDepth() == 24) {
             IJ.showMessage("Cannot import RGB image");
         }
@@ -1314,7 +1310,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 IJ.log("Contours found : " + title);
             }
         }
-        // TODO , should work with 4D hyperstacks        
+        // TODO , should work with 4D hyperstacks
         ImageHandler seg = ImageHandler.wrap(plus);
 
         int minX = 0;
@@ -1594,8 +1590,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
      * Delete and erase the object
      *
      * @param replacing parameter for roimanager
-     * @param erase true if pixels must be set to zero else only suppress from
-     * the list
+     * @param erase     true if pixels must be set to zero else only suppress from
+     *                  the list
      * @return Description of the Return Value
      */
     boolean delete(boolean erase) {
@@ -1761,34 +1757,47 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             indexes = getAllIndexes();
         }
 
+        // from TANGO
+        if (universe == null || universe.getWindow() == null || universe.getCanvas() == null) {
+            universe = new Image3DUniverse();
+            universe.show();
+            //univ.sync(true);
+        }
+
         for (int i = 0; i < indexes.length; i++) {
-            Object3D obj = (Object3D) objects3D.getObject(indexes[i]);
+            Object3D obj = objects3D.getObject(indexes[i]);
             add3DViewer(obj, (String) model.get(indexes[i]), new Color3f(r / 255.0f, g / 255.0f, b / 255.0f));
         }
-        if (showUniverse) {
-            universe.show();
-            showUniverse = false;
-            //universe.getCanvas().addNotify();
-        }
+
+        ImageCanvas3D canvas = (ImageCanvas3D) universe.getCanvas();
+        canvas.render();
 
         if (Recorder.record) {
             Recorder.record("Ext.Manager3D_Fill3DViewer", r, g, b, 0);
         }
     }
 
-    synchronized void add3DViewer(Object3D obj, String name, Color3f col) {
-        java.util.List l = null;
+    private void add3DViewer(Object3D obj, String name, Color3f col) {
+        List l = null;
         Object3DSurface surf = obj.getObject3DSurface();
         l = surf.getSurfaceTrianglesUnit(false);
 
         if (l != null) {
             if (!universe.contains(name)) {
+                ImageInt labelImage = obj.getMaxLabelImage(1);
+                ImageByte imageByte = ((ImageShort) labelImage).convertToByte(false);
+                ImagePlus imagePlus = imageByte.getImagePlus();
+                Content c = ContentCreator.createContent(name, imagePlus, 2, 1, 0, col, 0, new boolean[]{true, true, true});
+                universe.addContentLater(c);
+                c.setLocked(true);
+                /*
                 System.out.println("Adding obj " + name);
                 CustomTriangleMesh tm = new CustomTriangleMesh(l);
                 tm.setColor(col);
                 Content surface = universe.addCustomMesh(tm, name);
                 surface.toggleLock();
                 System.out.println("Added obj " + surface.toString());
+                */
             } // already exists
             else {
                 System.out.println("Recoloring obj " + name);
@@ -1817,7 +1826,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     /**
      * Description of the Method
      *
-     * @param low Description of the Parameter
+     * @param low  Description of the Parameter
      * @param high Description of the Parameter
      */
     private void segmentation3D(int low, int high) {
@@ -2258,7 +2267,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         String[] heads = new String[headings.size()];
         heads = headings.toArray(heads);
         tableResultsQuantif = new ResultsFrame("3D Quantif", heads, data, this, ResultsFrame.OBJECT_1);
-        //Create and set up the content pane.        
+        //Create and set up the content pane.
 
         tableResultsQuantif.showFrame();
 //
@@ -2280,7 +2289,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             return false;
         }
 
-        // only one object selected 
+        // only one object selected
         int[] indexes = list.getSelectedIndices();
 //        if (indexes.length != 1) {
 //            return false;
@@ -2345,7 +2354,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         String[] heads = new String[headings.size()];
         heads = headings.toArray(heads);
         tableResultsVoxels = new ResultsFrame("3D Voxels", heads, data, this, ResultsFrame.OBJECT_NO);
-        //Create and set up the content pane.        
+        //Create and set up the content pane.
         tableResultsVoxels.showFrame();
 
         if (Recorder.record) {
@@ -2465,7 +2474,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                     d2 = ob2.radiusCenter(ob1);
                     data[count + 1][h2++] = d2;
                     data[count + 1][h2++] = d1 / d2;
-                    // border-radius 
+                    // border-radius
                     data[count + 1][h2++] = dist;
                     data[count + 1][h2++] = dist / d2;
                 }
@@ -2723,36 +2732,6 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         Macro.abort();
         return false;
     }
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton button3Dviewer;
-    private javax.swing.JButton buttonAbout;
-    private javax.swing.JButton buttonAddImage;
-    private javax.swing.JButton buttonAngles;
-    private javax.swing.JButton buttonColoc;
-    private javax.swing.JButton buttonConfig;
-    private javax.swing.JButton buttonDelete;
-    private javax.swing.JButton buttonDeselect;
-    private javax.swing.JButton buttonDistances;
-    private javax.swing.JButton buttonErase;
-    private javax.swing.JButton buttonFillStack;
-    private javax.swing.JButton buttonLabel;
-    private javax.swing.JButton buttonListVoxels;
-    private javax.swing.JToggleButton buttonLiveRoi;
-    private javax.swing.JButton buttonLoad;
-    private javax.swing.JButton buttonMeasure;
-    private javax.swing.JButton buttonMerge;
-    private javax.swing.JButton buttonQuantif;
-    private javax.swing.JButton buttonRename;
-    private javax.swing.JButton buttonSave;
-    private javax.swing.JButton buttonSegmentation3D;
-    private javax.swing.JButton buttonSelectAll;
-    private javax.swing.JButton buttonSplit;
-    public javax.swing.JPanel jPanel;
-    private javax.swing.JScrollPane jScrollPane;
-    private javax.swing.JSeparator jSeparator3;
-    private javax.swing.JSeparator jSeparator4;
-    private javax.swing.JSeparator jSeparator5;
-    public javax.swing.JList list;
     // End of variables declaration//GEN-END:variables
 
     public void itemStateChanged(ItemEvent ie) {
@@ -2797,7 +2776,6 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     /**
-     *
      * @param view
      */
     @Override
