@@ -107,7 +107,7 @@ public class Track_Threshold implements PlugInFilter {
         Duplicator dup = new Duplicator();
         int[] dim = plus.getDimensions();
         int selectedTime = plus.getFrame();
-        ImagePlus timedup = dup.run(plus, 1, 1, 1, dim[3], selectedTime, selectedTime);
+        ImagePlus timeDuplicate = dup.run(plus, 1, 1, 1, dim[3], selectedTime, selectedTime);
         //timedup.show("Frame_" + selectedTime);
         if (filter) {
             int radX = (int) Math.floor(Math.pow((volMin * 3.0) / (4.0 * Math.PI), 1.0 / 3.0));
@@ -119,9 +119,9 @@ public class Track_Threshold implements PlugInFilter {
             }
             int radZ = radX; // use calibration ?
             IJ.log("Filtering with radius " + radX);
-            ImageStack res = FastFilters3D.filterIntImageStack(timedup.getStack(), FastFilters3D.MEDIAN, radX, radX, radZ, 0, true);
+            ImageStack res = FastFilters3D.filterIntImageStack(timeDuplicate.getStack(), FastFilters3D.MEDIAN, radX, radX, radZ, 0, true);
             ImagePlus filteredPlus = new ImagePlus("filtered_" + radX, res);
-            timedup.setStack(res);
+            timeDuplicate.setStack(res);
             filteredPlus.show();
         }
         IJ.log("Threshold method " + methods[threshold_method]);
@@ -129,7 +129,7 @@ public class Track_Threshold implements PlugInFilter {
         int thmin = (int) minTh;
         // is starts at mean selected, use mean, maybe remove in new version
         if (start) {
-            thmin = (int) ImageHandler.wrap(timedup).getMean();
+            thmin = (int) ImageHandler.wrap(timeDuplicate).getMean();
             IJ.log("Mean=" + thmin);
         }
 
@@ -144,7 +144,7 @@ public class Track_Threshold implements PlugInFilter {
         } else if (threshold_method == 2) {
             tmethod = TrackThreshold.THRESHOLD_METHOD_VOLUME;
         }
-        if (timedup.getBitDepth() == 8) {
+        if (timeDuplicate.getBitDepth() == 8) {
             threshold_method = TrackThreshold.THRESHOLD_METHOD_STEP;
         }
         TT.setMethodThreshold(tmethod);
@@ -162,17 +162,20 @@ public class Track_Threshold implements PlugInFilter {
             case 3:
                 cri = TrackThreshold.CRITERIA_METHOD_MSER;
                 break;
+            case 4:
+                cri = TrackThreshold.CRITERIA_METHOD_MAX_EDGES;
+                break;
         }
 
         TT.setCriteriaMethod(cri);
-        ImagePlus res = TT.segment(timedup, true);
+        ImagePlus res = TT.segment(timeDuplicate, true);
         if (res != null) res.show();
         else IJ.log("NO OBJECTS FOUND !");
     }
 
     private boolean dialogue() {
         methods = new String[]{"STEP", "KMEANS", "VOLUME"};
-        criteria = new String[]{"ELONGATION", "COMPACTNESS", "VOLUME", "MSER"};
+        criteria = new String[]{"ELONGATION", "COMPACTNESS", "VOLUME", "MSER", "EDGES"};
         GenericDialog gd = new GenericDialog("sizes");
         gd.addNumericField("Min_vol_pix", volMin, 0, 10, "");
         gd.addNumericField("Max_vol_pix", volMax, 0, 10, "");
@@ -197,7 +200,7 @@ public class Track_Threshold implements PlugInFilter {
         if (volMax < volMin) {
             int vtemp = volMax;
             volMax = volMin;
-            volMin = volMax;
+            volMin = vtemp;
         }
 
         return gd.wasOKed();
@@ -205,8 +208,8 @@ public class Track_Threshold implements PlugInFilter {
 
     private ArrayList<Point3D> computeMarkers(ImageInt markImage) {
         if (markImage.isBinary()) {
-            ImageLabeller labeller = new ImageLabeller();
-            markImage = labeller.getLabels(markImage);
+            ImageLabeller labeler = new ImageLabeller();
+            markImage = labeler.getLabels(markImage);
         }
         ArrayList<Point3D> point3Ds = new ArrayList<Point3D>();
         Objects3DPopulation objects3DPopulation = new Objects3DPopulation(markImage);
