@@ -87,14 +87,13 @@ public class RDAR_ implements PlugInFilter {
         for (Object3DVoxels object3DVoxels1 : list) vol += object3DVoxels.getVolumePixels();
         IJ.log("Volume Out : " + vol);
 
-
-        rdar.getEllipsoid().draw(drawEll, 1);
-        int c = object3DVoxels.getValue();
+        int color = object3DVoxels.getValue();
+        rdar.getEllipsoid().draw(drawEll, color);
         if (rdar.getPartsIn(minVolume) != null)
-            for (Object3DVoxels part : rdar.getPartsIn(minVolume)) part.draw(drawIn, c);
-        c = object3DVoxels.getValue();
+            for (Object3DVoxels part : rdar.getPartsIn(minVolume)) part.draw(drawIn, color);
+        color = object3DVoxels.getValue();
         if (rdar.getPartsOut(minVolume) != null)
-            for (Object3DVoxels part : rdar.getPartsOut(minVolume)) part.draw(drawOut, c);
+            for (Object3DVoxels part : rdar.getPartsOut(minVolume)) part.draw(drawOut, color);
         drawIn.show("Parts_In");
         drawOut.show("Parts_Out");
         drawEll.show("Ellipsoid");
