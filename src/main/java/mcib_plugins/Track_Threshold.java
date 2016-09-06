@@ -1,9 +1,6 @@
 package mcib_plugins;
 
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.WindowManager;
+import ij.*;
 import ij.gui.GenericDialog;
 import ij.measure.Calibration;
 import ij.plugin.Duplicator;
@@ -51,15 +48,15 @@ import java.util.ArrayList;
  */
 public class Track_Threshold implements PlugInFilter {
 
-    int volMax = 10000;
-    int volMin = 100;
-    double minTh = 0;
-    int minCont = 100;
-    boolean filter = true;
+    int volMax = (int) Prefs.get("mcib_iterative_volmax.int", 1000);
+    int volMin = (int) Prefs.get("mcib_iterative_volmin.int", 100);
+    double minTh = (int) Prefs.get("mcib_iterative_thmin.int", 0);
+    int minCont = (int) Prefs.get("mcib_iterative_contmin.int", 0);
+    boolean filter = false;
     Calibration cal;
-    private int step = 1;
-    private int threshold_method = 0;
-    private int crit = 0;
+    private int step = (int) Prefs.get("mcib_iterative_step.int", 10);
+    private int threshold_method = (int) Prefs.get("mcib_iterative_method.int", 0);
+    private int crit = (int) Prefs.get("mcib_iterative_criteria.int", 0);
     private boolean start;
     private String[] methods;
     private String[] criteria;
@@ -81,28 +78,9 @@ public class Track_Threshold implements PlugInFilter {
             point3Ds = computeMarkers(ImageInt.wrap(seeds));
         }
 
-        if (plus.getBitDepth() == 8) {
-            step = 1;
-        } else {
-            step = 100;
-        }
         if (!dialogue()) {
             return;
         }
-        //
-//        if (Recorder.record) {
-//            Recorder.setCommand(null);
-//            String param = "3D Iterative Thresholding\",\"Min_vol_pix=" + volMin + " Max_vol_pix=" + volMax + " Threshold=" + methods[threshold_method]
-//                    + " Criteria=" + criteria[crit] + " Value=" + step;
-//            if (start) {
-//                param = param.concat(" Starts");
-//            }
-//            if (filter) {
-//                param = param.concat(" Filtering");
-//            }
-//            Recorder.record("run", param);
-//        }
-
         // extract current time 
         Duplicator dup = new Duplicator();
         int[] dim = plus.getDimensions();
@@ -135,6 +113,20 @@ public class Track_Threshold implements PlugInFilter {
 
         TrackThreshold TT = new TrackThreshold(volMin, volMax, minCont, step, step, thmin);
         TT.setMarkers(point3Ds);
+
+        // markers image and zone image EXPERIMENTAL
+        ImagePlus markersPlus = WindowManager.getImage("markers");
+        if (markersPlus != null) {
+            TT.setImageMarkers(ImageInt.wrap(markersPlus));
+            IJ.log("markers image " + markersPlus);
+        }
+        ImagePlus zonePlus = WindowManager.getImage("zones");
+        if (zonePlus != null) {
+            TT.setImageZones(ImageInt.wrap(zonePlus));
+            IJ.log("zones image " + zonePlus);
+        }
+
+
         // 8-bits switch to step method
         int tmethod = TrackThreshold.THRESHOLD_METHOD_STEP;
         if (threshold_method == 0) {
@@ -202,6 +194,14 @@ public class Track_Threshold implements PlugInFilter {
             volMax = volMin;
             volMin = vtemp;
         }
+
+        Prefs.set("mcib_iterative_volmax.int", volMax);
+        Prefs.set("mcib_iterative_volmin.int", volMin);
+        Prefs.set("mcib_iterative_thmin.int", minTh);
+        Prefs.set("mcib_iterative_contmin.int", minCont);
+        Prefs.set("mcib_iterative_method.int", threshold_method);
+        Prefs.set("mcib_iterative_criteria.int", crit);
+        Prefs.set("mcib_iterative_step.int", step);
 
         return gd.wasOKed();
     }
