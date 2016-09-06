@@ -1589,7 +1589,6 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     /**
      * Delete and erase the object
      *
-     * @param replacing parameter for roimanager
      * @param erase     true if pixels must be set to zero else only suppress from
      *                  the list
      * @return Description of the Return Value
@@ -3032,26 +3031,31 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         }
         String fs = File.separator;
         if ((win.startsWith("A") || win.startsWith("M")) && (tableResultsMeasure != null)) {
+            IJ.log("Saving 3D Measure in " + dir + fs + "M_" + name);
             if (!tableResultsMeasure.getModel().writeData(dir + fs + "M_" + name)) {
                 IJ.log("Pb saving " + dir + fs + "M_" + name);
-            }
+            } else IJ.log("Saved 3D Measure");
         }
         if ((win.startsWith("A") || win.startsWith("Q")) && (tableResultsQuantif != null)) {
+            IJ.log("Saving 3D Quantif in " + dir + fs + "Q_" + name);
             if (!tableResultsQuantif.getModel().writeData(dir + fs + "Q_" + name)) {
                 IJ.log("Pb saving " + dir + fs + "Q_" + name);
             }
         }
         if ((win.startsWith("A") || win.startsWith("D")) && (tableResultsDistance != null)) {
+            IJ.log("Saving 3D Distance in " + dir + fs + "D_" + name);
             if (!tableResultsDistance.getModel().writeData(dir + fs + "D_" + name)) {
                 IJ.log("Pb saving " + dir + fs + "D_" + name);
             }
         }
         if ((win.startsWith("A") || win.startsWith("C")) && (tableResultsColoc != null)) {
+            IJ.log("Saving 3D Coloc in " + dir + fs + "C_" + name);
             if (!tableResultsColoc.getModel().writeData(dir + fs + "C_" + name)) {
                 IJ.log("Pb saving " + dir + fs + "C_" + name);
             }
         }
         if ((win.startsWith("A") || win.startsWith("L") || win.startsWith("V")) && (tableResultsVoxels != null)) {
+            IJ.log("Saving 3D List Voxels in " + dir + fs + "L_" + name);
             if (!tableResultsVoxels.getModel().writeData(dir + fs + "V_" + name)) {
                 IJ.log("Pb saving " + dir + fs + "V_" + name);
             }
