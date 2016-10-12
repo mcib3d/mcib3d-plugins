@@ -130,7 +130,7 @@ public class Ellipsoids_3D implements PlugInFilter {
                 IJ.log("Pole2 as Feret 2 (calibrated) : " + Feret2.getX() * resXY + " " + Feret2.getY() * resXY + " " + Feret2.getZ() * resZ);
 
                 // The two poles as Feret of ellipsoid
-                Object3D ell = new Object3DVoxels(ellipsoid.getImageHandler());
+                Object3D ell = new Object3DVoxels(ellipsoid.getImageHandler(), val);
                 //ell.computeContours();
                 Voxel3D Ell1 = ell.getFeretVoxel1();
                 Voxel3D Ell2 = ell.getFeretVoxel2();
