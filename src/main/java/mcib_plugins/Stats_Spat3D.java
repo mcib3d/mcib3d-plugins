@@ -11,6 +11,7 @@ import ij.process.ImageProcessor;
 import mcib3d.geom.Point3D;
 import mcib3d.utils.ThreadUtil;
 import mcib_plugins.analysis.spatialAnalysis;
+
 import java.awt.*;
 
 /**
@@ -50,11 +51,11 @@ public class Stats_Spat3D implements PlugInFilter {
     @Override
     public int setup(String arg, ImagePlus imp) {
         this.imp = imp;
-        return DOES_ALL;
+        return DOES_8G + DOES_16;
     }
 
     /**
-     * Main processing method for the DilateKernel_ object
+     * Main processing method
      *
      * @param ip Description of the Parameter
      */

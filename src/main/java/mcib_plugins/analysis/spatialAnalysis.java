@@ -2,12 +2,10 @@ package mcib_plugins.analysis;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.WindowManager;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
-import ij.gui.Roi;
 import ij.measure.Calibration;
-import ij.process.ImageProcessor;
-import ij.process.ShortProcessor;
 import mcib3d.geom.Object3D;
 import mcib3d.geom.Object3DLabel;
 import mcib3d.geom.Objects3DPopulation;
@@ -63,21 +61,9 @@ public class spatialAnalysis {
     }
 
     public static void createMask(ImagePlus plus) {
-        ImageProcessor mask = new ShortProcessor(plus.getWidth(), plus.getHeight());
-        Roi roi = plus.getRoi();
-        if (roi == null) {
-            return;
-        }
-        ImageProcessor ma = roi.getMask();
-
-        mask.insert(ma, roi.getBounds().x, roi.getBounds().y);
-
-        ImagePlus plusMask = new ImagePlus("mask", mask);
-        if (plus.getCalibration() != null) {
-            plusMask.setCalibration(plus.getCalibration());
-        }
-        plusMask.show();
-        IJ.log("Mask created");
+        WindowManager.setTempCurrentImage(plus);
+        ij.plugin.Selection DrawMask = new ij.plugin.Selection();
+        DrawMask.run("mask");
     }
 
     public void setMultiThread(int nb) {
@@ -734,7 +720,7 @@ public class spatialAnalysis {
                 segImage.show("Labelled Image");
             }
         } else {
-            segImage = (ImageInt) inImage.duplicate();
+            segImage = inImage.duplicate();
         }
         segImage.setCalibration(calibration);
 
@@ -757,6 +743,15 @@ public class spatialAnalysis {
         }
 
         nbSpots = pop.getNbObjects();
+
+        // create one random sample image
+        Objects3DPopulation popRandom = new Objects3DPopulation();
+        popRandom.setCalibration(calibration);
+        popRandom.setMask(mask);
+        popRandom.createRandomPopulation(nbSpots, distHardCore);
+        randomPop = segImage.createSameDimensions();
+        popRandom.draw(randomPop);
+
         if (verbose) {
             IJ.log("Computing spatial statistics, please wait ...");
         }
