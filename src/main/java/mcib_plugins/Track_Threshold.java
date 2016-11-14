@@ -71,6 +71,7 @@ public class Track_Threshold implements PlugInFilter {
 
         ImagePlus plus = IJ.getImage();
         ArrayList<Point3D> point3Ds = null;
+        Calibration calibration = plus.getCalibration();
 
         ImagePlus seeds = WindowManager.getImage("markers");
         if (seeds == null) IJ.log("No image with name \"markers\" found. Not using markers.");
@@ -161,6 +162,7 @@ public class Track_Threshold implements PlugInFilter {
 
         TT.setCriteriaMethod(cri);
         ImagePlus res = TT.segment(timeDuplicate, true);
+        if ((res != null) && (calibration != null)) res.setCalibration(calibration);
         if (res != null) res.show();
         else IJ.log("NO OBJECTS FOUND !");
     }
