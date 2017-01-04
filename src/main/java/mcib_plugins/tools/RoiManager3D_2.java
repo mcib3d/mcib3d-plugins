@@ -594,7 +594,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         //IJ.log("debug "+ob1+" "+ob2);
         coloc[0] = ob1.pcColoc(ob2);
         coloc[1] = ob2.pcColoc(ob1);
-        int[] surfc = ob1.surfaceContact(ob2, Prefs.get("RoiManager3D-Options_surfDist.double", 1.0));
+        boolean sc = Prefs.get("RoiManager3D-Options_SurfContact.boolean", true);
+        int[] surfc = {0, 0};
+        if (sc)
+            surfc = ob1.surfaceContact(ob2, Prefs.get("RoiManager3D-Options_surfDist.double", 1.0));
         coloc[2] = surfc[0] + surfc[1];
         // debug
         //IJ.log("debug "+coloc[0]+" "+coloc[1]+" "+coloc[2]);
@@ -1384,7 +1387,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 boolean roiok = false;
                 boolean edgeok = false;
                 obj = new Object3DVoxels(objList);
-                obj.setCalibration(cal);
+                Object3D_IJUtils.setCalibration(obj, cal);
                 obj.setLabelImage(seg);
                 obj.computeContours();
                 // seg image is only used to compute contours, after remove, in case user closes image
@@ -1503,7 +1506,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         int i0 = indexes[0];
 
         Object3D obj0 = objects3D.getObject(i0);
-        Calibration cal = obj0.getCalibration();
+        Calibration cal = Object3D_IJUtils.getCalibration(obj0);
         int val0 = obj0.getValue();
         //IntImage3D ima0 = obj0.getSegImage();
         Object3D obj1;
@@ -1526,11 +1529,11 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             res = true;
             // with arraylist
             obj1 = objslist[0];
-            obj1.setCalibration(cal);
+            Object3D_IJUtils.setCalibration(obj1, cal);
             obj1.setValue(val0);
             obj1.setName(obj0.getName() + "-split1");
             obj2 = objslist[1];
-            obj2.setCalibration(cal);
+            Object3D_IJUtils.setCalibration(obj2, cal);
             obj2.setValue(val0);
             obj2.setName(obj0.getName() + "-split2");
             delete(i0);
@@ -1589,8 +1592,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     /**
      * Delete and erase the object
      *
-     * @param erase     true if pixels must be set to zero else only suppress from
-     *                  the list
+     * @param erase true if pixels must be set to zero else only suppress from
+     *              the list
      * @return Description of the Return Value
      */
     boolean delete(boolean erase) {
@@ -2129,7 +2132,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             // CONVEX HULL
             if (Prefs.get("RoiManager3D-Options_convexhull.boolean", false)) {
                 Object3DSurface surf = new Object3DSurface(obj.computeMeshSurface(false));
-                surf.setCalibration(obj.getCalibration());
+                Object3D_IJUtils.setCalibration(surf, Object3D_IJUtils.getCalibration(obj));
                 surf.setSmoothingFactor(0.1f);
                 Object3DSurface convexsurf = surf.getConvexSurface();
                 convexsurf.multiThread = true;
