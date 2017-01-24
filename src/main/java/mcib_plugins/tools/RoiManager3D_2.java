@@ -823,7 +823,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         buttonConfig = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setResizable(false);
+        if (IJ.isMacintosh() || IJ.isMacOSX()) setResizable(true);
+        else setResizable(false);
 
         list.setModel(new javax.swing.AbstractListModel() {
             String[] strings = {"Item 1", "Item 2", "Item 3", "Item 4", "Item 5"};
@@ -1723,10 +1724,12 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             Object3D obj = objects3D.getObject(indexes[i]);
             // if gray draw luminosity gray level
             if (gray) {
-                obj.draw(stack, intensity);
+                Object3D_IJUtils.draw(obj, stack, intensity);
+                //obj.draw(stack, intensity);
                 ima.updateAndDraw();
             } else if (color) {
-                obj.draw(stack, r, g, b);
+                Object3D_IJUtils.draw(obj, stack, r, g, b);
+                //obj.draw(stack, r, g, b);
                 ima.updateAndDraw();
             } else {
                 IJ.log("Image Type not supported for fill 3D");
@@ -2045,7 +2048,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             headings.add("DCSD (unit)");
         }
 
-        Object[][] data = new Object[indexes.length][headings.size()];
+        final Object[][] data = new Object[indexes.length][headings.size()];
 
         Object3D obj;
         double resXY;
@@ -2129,18 +2132,19 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                     data[i][h++] = geoinv[g];
                 }
             }
-            // CONVEX HULL
+            // CONVEX HULL //TODO put in a thread because very long
             if (Prefs.get("RoiManager3D-Options_convexhull.boolean", false)) {
-                Object3DSurface surf = new Object3DSurface(obj.computeMeshSurface(false));
+                Object3DSurface surf = new Object3DSurface(Object3D_IJUtils.computeMeshSurface(obj, false));
                 Object3D_IJUtils.setCalibration(surf, Object3D_IJUtils.getCalibration(obj));
                 surf.setSmoothingFactor(0.1f);
-                Object3DSurface convexsurf = surf.getConvexSurface();
-                convexsurf.multiThread = true;
-                double volHull = convexsurf.getVolumeUnit();
+                Object3DSurface convexSurface = surf.getConvexSurface();
+                convexSurface.multiThread = true;
+                double volHull = convexSurface.getVolumeUnit();
                 data[i][h++] = surf.getSurfaceMeshUnit();
                 data[i][h++] = surf.getSmoothSurfaceAreaUnit();
-                data[i][h++] = convexsurf.getSurfaceMeshUnit();
+                data[i][h++] = convexSurface.getSurfaceMeshUnit();
                 data[i][h++] = volHull;
+                h += 4;
             }
             if (Prefs.get("RoiManager3D-Options_dist2Surf.boolean", true)) {
                 data[i][h++] = obj.getDistCenterMin();
@@ -2658,7 +2662,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             boolean ok = false;
             for (int i = 0; i < indexes.length; i++) {
                 obj = objects3D.getObject(indexes[i]);
-                ok |= obj.draw(mask, zz, 255);
+                ok |= Object3D_IJUtils.draw(obj, mask, zz, 255);
+                //ok |= obj.draw(mask, zz, 255);
             }
             if (!ok) {
                 arrayRois[zz] = null;
