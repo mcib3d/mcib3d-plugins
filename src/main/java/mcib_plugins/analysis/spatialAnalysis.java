@@ -6,10 +6,7 @@ import ij.WindowManager;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.measure.Calibration;
-import mcib3d.geom.Object3D;
-import mcib3d.geom.Object3DLabel;
-import mcib3d.geom.Objects3DPopulation;
-import mcib3d.geom.Point3D;
+import mcib3d.geom.*;
 import mcib3d.image3d.ImageHandler;
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.ImageLabeller;
@@ -156,7 +153,8 @@ public class spatialAnalysis {
     }
 
     private void processF(Objects3DPopulation pop, Object3D mask, final boolean verbose, boolean show, boolean save) {
-        final Calibration calibration = mask.getCalibration();
+        final Calibration calibration = Object3D_IJUtils.getCalibration(mask);
+        //final Calibration calibration = mask.getCalibration();
         final int nbSpots = pop.getNbObjects();
 
         // F
@@ -338,7 +336,8 @@ public class spatialAnalysis {
     }
 
     private void processG(Objects3DPopulation pop, Object3D mask, final boolean verbose, boolean show, boolean save) {
-        final Calibration calibration = mask.getCalibration();
+        final Calibration calibration = Object3D_IJUtils.getCalibration(mask);
+        //final Calibration calibration = mask.getCalibration();
         final int nbSpots = pop.getNbObjects();
 
         // observed G
@@ -524,7 +523,8 @@ public class spatialAnalysis {
 
 
     private void processH(Objects3DPopulation pop, Object3D mask, final boolean verbose, boolean show, boolean save) {
-        final Calibration calibration = mask.getCalibration();
+        final Calibration calibration = Object3D_IJUtils.getCalibration(mask);
+        //final Calibration calibration = mask.getCalibration();
         final int nbSpots = pop.getNbObjects();
 
         // observed H
@@ -729,7 +729,8 @@ public class spatialAnalysis {
         Objects3DPopulation pop = new Objects3DPopulation();
         ImageInt maskHandler = (ImageInt) plusMask;
         Object3D mask = new Object3DLabel(maskHandler, (int) maskHandler.getMax());
-        mask.setCalibration(calibration);
+        Object3D_IJUtils.setCalibration(mask, calibration);
+        //mask.setCalibration(calibration);
         pop.setMask(mask);
         pop.addImage(segImage, calibration);
         pop.setCalibration(calibration);

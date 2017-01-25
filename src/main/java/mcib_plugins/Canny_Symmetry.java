@@ -9,21 +9,17 @@ import ij.ImagePlus;
 import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.plugin.filter.PlugInFilter;
-import static ij.plugin.filter.PlugInFilter.DOES_16;
-import static ij.plugin.filter.PlugInFilter.DOES_32;
-import static ij.plugin.filter.PlugInFilter.DOES_8G;
 import ij.process.ImageProcessor;
 import mcib3d.image3d.ImageHandler;
 import mcib3d.image3d.processing.CannyEdge3D;
 import mcib3d.image3d.processing.SymmetryFilter;
 
 /**
- *
  * @author thomasb
  */
 public class Canny_Symmetry implements PlugInFilter {
 
-    ImagePlus plus;
+    ImagePlus plus = null;
 
     double alpha = Prefs.get("mcib_symmetry_alpha.double ", 0.5);
     int radius = (int) Prefs.get("mcib_symmetry_radius.int", 10);
