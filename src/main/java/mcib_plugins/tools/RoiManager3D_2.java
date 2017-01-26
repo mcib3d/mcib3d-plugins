@@ -7,6 +7,7 @@ package mcib_plugins.tools;
 import ij.*;
 import ij.gui.*;
 import ij.io.OpenDialog;
+import ij.io.SaveDialog;
 import ij.macro.ExtensionDescriptor;
 import ij.macro.Functions;
 import ij.macro.MacroExtension;
@@ -23,6 +24,7 @@ import mcib3d.geom.*;
 import mcib3d.image3d.*;
 import mcib3d.utils.AboutMCIB;
 import mcib3d.utils.CheckInstall;
+import mcib3d.utils.Logger.IJLog;
 import org.scijava.java3d.View;
 import org.scijava.vecmath.Color3f;
 
@@ -112,6 +114,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         list.setModel(model);
         setVisible(true);
         objects3D = new Objects3DPopulation();
+        objects3D.setLog(new IJLog());
         hashNames = new HashMap();
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         // window
@@ -150,6 +153,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
+                    //System.out.println(info.getName()+" ");
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
 
@@ -792,6 +796,25 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                //System.out.println(info.getName()+" ");
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(RoiManager3D_2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(RoiManager3D_2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(RoiManager3D_2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(RoiManager3D_2.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+
         jPanel = new javax.swing.JPanel();
         jScrollPane = new javax.swing.JScrollPane();
         list = new javax.swing.JList();
@@ -823,8 +846,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         buttonConfig = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        if (IJ.isMacintosh() || IJ.isMacOSX()) setResizable(true);
-        else setResizable(false);
+        setPreferredSize(new Dimension(440, 445));
+        setResizable(false);
+        //if (IJ.isMacintosh() || IJ.isMacOSX()) setResizable(true);
+        //else setResizable(false);
 
         list.setModel(new javax.swing.AbstractListModel() {
             String[] strings = {"Item 1", "Item 2", "Item 3", "Item 4", "Item 5"};
@@ -1314,7 +1339,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 IJ.log("Contours found : " + title);
             }
         }
-        // TODO , should work with 4D hyperstacks
+        // TODO , should work with 4D hyperstacks, extract current frame
         ImageHandler seg = ImageHandler.wrap(plus);
 
         int minX = 0;
@@ -2385,7 +2410,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     private boolean saveObjects() {
-        OpenDialog op = new OpenDialog("Save RoiSet3D", "");
+        SaveDialog op = new SaveDialog("Save RoiSet3D", "Roi3D.zip", ".zip");
         return saveObjects(op.getDirectory() + op.getFileName());
     }
 
