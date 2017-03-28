@@ -11,15 +11,13 @@ import ij.gui.GenericDialog;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
-import java.util.ArrayList;
-import mcib3d.geom.Objects3DPopulation;
 import mcib3d.geom.Voxel3D;
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.processing.MaximaFinder;
-import mcib_plugins.tools.RoiManager3D_2;
+
+import java.util.ArrayList;
 
 /**
- *
  * @author thomasb
  */
 public class MaximaFinder3D_ implements PlugInFilter {
@@ -55,6 +53,7 @@ public class MaximaFinder3D_ implements PlugInFilter {
                 rt.addValue("X", V.getX());
                 rt.addValue("Y", V.getY());
                 rt.addValue("Z", V.getZ());
+                rt.addValue("V", V.getValue());
             }
             rt.show("Results");
         }
