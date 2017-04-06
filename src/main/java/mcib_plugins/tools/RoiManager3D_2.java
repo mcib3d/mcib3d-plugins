@@ -12,6 +12,7 @@ import ij.macro.ExtensionDescriptor;
 import ij.macro.Functions;
 import ij.macro.MacroExtension;
 import ij.measure.Calibration;
+import ij.plugin.Duplicator;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.ThresholdToSelection;
 import ij.plugin.frame.Recorder;
@@ -42,7 +43,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author thomas
@@ -1315,6 +1315,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
      */
     void addImage() {
         ImagePlus plus = getImage();
+        if (plus == null) {
+            IJ.showMessage("Please open an labelled image");
+            return;
+        }
         ImagePlus contours;
         String title = plus.getTitle();
         objects3D.setCalibration(plus.getCalibration());
@@ -1322,6 +1326,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         // cannot add RGB
         if (plus.getBitDepth() == 24) {
             IJ.showMessage("Cannot import RGB image");
+            return;
         }
 
         // image is coming from OC3D
@@ -1730,7 +1735,11 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         }
 
         // current image to fill in
-        ImagePlus ima = getImage();
+        ImagePlus ima = WindowManager.getCurrentImage();
+        if (ima.isHyperStack()) {
+            IJ.log("3D fill does not work with hyperstack");
+            return;
+        }
         if (ima == null) {
             return;
         }
@@ -1808,11 +1817,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     private void add3DViewer(Object3D obj, String name, Color3f col) {
-        List l = null;
-        Object3DSurface surf = obj.getObject3DSurface();
-        l = surf.getSurfaceTrianglesUnit(false);
-
-        if (l != null) {
+        if (obj.getAreaPixels() > 0) {
             if (!universe.contains(name)) {
                 ImageInt labelImage = obj.getMaxLabelImage(1);
                 ImageByte imageByte = ((ImageShort) labelImage).convertToByte(false);
@@ -1820,14 +1825,6 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 Content c = ContentCreator.createContent(name, imagePlus, 2, 1, 0, col, 0, new boolean[]{true, true, true});
                 universe.addContentLater(c);
                 c.setLocked(true);
-                /*
-                System.out.println("Adding obj " + name);
-                CustomTriangleMesh tm = new CustomTriangleMesh(l);
-                tm.setColor(col);
-                Content surface = universe.addCustomMesh(tm, name);
-                surface.toggleLock();
-                System.out.println("Added obj " + surface.toString());
-                */
             } // already exists
             else {
                 System.out.println("Recoloring obj " + name);
@@ -1835,6 +1832,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 surface.setColor(col);
             }
         }
+        //Object3D_IJUtils.computeMeshSurface(obj,true);
     }
 
     private void getUniverse() {
@@ -2159,7 +2157,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             }
             // CONVEX HULL //TODO put in a thread because very long
             if (Prefs.get("RoiManager3D-Options_convexhull.boolean", false)) {
-                Object3DSurface surf = new Object3DSurface(Object3D_IJUtils.computeMeshSurface(obj, false));
+                Object3DSurface surf = new Object3DSurface(Viewer3D_Utils.computeMeshSurface(obj, false));
                 Object3D_IJUtils.setCalibration(surf, Object3D_IJUtils.getCalibration(obj));
                 surf.setSmoothingFactor(0.1f);
                 Object3DSurface convexSurface = surf.getConvexSurface();
@@ -2556,6 +2554,17 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             //IJ.log("There are no images open.");
             return null;
         } else {
+            if (imp.isHyperStack()) {
+                int channel = imp.getChannel();
+                int frame = imp.getFrame();
+                IJ.log("Duplicating HyperStack : C-" + channel + " T-" + frame);
+                Roi roi = imp.getRoi();
+                imp.killRoi();
+                Duplicator duplicator = new Duplicator();
+                ImagePlus duplicate = duplicator.run(imp, channel, channel, 1, imp.getNSlices(), frame, frame);
+                duplicate.setRoi(roi);
+                return duplicate;
+            }
             return imp;
         }
     }
@@ -2565,6 +2574,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         if (imp == null) {
             return null;
         }
+        // handle hyperstacks
+
         return ImageHandler.wrap(imp);
     }
 
@@ -2608,7 +2619,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     private void registerActiveImage() {
-        ImagePlus activeImage = this.getImage();
+        //ImagePlus activeImage = this.getImage();
+        ImagePlus activeImage = WindowManager.getCurrentImage();
         //System.out.println("Register " + activeImage + " " + currentImage);
         if (activeImage != null && activeImage.getProcessor() != null && activeImage.getImageStackSize() > 1) {
             if (currentImage != null && currentImage.getWindow() != null && currentImage != activeImage) {
@@ -2645,7 +2657,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
      * Description of the Method
      */
     void computeRois() {
-        ImagePlus imp = this.getImage();
+        //ImagePlus imp = this.getImage();
+        ImagePlus imp = WindowManager.getCurrentImage();
         if (imp == null) {
             return;
         }
@@ -2717,9 +2730,11 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
     private void updateRois(int slice) {
         // synchronized (this) {
-        ImagePlus plus = this.getImage();
+        //ImagePlus plus = this.getImage();
+        ImagePlus plus = WindowManager.getCurrentImage();
         if (plus != null) {
             int sl = plus.getSlice() - 1;
+            //IJ.log("updating slice " + sl);
             if (slice >= 0) {
                 sl = slice;
             }
