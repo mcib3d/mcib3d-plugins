@@ -147,7 +147,7 @@ public class Track_Threshold implements PlugInFilter {
                 cri = TrackThreshold.CRITERIA_METHOD_MIN_ELONGATION;
                 break;
             case 1:
-                cri = TrackThreshold.CRITERIA_METHOD_MAX_COMPACITY;
+                cri = TrackThreshold.CRITERIA_METHOD_MAX_COMPACTNESS;
                 break;
             case 2:
                 cri = TrackThreshold.CRITERIA_METHOD_MAX_VOLUME;
