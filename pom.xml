@@ -36,7 +36,7 @@
         <dependency>
             <groupId>net.imagej</groupId>
             <artifactId>ij</artifactId>
-            <version>1.50g</version>
+            <version>1.51k</version>
             <type>jar</type>
         </dependency>
         <dependency>
