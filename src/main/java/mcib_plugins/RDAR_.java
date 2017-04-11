@@ -21,6 +21,7 @@ import java.util.ArrayList;
  */
 public class RDAR_ implements PlugInFilter {
     ResultsTable rt;
+    boolean display = false;
     private ImagePlus imagePlus;
     private int minVolume = 100;
 
@@ -36,12 +37,17 @@ public class RDAR_ implements PlugInFilter {
             ImageInt imageInt = ImageInt.wrap(imagePlus);
             Objects3DPopulation objects3DPopulation = new Objects3DPopulation(imageInt);
             // drawing
-            ImageHandler drawIn = new ImageShort("Parts inside", imagePlus.getWidth(), imagePlus.getHeight(), imagePlus.getImageStackSize());
-            drawIn.setScale(imageInt);
-            ImageHandler drawOut = new ImageShort("Parts outside", imagePlus.getWidth(), imagePlus.getHeight(), imagePlus.getImageStackSize());
-            drawOut.setScale(imageInt);
-            ImageHandler drawEll = new ImageShort("Ellipsoid", imagePlus.getWidth(), imagePlus.getHeight(), imagePlus.getImageStackSize());
-            drawEll.setScale(imageInt);
+            ImageHandler drawIn = null;
+            ImageHandler drawOut = null;
+            ImageHandler drawEll = null;
+            if (display) {
+                drawIn = new ImageShort("Parts inside", imagePlus.getWidth(), imagePlus.getHeight(), imagePlus.getImageStackSize());
+                drawIn.setScale(imageInt);
+                drawOut = new ImageShort("Parts outside", imagePlus.getWidth(), imagePlus.getHeight(), imagePlus.getImageStackSize());
+                drawOut.setScale(imageInt);
+                drawEll = new ImageShort("Ellipsoid", imagePlus.getWidth(), imagePlus.getHeight(), imagePlus.getImageStackSize());
+                drawEll.setScale(imageInt);
+            }
             // ResultsTable
             rt = ResultsTable.getResultsTable();
             if (rt == null) {
@@ -52,9 +58,11 @@ public class RDAR_ implements PlugInFilter {
                 processObject(object3D, drawIn, drawOut, drawEll);
             }
             rt.show("Results");
-            drawIn.show();
-            drawOut.show();
-            drawEll.show();
+            if (display) {
+                drawIn.show("Parts_In");
+                drawOut.show("Parts_Out");
+                drawEll.show("Ellipsoid");
+            }
         }
     }
 
@@ -78,24 +86,25 @@ public class RDAR_ implements PlugInFilter {
             for (Object3DVoxels object3DVoxels1 : list) vol += object3DVoxels.getVolumePixels();
         rt.addValue("volOut", vol);
 
-        int color = object3DVoxels.getValue();
-        rdar.getEllipsoid().draw(drawEll, color);
-        if (rdar.getPartsIn(minVolume) != null)
-            for (Object3DVoxels part : rdar.getPartsIn(minVolume)) part.draw(drawIn, color);
-        color = object3DVoxels.getValue();
-        if (rdar.getPartsOut(minVolume) != null)
-            for (Object3DVoxels part : rdar.getPartsOut(minVolume)) part.draw(drawOut, color);
-        drawIn.show("Parts_In");
-        drawOut.show("Parts_Out");
-        drawEll.show("Ellipsoid");
+        // drawing
+        if (display) {
+            int color = object3DVoxels.getValue();
+            rdar.getEllipsoid().draw(drawEll, color);
+            if (rdar.getPartsIn(minVolume) != null)
+                for (Object3DVoxels part : rdar.getPartsIn(minVolume)) part.draw(drawIn, color);
+            color = object3DVoxels.getValue();
+            if (rdar.getPartsOut(minVolume) != null)
+                for (Object3DVoxels part : rdar.getPartsOut(minVolume)) part.draw(drawOut, color);
+        }
     }
 
     private boolean dialog() {
         GenericDialog genericDialog = new GenericDialog("RDAR");
         genericDialog.addNumericField("Min volume parts", minVolume, 1, 10, "pix");
+        genericDialog.addCheckbox("Display images", display);
         genericDialog.showDialog();
         minVolume = (int) genericDialog.getNextNumber();
-
+        display = genericDialog.getNextBoolean();
         return genericDialog.wasOKed();
 
     }
