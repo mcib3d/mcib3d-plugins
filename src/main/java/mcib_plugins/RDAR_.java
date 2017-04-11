@@ -3,6 +3,7 @@ package mcib_plugins;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
+import ij.measure.ResultsTable;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import mcib3d.geom.Object3D;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
  * Created by thomasb on 19/7/16.
  */
 public class RDAR_ implements PlugInFilter {
+    ResultsTable rt;
     private ImagePlus imagePlus;
     private int minVolume = 100;
 
@@ -40,9 +42,16 @@ public class RDAR_ implements PlugInFilter {
             drawOut.setScale(imageInt);
             ImageHandler drawEll = new ImageShort("Ellipsoid", imagePlus.getWidth(), imagePlus.getHeight(), imagePlus.getImageStackSize());
             drawEll.setScale(imageInt);
+            // ResultsTable
+            rt = ResultsTable.getResultsTable();
+            if (rt == null) {
+                rt = new ResultsTable();
+            }
+            rt.reset();
             for (Object3D object3D : objects3DPopulation.getObjectsList()) {
                 processObject(object3D, drawIn, drawOut, drawEll);
             }
+            rt.show("Results");
             drawIn.show();
             drawOut.show();
             drawEll.show();
@@ -50,24 +59,24 @@ public class RDAR_ implements PlugInFilter {
     }
 
     private void processObject(Object3D object3D, ImageHandler drawIn, ImageHandler drawOut, ImageHandler drawEll) {
-        double resXY = object3D.getResXY();
-        double resZ = object3D.getResZ();
         IJ.log("Analysing object " + object3D.getValue());
         Object3DVoxels object3DVoxels = object3D.getObject3DVoxels();
-
+        rt.incrementCounter();
         RDAR rdar = new RDAR(object3D.getObject3DVoxels());
-        IJ.log("Nb parts in : " + rdar.getPartsInNumber(minVolume) + ", nb parts out : " + rdar.getPartsOutNumber(minVolume));
+        rt.addValue("Value", object3D.getValue());
+        rt.addValue("NbIn", rdar.getPartsInNumber(minVolume));
+        rt.addValue("NbOut", rdar.getPartsOutNumber(minVolume));
         // volume
         ArrayList<Object3DVoxels> list = rdar.getPartsIn(minVolume);
         int vol = 0;
         if (list != null)
             for (Object3DVoxels object3DVoxels1 : list) vol += object3DVoxels.getVolumePixels();
-        IJ.log("Volume In : " + vol);
+        rt.addValue("volIn", vol);
         list = rdar.getPartsOut(minVolume);
         vol = 0;
         if (list != null)
             for (Object3DVoxels object3DVoxels1 : list) vol += object3DVoxels.getVolumePixels();
-        IJ.log("Volume Out : " + vol);
+        rt.addValue("volOut", vol);
 
         int color = object3DVoxels.getValue();
         rdar.getEllipsoid().draw(drawEll, color);
@@ -79,7 +88,6 @@ public class RDAR_ implements PlugInFilter {
         drawIn.show("Parts_In");
         drawOut.show("Parts_Out");
         drawEll.show("Ellipsoid");
-        IJ.log("");
     }
 
     private boolean dialog() {
