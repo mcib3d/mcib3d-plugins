@@ -111,6 +111,7 @@ public class Watershed_Split3D implements PlugIn {
         }
         IJ.log("Computing watershed");
         Watershed3D water = new Watershed3D(edt16, seedsImg, 0, 0);
+        water.setLabelSeeds(true);
         water.setAnim(anim);
         water.getWatershedImage3D().show("Split");
         IJ.log("Finished in " + (System.currentTimeMillis() - t) + " ms.");

@@ -2,11 +2,8 @@ package mcib_plugins;
 
 //import fish.FishImage3D;
 //import fish.FishObject;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.Prefs;
-import ij.WindowManager;
+
+import ij.*;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import mcib3d.image3d.processing.FastFilters3D;
@@ -103,6 +100,7 @@ public class Watershed_3D implements PlugIn {
         IJ.log("Computing watershed");
         long t = System.currentTimeMillis();
         Watershed3D water = new Watershed3D(spotStack, seedStack, voxels_threshold, seeds_threshold);
+        water.setLabelSeeds(true);
         water.setAnim(anim);
         water.getWatershedImage3D().show();
         IJ.log("Finished in " + (System.currentTimeMillis() - t) + " ms.");

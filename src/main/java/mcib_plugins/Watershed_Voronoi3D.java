@@ -41,7 +41,10 @@ public class Watershed_Voronoi3D implements PlugIn {
     private void WatershedVoronoi() {
         IJ.log("");
         long t = System.currentTimeMillis();
-        Watershed3DVoronoi watershed3DVoronoi = new Watershed3DVoronoi(ImageInt.wrap(seedPlus), radMax);
+        ImageInt imageInt = ImageInt.wrap(seedPlus);
+        Watershed3DVoronoi watershed3DVoronoi = new Watershed3DVoronoi(imageInt, radMax);
+        if (imageInt.isBinary()) watershed3DVoronoi.setLabelSeeds(true);
+        else watershed3DVoronoi.setLabelSeeds(false);
         watershed3DVoronoi.getVoronoiZones(showEDT).show("VoronoiZones");
         if (showLines) watershed3DVoronoi.getVoronoiLines(true).show("VoronoiLines");
         IJ.log("Finished in " + (System.currentTimeMillis() - t) + " ms.");
