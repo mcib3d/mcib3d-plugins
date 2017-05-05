@@ -4,10 +4,10 @@ package mcib_plugins;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.process.ByteProcessor;
-import ij.process.ImageProcessor;
 import ij.gui.Roi;
 import ij.plugin.filter.ThresholdToSelection;
+import ij.process.ByteProcessor;
+import ij.process.ImageProcessor;
 
 /*
  * This plugin takes a binary stack as input, where some slices are
@@ -97,20 +97,85 @@ public class BinaryInterpolator {
         for (int z = first; z < last; z++) {
             if (z == next) {
                 current = z;
-                for (next = z + 1; idt[next] == null; next++);
+                for (next = z + 1; idt[next] == null; next++) ;
                 continue;
             }
 
-            byte[] p =
-                    (byte[]) stack.getProcessor(z + 1).getPixels();
+            byte[] p = (byte[]) stack.getProcessor(z + 1).getPixels();
             for (int i = 0; i < w * h; i++) {
-                if (0 <= idt[current][i] * (next - z)
-                        + idt[next][i] * (z - current)) {
+                if (0 <= idt[current][i] * (next - z) + idt[next][i] * (z - current)) {
                     p[i] = (byte) 255;
                 }
             }
             IJ.showProgress(z - first + 1, last - z);
         }
+    }
+
+    int[] getIDT(Object pixels) {
+        IDT idt = new IDT();
+        if (idt.init((byte[]) pixels) == 0) {
+            return null;
+        }
+        idt.propagate();
+        return idt.result;
+    }
+
+    final boolean isBoundary(byte[] pixels, int x, int y) {
+        if (pixels[x + w * y] == 0) {
+            return false;
+        }
+        if (x <= 0 || pixels[x - 1 + w * y] == 0) {
+            return true;
+        }
+        if (x >= w - 1 || pixels[x + 1 + w * y] == 0) {
+            return true;
+        }
+        if (y <= 0 || pixels[x + w * (y - 1)] == 0) {
+            return true;
+        }
+        if (y >= h - 1 || pixels[x + w * (y + 1)] == 0) {
+            return true;
+        }
+        if (x <= 0 || y <= 0 || pixels[x - 1 + w * (y - 1)] == 0) {
+            return true;
+        }
+        if (x <= 0 || y >= h - 1 || pixels[x - 1 + w * (y + 1)] == 0) {
+            return true;
+        }
+        if (x >= w - 1 || y <= 0 || pixels[x + 1 + w * (y - 1)] == 0) {
+            return true;
+        }
+        return x >= w - 1 || y >= h - 1
+                || pixels[x + 1 + w * (y + 1)] == 0;
+    }
+
+    final boolean isJustOutside(byte[] pixels, int x, int y) {
+        if (pixels[x + w * y] != 0) {
+            return false;
+        }
+        if (x > 0 && pixels[x - 1 + w * y] != 0) {
+            return true;
+        }
+        if (x < w - 1 && pixels[x + 1 + w * y] != 0) {
+            return true;
+        }
+        if (y > 0 && pixels[x + w * (y - 1)] != 0) {
+            return true;
+        }
+        if (y < h - 1 && pixels[x + w * (y + 1)] != 0) {
+            return true;
+        }
+        if (x > 0 && y > 0 && pixels[x - 1 + w * (y - 1)] != 0) {
+            return true;
+        }
+        if (x > 0 && y < h - 1 && pixels[x - 1 + w * (y + 1)] != 0) {
+            return true;
+        }
+        if (x < w - 1 && y > 0 && pixels[x + 1 + w * (y - 1)] != 0) {
+            return true;
+        }
+        return x < w - 1 && y < h - 1
+                && pixels[x + 1 + w * (y + 1)] != 0;
     }
 
     /*
@@ -199,78 +264,5 @@ public class BinaryInterpolator {
                 }
             }
         }
-    }
-
-    int[] getIDT(Object pixels) {
-        IDT idt = new IDT();
-        if (idt.init((byte[]) pixels) == 0) {
-            return null;
-        }
-        idt.propagate();
-        return idt.result;
-    }
-
-    final boolean isBoundary(byte[] pixels, int x, int y) {
-        if (pixels[x + w * y] == 0) {
-            return false;
-        }
-        if (x <= 0 || pixels[x - 1 + w * y] == 0) {
-            return true;
-        }
-        if (x >= w - 1 || pixels[x + 1 + w * y] == 0) {
-            return true;
-        }
-        if (y <= 0 || pixels[x + w * (y - 1)] == 0) {
-            return true;
-        }
-        if (y >= h - 1 || pixels[x + w * (y + 1)] == 0) {
-            return true;
-        }
-        if (x <= 0 || y <= 0 || pixels[x - 1 + w * (y - 1)] == 0) {
-            return true;
-        }
-        if (x <= 0 || y >= h - 1 || pixels[x - 1 + w * (y + 1)] == 0) {
-            return true;
-        }
-        if (x >= w - 1 || y <= 0 || pixels[x + 1 + w * (y - 1)] == 0) {
-            return true;
-        }
-        if (x >= w - 1 || y >= h - 1
-                || pixels[x + 1 + w * (y + 1)] == 0) {
-            return true;
-        }
-        return false;
-    }
-
-    final boolean isJustOutside(byte[] pixels, int x, int y) {
-        if (pixels[x + w * y] != 0) {
-            return false;
-        }
-        if (x > 0 && pixels[x - 1 + w * y] != 0) {
-            return true;
-        }
-        if (x < w - 1 && pixels[x + 1 + w * y] != 0) {
-            return true;
-        }
-        if (y > 0 && pixels[x + w * (y - 1)] != 0) {
-            return true;
-        }
-        if (y < h - 1 && pixels[x + w * (y + 1)] != 0) {
-            return true;
-        }
-        if (x > 0 && y > 0 && pixels[x - 1 + w * (y - 1)] != 0) {
-            return true;
-        }
-        if (x > 0 && y < h - 1 && pixels[x - 1 + w * (y + 1)] != 0) {
-            return true;
-        }
-        if (x < w - 1 && y > 0 && pixels[x + 1 + w * (y - 1)] != 0) {
-            return true;
-        }
-        if (x < w - 1 && y < h - 1
-                && pixels[x + 1 + w * (y + 1)] != 0) {
-            return true;
-        }
-        return false;
     }
 }
