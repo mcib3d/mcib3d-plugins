@@ -135,6 +135,30 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         universe.addUniverseListener(this);
 
         new DropTarget(list, DnDConstants.ACTION_COPY_OR_MOVE, this);
+
+        list.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent ke) {
+                String key = "" + ke.getKeyChar();
+                //IJ.log("Key Pressed " + key);
+                if ((!key.equalsIgnoreCase("0")) && (!key.equalsIgnoreCase("1")) && (!key.equalsIgnoreCase("2")) && (!key.equalsIgnoreCase("3"))) {
+                    return;
+                }
+
+                int[] indices = list.getSelectedIndices();
+                for (int i : indices) {
+                    objects3D.getObject(i).setType(Integer.parseInt(key));
+                    objects3D.getObject(i).setComment("");
+                    if (objects3D.getObject(i).getType() > 0) {
+                        updateName(i);
+                    } else {
+                        updateName(i);
+                    }
+                }
+
+                list.updateUI();
+            }
+        });
     }
 
     /**
@@ -1533,6 +1557,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     private boolean split() {
         ImagePlus plus = getImage();
         //IntImage3D ima = new IntImage3D(plus.getStack());
+        if (list.isSelectionEmpty()) {
+            IJ.log("Select an object to split");
+            return false;
+        }
         int[] indexes = list.getSelectedIndices();
         int i0 = indexes[0];
 
@@ -1555,7 +1583,6 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         IJ.log("Splitting");
         Object3DVoxels[] objslist = Segment3DSpots.splitSpotWatershed(obj0, 2, dist);
         IJ.log("split complete");
-        //IJ.log(objslist+" "+objslist.length+" "+objslist[0]+" "+objslist[0].getVolumePixels()+" "+objslist[1]+" "+objslist[1].getVolumePixels());
         if ((objslist != null) && (objslist[0].getVolumePixels() > 0) && (objslist[1].getVolumePixels() > 0)) {
             res = true;
             // with arraylist
@@ -2417,6 +2444,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         if (indexes.length == 0) {
             indexes = getAllIndexes();
         }
+
         return objects3D.saveObjects(path, indexes);
     }
 
@@ -2750,15 +2778,22 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
     private void label() {
         int[] idx = list.getSelectedIndices();
+        if (idx.length == 0) {
+            idx = getAllIndexes();
+        }
+
         ImagePlus plus = this.getImage();
         Overlay over = new Overlay();
         over.drawLabels(false);
         Font font = new Font(Font.DIALOG, Font.PLAIN, 10);
         for (int i = 0; i < idx.length; i++) {
             Object3D obj = objects3D.getObject(idx[i]);
-            Roi roi = new TextRoi(obj.getCenterX(), obj.getCenterY(), (String) model.get(idx[i]), font);
+            String name = (String) model.get(idx[i]);
+            Roi roi = new TextRoi((int) (obj.getCenterX() - name.length() * font.getSize() / 4), obj.getYmax() + font.getSize() / 2, name, font);
             roi.setPosition((int) (obj.getCenterZ() + 1));
             over.add(roi);
+            // test draw
+            Object3D_IJUtils.drawLabel(obj, plus.getStack(), 255);
         }
         plus.setOverlay(over);
         plus.updateAndDraw();
