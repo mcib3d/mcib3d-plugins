@@ -1559,6 +1559,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         //IntImage3D ima = new IntImage3D(plus.getStack());
         if (list.isSelectionEmpty()) {
             IJ.log("Select an object to split");
+
             return false;
         }
         int[] indexes = list.getSelectedIndices();
@@ -2436,6 +2437,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
     private boolean saveObjects() {
         SaveDialog op = new SaveDialog("Save RoiSet3D", "Roi3D.zip", ".zip");
+        if (Recorder.record) {
+            Recorder.record("Ext.Manager3D_Save", op.getDirectory() + op.getFileName());
+        }
+
         return saveObjects(op.getDirectory() + op.getFileName());
     }
 
