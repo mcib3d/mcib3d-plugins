@@ -182,7 +182,7 @@ public class Ellipsoids_3D implements PlugInFilter {
                 rt.setValue("XY1(deg)", row, axy[1]);
                 rt.setValue("XZ1(deg)", row, axz[1]);
                 rt.setValue("YZ1(deg)", row, ayz[1]);
-                rt.setValue("XY2(deg)", row, axy[1]);
+                rt.setValue("XY2(deg)", row, axy[2]);
                 rt.setValue("XZ2(deg)", row, axz[2]);
                 rt.setValue("YZ2(deg)", row, ayz[2]);
                 // volumes

@@ -57,9 +57,11 @@ public class Track_Threshold implements PlugInFilter {
     private int step = (int) Prefs.get("mcib_iterative_step.int", 10);
     private int threshold_method = (int) Prefs.get("mcib_iterative_method.int", 0);
     private int crit = (int) Prefs.get("mcib_iterative_criteria.int", 0);
+    private int seg = (int) Prefs.get("mcib_iterative_seg.int", 0);
     private boolean start;
     private String[] methods;
     private String[] criteria;
+    private String[] segs;
 
     @Override
     public int setup(String arg, ImagePlus imp) {
@@ -74,7 +76,7 @@ public class Track_Threshold implements PlugInFilter {
         Calibration calibration = plus.getCalibration();
 
         ImagePlus seeds = WindowManager.getImage("markers");
-        if (seeds == null) IJ.log("No image with name \"markers\" found. Not using markers.");
+        if (seeds == null) ;//IJ.log("No image with name \"markers\" found. Not using markers.");
         else {
             point3Ds = computeMarkers(ImageInt.wrap(seeds));
         }
@@ -161,15 +163,22 @@ public class Track_Threshold implements PlugInFilter {
         }
 
         TT.setCriteriaMethod(cri);
-        ImagePlus res = TT.segment(timeDuplicate, true);
+        ImagePlus res;
+        if (seg == 0)
+            res = TT.segment(timeDuplicate, true);
+        else
+            res = TT.segmentBest(timeDuplicate, true);
         if ((res != null) && (calibration != null)) res.setCalibration(calibration);
         if (res != null) res.show();
         else IJ.log("NO OBJECTS FOUND !");
+        // test
+        //ImagePlus resBest = TT.segmentBest(timeDuplicate, true);
     }
 
     private boolean dialogue() {
         methods = new String[]{"STEP", "KMEANS", "VOLUME"};
         criteria = new String[]{"ELONGATION", "COMPACTNESS", "VOLUME", "MSER", "EDGES"};
+        segs = new String[]{"All", "Best"};
         GenericDialog gd = new GenericDialog("sizes");
         gd.addNumericField("Min_vol_pix", volMin, 0, 10, "");
         gd.addNumericField("Max_vol_pix", volMax, 0, 10, "");
@@ -177,6 +186,7 @@ public class Track_Threshold implements PlugInFilter {
         gd.addNumericField("Min_contrast (exp)", minCont, 0, 10, "");
         gd.addChoice("Criteria_method", criteria, criteria[crit]);
         gd.addChoice("Threshold_method", methods, methods[threshold_method]);
+        gd.addChoice("Segment_results", segs, segs[seg]);
         gd.addNumericField("Value_method", step, 1, 10, "");
         gd.addCheckbox("Starts at mean", start);
         gd.addCheckbox("Filtering", filter);
@@ -187,6 +197,7 @@ public class Track_Threshold implements PlugInFilter {
         minCont = (int) gd.getNextNumber();
         crit = gd.getNextChoiceIndex();
         threshold_method = gd.getNextChoiceIndex();
+        seg = gd.getNextChoiceIndex();
         step = (int) gd.getNextNumber();
         start = gd.getNextBoolean();
         filter = gd.getNextBoolean();
@@ -203,6 +214,7 @@ public class Track_Threshold implements PlugInFilter {
         Prefs.set("mcib_iterative_contmin.int", minCont);
         Prefs.set("mcib_iterative_method.int", threshold_method);
         Prefs.set("mcib_iterative_criteria.int", crit);
+        Prefs.set("mcib_iterative_seg.int", seg);
         Prefs.set("mcib_iterative_step.int", step);
 
         return gd.wasOKed();
