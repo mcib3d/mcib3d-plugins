@@ -88,6 +88,7 @@ public class Ellipsoids_3D implements PlugInFilter {
                 }
                 Vector3D V = obj.getVectorAxis(2);
                 Vector3D W = obj.getVectorAxis(1);
+                Vector3D U = obj.getVectorAxis(0);
                 //obj.computeContours();
                 //double r1 = obj.getDistCenterMax();
                 double r1 = obj.getRadiusMoments(2);
@@ -163,14 +164,18 @@ public class Ellipsoids_3D implements PlugInFilter {
                 rt.setValue("Cx(pix)", row, obj.getCenterX());
                 rt.setValue("Cy(pix)", row, obj.getCenterY());
                 rt.setValue("Cz(pix)", row, obj.getCenterZ());
-                // main axis
-                rt.setValue("MainVx(pix)", row, V.getX());
-                rt.setValue("MainVy(pix)", row, V.getY());
-                rt.setValue("MainVz(pix)", row, V.getZ());
+                // third axis
+                rt.setValue("Vx0(pix)", row, U.getX());
+                rt.setValue("Vy0(pix)", row, U.getY());
+                rt.setValue("Vz0(pix)", row, U.getZ());
                 // second axis
-                rt.setValue("SecVx(pix)", row, W.getX());
-                rt.setValue("SecVy(pix)", row, W.getY());
-                rt.setValue("SecVz(pix)", row, W.getZ());
+                rt.setValue("Vx1(pix)", row, W.getX());
+                rt.setValue("Vy1(pix)", row, W.getY());
+                rt.setValue("Vz1(pix)", row, W.getZ());
+                // main axis
+                rt.setValue("Vx2(pix)", row, V.getX());
+                rt.setValue("Vy2(pix)", row, V.getY());
+                rt.setValue("Vz2(pix)", row, V.getZ());
                 // radii
                 rt.setValue("R1(unit)", row, rad1);
                 rt.setValue("R2(unit)", row, rad2);
