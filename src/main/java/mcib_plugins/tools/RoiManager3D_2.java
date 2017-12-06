@@ -89,8 +89,6 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     private javax.swing.JButton buttonMerge;
     private javax.swing.JButton buttonQuantif;
     private javax.swing.JButton buttonRename;
-
-    ////////////// HANDLE MACROS EXTENSIONS (end)
     private javax.swing.JButton buttonSave;
     private javax.swing.JButton buttonSegmentation3D;
     private javax.swing.JButton buttonSelectAll;
@@ -111,10 +109,11 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         IJ.log("Starting RoiManager3D");
         initComponents();
         this.setTitle("RoiManager3D " + version);
-        list.setModel(model);
         setVisible(true);
         objects3D = new Objects3DPopulation();
         objects3D.setLog(new IJLog());
+        list.setModel(model);
+        //list.setCellRenderer(new Manager3DCellRenderer(objects3D));
         hashNames = new HashMap();
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         // window
@@ -1627,24 +1626,26 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
      * @return Description of the Return Value
      */
     boolean rename(String name2) {
-        int index = list.getSelectedIndex();
-        if (index < 0) {
-            return error("Exactly one item in the list must be selected.");
+        int[] indices = list.getSelectedIndices();
+        if (indices.length == 0) {
+            return error("One or more items in the list must be selected.");
         }
         if (name2 == null) {
             name2 = IJ.getString("New name", "Name");
         }
-        objects3D.getObject(index).setName(name2);
-        model.set(index, name2);
+        int c=1;
+        for(int i:indices){
+            //IJ.log("renaming "+i+" "+name2+" "+c);
+            objects3D.getObject(i).setName(name2+""+c);
+            updateName(i);
+            c++;
+        }
+
         if (Recorder.record) {
             Recorder.record("Ext.Manager3D_Rename", name2);
         }
         list.updateUI();
 
-        // test write all names
-//        for (int i = 0; i < model.getSize(); i++) {
-//            System.out.println("" + model.get(i));
-//        }
         return true;
     }
 
@@ -1950,6 +1951,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         headings.add("Nb");
         headings.add("Obj1");
         headings.add("Obj2");
+        headings.add("Type1");
+        headings.add("Type2");
         headings.add("Label1");
         headings.add("Label2");
         headings.add("coloc");
@@ -1973,11 +1976,15 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 data[count][h1++] = count;
                 data[count][h1++] = (indexes[i1] + 1);
                 data[count][h1++] = (indexes[i2] + 1);
+                data[count][h1++] = ob1.getType();
+                data[count][h1++] = ob2.getType();
                 data[count][h1++] = model.get(indexes[i1]);
                 data[count][h1++] = model.get(indexes[i2]);
                 data[count + 1][h2++] = count + 1;
                 data[count + 1][h2++] = (indexes[i2] + 1);
                 data[count + 1][h2++] = (indexes[i1] + 1);
+                data[count+1][h2++] = ob2.getType();
+                data[count+1][h2++] = ob1.getType();
                 data[count + 1][h2++] = model.get(indexes[i2]);
                 data[count + 1][h2++] = model.get(indexes[i1]);
 
@@ -2031,6 +2038,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         ArrayList<String> headings = new ArrayList<String>();
         headings.add("Nb");
         headings.add("Obj");
+        headings.add("Type");
         headings.add("Label");
         if (Prefs.get("RoiManager3D-Options_centroid-pix.boolean", true)) {
             headings.add("CX (pix)");
@@ -2106,11 +2114,12 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         double resZ;
         //int count = rtMeasure.getCounter();
         for (int i = 0; i < indexes.length; i++) {
+            obj = objects3D.getObject(indexes[i]);
             int h = 0;
             data[i][h++] = i;
             data[i][h++] = indexes[i] + 1;
+            data[i][h++] = obj.getType();
             data[i][h++] = model.get(indexes[i]);
-            obj = objects3D.getObject(indexes[i]);
             resXY = obj.getResXY();
             resZ = obj.getResZ();
             if (Prefs.get("RoiManager3D-Options_centroid-pix.boolean", true)) {
@@ -2243,6 +2252,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         ArrayList<String> headings = new ArrayList<String>();
         headings.add("Nb");
         headings.add("Obj");
+        headings.add("Type");
         headings.add("Label");
         headings.add("AtCenter");
         if (Prefs.get("RoiManager3D-Options_COM-pix.boolean", true)) {
@@ -2280,11 +2290,12 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         Object3D obj;
         ImageHandler ima = this.getImage3D();
         for (int i = 0; i < indexes.length; i++) {
+            obj = objects3D.getObject(indexes[i]);
             int h = 0;
             data[i][h++] = i;
             data[i][h++] = indexes[i] + 1;
+            data[i][h++] = obj.getType();
             data[i][h++] = model.get(indexes[i]);
-            obj = objects3D.getObject(indexes[i]);
             resXY = obj.getResXY();
             resZ = obj.getResZ();
             data[i][h++] = obj.getPixCenterValue(ima);
@@ -2365,6 +2376,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         ArrayList<String> headings = new ArrayList<String>();
         headings.add("Nb");
         headings.add("Obj");
+        headings.add("TYpe");
         headings.add("Label");
         headings.add("X");
         headings.add("Y");
@@ -2396,6 +2408,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 int h = 0;
                 data[count][h++] = count;
                 data[count][h++] = nbObj;
+                data[count][h++] = nbObj;
+                data[count][h++] = obj.getType();
                 data[count][h++] = nameObj;
                 voxel = (Voxel3D) v.get(i);
                 data[count][h++] = voxel.getX();
@@ -2473,6 +2487,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         headings.add("Nb");
         headings.add("Obj1");
         headings.add("Obj2");
+        headings.add("Type1");
+        headings.add("Type2");
         headings.add("Label1");
         headings.add("Label2");
         headings.add("cen-cen");
@@ -2499,21 +2515,25 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         for (int i1 = 0; i1 < nb; i1++) {
             ob1 = objects3D.getObject(indexes[i1]);
             for (int i2 = i1 + 1; i2 < nb; i2++) {
+                ob2 = objects3D.getObject(indexes[i2]);
                 IJ.showStatus("Distance " + (indexes[i1] + 1) + "-" + (indexes[i2] + 1));
                 int h1 = 0;
                 int h2 = 0;
                 data[count][h1++] = count;
                 data[count][h1++] = (indexes[i1] + 1);
                 data[count][h1++] = (indexes[i2] + 1);
+                data[count][h1++] = ob1.getType();
+                data[count][h1++] = ob2.getType();
                 data[count][h1++] = model.get(indexes[i1]);
                 data[count][h1++] = model.get(indexes[i2]);
                 data[count + 1][h2++] = count + 1;
                 data[count + 1][h2++] = (indexes[i2] + 1);
                 data[count + 1][h2++] = (indexes[i1] + 1);
+                data[count+1][h2++] = ob2.getType();
+                data[count+1][h2++] = ob1.getType();
                 data[count + 1][h2++] = model.get(indexes[i2]);
                 data[count + 1][h2++] = model.get(indexes[i1]);
 
-                ob2 = objects3D.getObject(indexes[i2]);
                 // From object 1
                 d1 = ob1.distCenterUnit(ob2);
                 data[count][h1++] = d1;
