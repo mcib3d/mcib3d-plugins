@@ -6,7 +6,10 @@ import ij.WindowManager;
 import ij.gui.Plot;
 import ij.gui.PlotWindow;
 import ij.measure.Calibration;
-import mcib3d.geom.*;
+import mcib3d.geom.Object3D;
+import mcib3d.geom.Object3DLabel;
+import mcib3d.geom.Objects3DPopulation;
+import mcib3d.geom.Point3D;
 import mcib3d.image3d.ImageHandler;
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.ImageLabeller;
@@ -153,7 +156,10 @@ public class spatialAnalysis {
     }
 
     private void processF(Objects3DPopulation pop, Object3D mask, final boolean verbose, boolean show, boolean save) {
-        final Calibration calibration = Object3D_IJUtils.getCalibration(mask);
+        //final Calibration calibration = Object3D_IJUtils.getCalibration(mask);
+        final double sxy = mask.getResXY();
+        final double sz = mask.getResZ();
+        final String unit = mask.getUnits();
         //final Calibration calibration = mask.getCalibration();
         final int nbSpots = pop.getNbObjects();
 
@@ -191,7 +197,8 @@ public class spatialAnalysis {
                                 IJ.showStatus("Random population F " + (i + 1) + " by processor " + (k + 1));
                             }
                             Objects3DPopulation popRandom = new Objects3DPopulation();
-                            popRandom.setCalibration(calibration);
+                            //popRandom.setCalibration(calibration);
+                            popRandom.setCalibration(sxy, sz, unit);
                             popRandom.setMask(mask2);
                             popRandom.createRandomPopulation(nbSpots, distHardCore);
                             popRandom.createKDTreeCenters();
@@ -223,7 +230,8 @@ public class spatialAnalysis {
                                 IJ.showStatus("Random population F " + (i + 1) + " by processor " + (k + 1));
                             }
                             Objects3DPopulation poprandom = new Objects3DPopulation();
-                            poprandom.setCalibration(calibration);
+                            //poprandom.setCalibration(calibration);
+                            poprandom.setCalibration(sxy, sz, unit);
                             poprandom.setMask(mask2);
                             poprandom.createRandomPopulation(nbSpots, distHardCore);
                             poprandom.createKDTreeCenters();
@@ -336,7 +344,10 @@ public class spatialAnalysis {
     }
 
     private void processG(Objects3DPopulation pop, Object3D mask, final boolean verbose, boolean show, boolean save) {
-        final Calibration calibration = Object3D_IJUtils.getCalibration(mask);
+        //final Calibration calibration = Object3D_IJUtils.getCalibration(mask);
+        final double sxy = mask.getResXY();
+        final double sz = mask.getResZ();
+        final String unit = mask.getUnits();
         //final Calibration calibration = mask.getCalibration();
         final int nbSpots = pop.getNbObjects();
 
@@ -373,10 +384,12 @@ public class spatialAnalysis {
                                 IJ.showStatus("Random population G " + (i + 1) + " by processor " + (k + 1));
                             }
                             Objects3DPopulation popRandom = new Objects3DPopulation();
-                            popRandom.setCalibration(calibration);
+                            //popRandom.setCalibration(calibration);
+                            popRandom.setCalibration(sxy, sz, unit);
                             popRandom.setMask(mask2);
                             popRandom.createRandomPopulation(nbSpots, distHardCore);
-                            distances2 = popRandom.distancesAllClosestCenter();
+                            //distances2 = popRandom.distancesAllClosestCenter();
+                            distances2 = popRandom.distancesAllClosestBorder();
                             distances2.sort();
                             sampleDistancesG[i] = distances2;
                         }
@@ -405,7 +418,8 @@ public class spatialAnalysis {
                                 IJ.showStatus("Random population G " + (i + 1) + " by processor " + (k + 1));
                             }
                             Objects3DPopulation popRandom = new Objects3DPopulation();
-                            popRandom.setCalibration(calibration);
+                            //popRandom.setCalibration(calibration);
+                            popRandom.setCalibration(sxy, sz, unit);
                             popRandom.setMask(mask2);
                             popRandom.createRandomPopulation(nbSpots, distHardCore);
                             distances2 = popRandom.distancesAllClosestCenter();
@@ -523,7 +537,10 @@ public class spatialAnalysis {
 
 
     private void processH(Objects3DPopulation pop, Object3D mask, final boolean verbose, boolean show, boolean save) {
-        final Calibration calibration = Object3D_IJUtils.getCalibration(mask);
+        //final Calibration calibration = Object3D_IJUtils.getCalibration(mask);
+        final double sxy = mask.getResXY();
+        final double sz = mask.getResZ();
+        final String unit = mask.getUnits();
         //final Calibration calibration = mask.getCalibration();
         final int nbSpots = pop.getNbObjects();
 
@@ -560,7 +577,8 @@ public class spatialAnalysis {
                                 IJ.showStatus("Random population H " + (i + 1) + " by processor " + (k + 1));
                             }
                             Objects3DPopulation popRandom = new Objects3DPopulation();
-                            popRandom.setCalibration(calibration);
+                            //popRandom.setCalibration(calibration);
+                            popRandom.setCalibration(sxy, sz, unit);
                             popRandom.setMask(mask2);
                             popRandom.createRandomPopulation(nbSpots, distHardCore);
                             distances2 = popRandom.distancesAllCenter();
@@ -592,7 +610,8 @@ public class spatialAnalysis {
                                 IJ.showStatus("Random population H " + (i + 1) + " by processor " + (k + 1));
                             }
                             Objects3DPopulation popRandom = new Objects3DPopulation();
-                            popRandom.setCalibration(calibration);
+                            //popRandom.setCalibration(calibration);
+                            popRandom.setCalibration(sxy, sz, unit);
                             popRandom.setMask(mask2);
                             popRandom.createRandomPopulation(nbSpots, distHardCore);
                             distances2 = popRandom.distancesAllCenter();
@@ -693,7 +712,8 @@ public class spatialAnalysis {
      * Main processing method for the DilateKernel_ object
      */
     public boolean process(ImageHandler plusSpots, ImageHandler plusMask, String functions, boolean verbose, boolean show, boolean save) {
-        Calibration calibration = plusSpots.getCalibration();
+        //Calibration calibration = plusSpots.getCalibration();
+        /*
         if (calibration == null) {
             IJ.log("Image not calibrated");
             calibration = new Calibration();
@@ -702,6 +722,10 @@ public class spatialAnalysis {
             calibration.pixelHeight = 1;
             calibration.pixelDepth = 1;
         }
+        */
+        double scaleXY = plusMask.getScaleXY();
+        double scaleZ = plusMask.getScaleZ();
+        String unit = plusMask.getUnit();
 
         ImageInt inImage = (ImageInt) plusSpots;
         ImageInt segImage;
@@ -722,32 +746,37 @@ public class spatialAnalysis {
         } else {
             segImage = inImage.duplicate();
         }
-        segImage.setCalibration(calibration);
+        segImage.setScale(plusSpots);
+        //segImage.setCalibration(calibration);
 
         int nbSpots;
 
         Objects3DPopulation pop = new Objects3DPopulation();
         ImageInt maskHandler = (ImageInt) plusMask;
         Object3D mask = new Object3DLabel(maskHandler, (int) maskHandler.getMax());
-        Object3D_IJUtils.setCalibration(mask, calibration);
-        //mask.setCalibration(calibration);
+        //Object3D_IJUtils.setCalibration(mask, calibration);
+        mask.setCalibration(scaleXY, scaleZ, unit);
         pop.setMask(mask);
-        pop.addImage(segImage, calibration);
-        pop.setCalibration(calibration);
+        pop.addImage(segImage, 0);
+        //pop.setCalibration(calibration);
+        pop.setCalibration(scaleXY, scaleZ, unit);
 
+        /*
         if ((plusMask.getCalibration() == null) || (!plusMask.getCalibration().scaled())) {
             if (verbose) {
                 IJ.log("mask not calibrated, calibrating ...");
             }
-            plusMask.setCalibration(calibration);
+            //plusMask.setCalibration(calibration);
+            plusMask.setScale(plusSpots);
             plusMask.getImagePlus().updateAndRepaintWindow();
         }
+        */
 
         nbSpots = pop.getNbObjects();
 
         // create one random sample image
         Objects3DPopulation popRandom = new Objects3DPopulation();
-        popRandom.setCalibration(calibration);
+        popRandom.setCalibration(scaleXY, scaleZ, unit);
         popRandom.setMask(mask);
         popRandom.createRandomPopulation(nbSpots, distHardCore);
         randomPop = segImage.createSameDimensions();

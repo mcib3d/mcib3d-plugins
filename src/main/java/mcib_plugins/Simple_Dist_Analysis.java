@@ -43,7 +43,7 @@ public class Simple_Dist_Analysis implements PlugInFilter {
         ImageInt img = ImageInt.wrap(plus);
         Calibration cal = plus.getCalibration();
         if (Dialogue()) {
-            if (cal != null) img.setCalibration(cal);
+            if (cal != null) img.setScale(cal.pixelWidth, cal.pixelDepth, cal.getUnits());//img.setCalibration(cal);
             ImageInt imageInt = img;
             // binary or seg
             if (img.isBinary()) {
@@ -60,7 +60,7 @@ public class Simple_Dist_Analysis implements PlugInFilter {
             ArrayUtil[] arrayUtils = dist.getHistogram(nBins);
             Plot plotG = new Plot("G function", "distances (" + cal.getUnit() + ") ", "frequency");
             plotG.setColor(color);
-            arrayUtils[1].divideAll(dist.getSize());
+            arrayUtils[1].divideAll(dist.size());
             plotG.addPoints(arrayUtils[0].getArray(), arrayUtils[1].getArray(), Plot.LINE);
             plotG.show();
             dist.sort();
@@ -74,7 +74,7 @@ public class Simple_Dist_Analysis implements PlugInFilter {
             // H
             dist = objPopA.distancesAllCenter();
             arrayUtils = dist.getHistogram(nBins);
-            arrayUtils[1].divideAll(dist.getSize());
+            arrayUtils[1].divideAll(dist.size());
             Plot plotH = new Plot("H function", "distances (" + cal.getUnit() + ") ", "frequency");
             plotH.setColor(color);
             plotH.addPoints(arrayUtils[0].getArray(), arrayUtils[1].getArray(), Plot.LINE);
