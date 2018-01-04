@@ -35,7 +35,7 @@ public class spatialAnalysis {
     //Calibration calibration;
     private final int numEvaluationPoints;
     private final int numRandomSamples;
-    private final double distHardCore;
+    private final double distHardCore; // distance in units
     //int imaspots = 0;
     //int imamask = 1;
     //String[] names;
@@ -388,8 +388,7 @@ public class spatialAnalysis {
                             popRandom.setCalibration(sxy, sz, unit);
                             popRandom.setMask(mask2);
                             popRandom.createRandomPopulation(nbSpots, distHardCore);
-                            //distances2 = popRandom.distancesAllClosestCenter();
-                            distances2 = popRandom.distancesAllClosestBorder();
+                            distances2 = popRandom.distancesAllClosestCenter();
                             distances2.sort();
                             sampleDistancesG[i] = distances2;
                         }
@@ -778,33 +777,39 @@ public class spatialAnalysis {
         Objects3DPopulation popRandom = new Objects3DPopulation();
         popRandom.setCalibration(scaleXY, scaleZ, unit);
         popRandom.setMask(mask);
-        popRandom.createRandomPopulation(nbSpots, distHardCore);
-        randomPop = segImage.createSameDimensions();
-        popRandom.draw(randomPop);
+        boolean test = popRandom.createRandomPopulation(nbSpots, distHardCore);
+        // check if everything was ok
+        if (!test) {
+            IJ.log("Could not create random population. Aborting.");
+            return false;
+        } else {
+            randomPop = segImage.createSameDimensions();
+            popRandom.draw(randomPop);
 
-        if (verbose) {
-            IJ.log("Computing spatial statistics, please wait ...");
+            if (verbose) {
+                IJ.log("Computing spatial statistics, please wait ...");
+            }
+
+            if (verbose) {
+                IJ.log("Nb Spot=" + nbSpots);
+                IJ.log("Volume mask=" + mask.getVolumeUnit());
+                IJ.log("Density=" + (nbSpots / mask.getVolumeUnit()));
+            }
+
+            if (functions.contains("F")) {
+                processF(pop, mask, verbose, show, save);
+            }
+
+            if (functions.contains("G")) {
+                processG(pop, mask, verbose, show, save);
+            }
+
+            if (functions.contains("H")) {
+                processH(pop, mask, verbose, show, save);
+            }
+
+            return true;
         }
-
-        if (verbose) {
-            IJ.log("Nb Spot=" + nbSpots);
-            IJ.log("Volume mask=" + mask.getVolumeUnit());
-            IJ.log("Density=" + (nbSpots / mask.getVolumeUnit()));
-        }
-
-        if (functions.contains("F")) {
-            processF(pop, mask, verbose, show, save);
-        }
-
-        if (functions.contains("G")) {
-            processG(pop, mask, verbose, show, save);
-        }
-
-        if (functions.contains("H")) {
-            processH(pop, mask, verbose, show, save);
-        }
-
-        return true;
     }
 
     public double getSdi_F() {

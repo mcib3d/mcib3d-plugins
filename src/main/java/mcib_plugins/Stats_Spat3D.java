@@ -26,7 +26,7 @@ public class Stats_Spat3D implements PlugInFilter {
     Calibration calibration;
     int numEvaluationPointsF = 10000;
     int numRandomSamples = 100;
-    double distHardCore = 0;
+    double distHardCore = 0; // in units
     // double stepKFunction = 0.5d;
     // double maxCoeffKFunction = 0.5d;
     int imaspots = 0;
