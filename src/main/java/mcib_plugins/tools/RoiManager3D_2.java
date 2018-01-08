@@ -2095,9 +2095,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         }
         // CONVEX HULL
         if (Prefs.get("RoiManager3D-Options_convexhull.boolean", false)) {
-            headings.add("SurfMesh (unit)");
-            headings.add("SurfMeshsmooth (unit)");
-            headings.add("SurfMeshHull (unit)");
+            //headings.add("SurfMesh (unit)");
+            //headings.add("SurfMeshsmooth (unit)");
+            //headings.add("SurfMeshHull (unit)");
             headings.add("VolHull (unit)");
         }
         if (Prefs.get("RoiManager3D-Options_dist2Surf.boolean", true)) {
@@ -2194,17 +2194,18 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             }
             // CONVEX HULL //TODO put in a thread because very long
             if (Prefs.get("RoiManager3D-Options_convexhull.boolean", false)) {
-                Object3DSurface surf = new Object3DSurface(Viewer3D_Utils.computeMeshSurface(obj, false));
-                Object3D_IJUtils.setCalibration(surf, Object3D_IJUtils.getCalibration(obj));
-                surf.setSmoothingFactor(0.1f);
-                Object3DSurface convexSurface = surf.getConvexSurface();
-                convexSurface.multiThread = true;
-                double volHull = convexSurface.getVolumeUnit();
-                data[i][h++] = surf.getSurfaceMeshUnit();
-                data[i][h++] = surf.getSmoothSurfaceAreaUnit();
-                data[i][h++] = convexSurface.getSurfaceMeshUnit();
+                //Object3DSurface surf = new Object3DSurface(Viewer3D_Utils.computeMeshSurface(obj, false));
+                //Object3D_IJUtils.setCalibration(surf, Object3D_IJUtils.getCalibration(obj));
+                //surf.setSmoothingFactor(0.1f);
+                //Object3DSurface convexSurface = surf.getConvexSurface();
+                //convexSurface.multiThread = true;
+                Object3D object3DConvex = obj.getConvexObject();
+                double volHull = object3DConvex.getVolumeUnit();
+                //data[i][h++] = object3DConvex.getSurfaceMeshUnit();
+                //data[i][h++] = object3DConvex.getSmoothSurfaceAreaUnit();
+                //data[i][h++] = object3DConvex.getSurfaceMeshUnit();
                 data[i][h++] = volHull;
-                h += 4;
+                //h += 4;
             }
             if (Prefs.get("RoiManager3D-Options_dist2Surf.boolean", true)) {
                 data[i][h++] = obj.getDistCenterMin();
@@ -2907,10 +2908,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
     @Override
     public void contentSelected(Content c) {
+        IJ.log("Selected content " + c.getName());
         if ((c == null) || (!Prefs.get("RoiManager3D-Options_sync3DViewer.boolean", false))) {
             return;
         }
-        // IJ.log("Selected content " + c.getName());
         selectByName(c.getName());
     }
 
@@ -2953,6 +2954,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     public void selectByName(String name) {
+        IJ.log("Selecting " + name);
         Integer sel = hashNames.get(name);
         if ((sel != null) && (sel >= 0)) {
             list.setSelectedIndex(sel);
