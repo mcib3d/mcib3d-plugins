@@ -2675,17 +2675,14 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     private void registerActiveImage() {
         //ImagePlus activeImage = this.getImage();
         ImagePlus activeImage = WindowManager.getCurrentImage();
-        //System.out.println("Register " + activeImage + " " + currentImage);
         if (activeImage != null && activeImage.getProcessor() != null && activeImage.getImageStackSize() > 1) {
             if (currentImage != null && currentImage.getWindow() != null && currentImage != activeImage) {
-                //System.out.println("remove listener:"+currentImage.getTitle());
                 removeScrollListener(currentImage, this, this);
                 currentImage.killRoi();
                 currentImage.updateAndDraw();
                 currentImage = null;
             }
             if (currentImage != activeImage) {
-                //System.out.println("add listener:"+activeImage.getTitle());
                 addScrollListener(activeImage, this, this);
                 this.currentImage = activeImage;
             }
