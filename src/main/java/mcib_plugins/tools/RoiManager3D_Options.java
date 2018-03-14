@@ -93,6 +93,7 @@ public class RoiManager3D_Options implements PlugIn {
         boolean excludeXY = Prefs.get("RoiManager3D-Options_ExcludeXY.boolean", false);
         boolean excludeZ = Prefs.get("RoiManager3D-Options_ExcludeZ.boolean", false);
         boolean sync3Dviewer = Prefs.get("RoiManager3D-Options_sync3DViewer.boolean", false);
+        int roi= (int)Prefs.get("RoiManager3D-Options_roi.double", 0);
 
         GenericDialog gd = new GenericDialog("RoiManager3D Set Measurements");
         gd.addMessage("Measurements :", Font.decode("dialog bold 14"));
@@ -106,6 +107,9 @@ public class RoiManager3D_Options implements PlugIn {
         gd.addNumericField("Distance_between_centers (pixel)", splitDist, 0);
         gd.addMessage("Surf. contact options : ");
         gd.addNumericField("Distance_max_contact", surfDist, 2);
+        gd.addMessage("Overlay 3D ROI option : ");
+        String[] rois={"Contour","Sphere","Point","Bounding Box"};
+        gd.addChoice("Drawing : ",rois,rois[roi]);
 
         gd.showDialog();
 
@@ -143,6 +147,7 @@ public class RoiManager3D_Options implements PlugIn {
         
         Prefs.set("RoiManager3D-Options_splitDist.double", gd.getNextNumber());
         Prefs.set("RoiManager3D-Options_surfDist.double", gd.getNextNumber());
+        Prefs.set("RoiManager3D-Options_roi.double", gd.getNextChoiceIndex());
 
     }
 }

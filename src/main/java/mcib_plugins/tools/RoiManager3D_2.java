@@ -12,6 +12,7 @@ import ij.macro.ExtensionDescriptor;
 import ij.macro.Functions;
 import ij.macro.MacroExtension;
 import ij.measure.Calibration;
+import ij.plugin.Concatenator;
 import ij.plugin.Duplicator;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.ThresholdToSelection;
@@ -83,7 +84,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     private javax.swing.JButton buttonFillStack;
     private javax.swing.JButton buttonLabel;
     private javax.swing.JButton buttonListVoxels;
-    private javax.swing.JToggleButton buttonLiveRoi;
+    private javax.swing.JButton buttonLiveRoi;
     private javax.swing.JButton buttonLoad;
     private javax.swing.JButton buttonMeasure;
     private javax.swing.JButton buttonMerge;
@@ -121,8 +122,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
         if (IJ.macroRunning()) {
             Functions.registerExtensions(this);
-            live = false;
-            buttonLiveRoi.setSelected(false);
+            setLiveMode(false);
+            //buttonLiveRoi.setSelected(false);
         }
 
         if (Recorder.record) {
@@ -140,7 +141,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             public void keyPressed(KeyEvent ke) {
                 String key = "" + ke.getKeyChar();
                 //IJ.log("Key Pressed " + key);
-                if ((!key.equalsIgnoreCase("0")) && (!key.equalsIgnoreCase("1")) && (!key.equalsIgnoreCase("2")) && (!key.equalsIgnoreCase("3"))) {
+                if ((!key.equalsIgnoreCase("0")) && (!key.equalsIgnoreCase("1")) && (!key.equalsIgnoreCase("2")) && (!key.equalsIgnoreCase("3"))
+                        && (!key.equalsIgnoreCase("4")) && (!key.equalsIgnoreCase("5")) && (!key.equalsIgnoreCase("6"))
+                        && (!key.equalsIgnoreCase("7")) && (!key.equalsIgnoreCase("8")) && (!key.equalsIgnoreCase("9"))) {
                     return;
                 }
 
@@ -299,11 +302,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         } else if (name.equals("Manager3D_Delete")) {
             delete(false);
         } else if (name.equals("Manager3D_LiveRoi")) {
-            live = !live;
-            if (live) {
-                this.computeRois();
-                this.updateRois();
-            }
+            setLiveMode(!live);
         } else if (name.equals("Manager3D_Reset")) {
             reset();
         } else if (name.equals("Manager3D_Erase")) {
@@ -860,7 +859,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         buttonSave = new javax.swing.JButton();
         buttonDistances = new javax.swing.JButton();
         buttonAbout = new javax.swing.JButton();
-        buttonLiveRoi = new javax.swing.JToggleButton();
+        buttonLiveRoi = new javax.swing.JButton();
         buttonSelectAll = new javax.swing.JButton();
         buttonDeselect = new javax.swing.JButton();
         jSeparator3 = new javax.swing.JSeparator();
@@ -1033,7 +1032,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             }
         });
 
-        buttonLiveRoi.setText("Live Roi");
+        buttonLiveRoi.setText("Live Roi:  OFF");
         buttonLiveRoi.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 buttonLiveRoiActionPerformed(evt);
@@ -1224,7 +1223,12 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }//GEN-LAST:event_buttonSegmentation3DActionPerformed
 
     private void buttonAddImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAddImageActionPerformed
+        buttonAddImage.setText("Adding ...");
+        repaint();
         addImage();
+        buttonAddImage.setText("Add Image");
+        repaint();
+
     }//GEN-LAST:event_buttonAddImageActionPerformed
 
     private void listValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_listValueChanged
@@ -1286,11 +1290,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }//GEN-LAST:event_buttonListVoxelsActionPerformed
 
     private void buttonLiveRoiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonLiveRoiActionPerformed
-        live = !live;
-        if (live) {
-            this.computeRois();
-            this.updateRois();
-        }
+        setLiveMode(!live);
     }//GEN-LAST:event_buttonLiveRoiActionPerformed
 
     private void listMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_listMouseReleased
@@ -1633,10 +1633,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         if (name2 == null) {
             name2 = IJ.getString("New name", "Name");
         }
-        int c=1;
-        for(int i:indices){
+        int c = 1;
+        for (int i : indices) {
             //IJ.log("renaming "+i+" "+name2+" "+c);
-            objects3D.getObject(i).setName(name2+""+c);
+            objects3D.getObject(i).setName(name2 + "" + c);
             updateName(i);
             c++;
         }
@@ -1681,8 +1681,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             index = getAllIndexes();
         }
         // prevent from updating live Rois
-        live = false;
-        buttonLiveRoi.setSelected(false);
+        setLiveMode(false);
 
         boolean delete;
 
@@ -1983,8 +1982,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 data[count + 1][h2++] = count + 1;
                 data[count + 1][h2++] = (indexes[i2] + 1);
                 data[count + 1][h2++] = (indexes[i1] + 1);
-                data[count+1][h2++] = ob2.getType();
-                data[count+1][h2++] = ob1.getType();
+                data[count + 1][h2++] = ob2.getType();
+                data[count + 1][h2++] = ob1.getType();
                 data[count + 1][h2++] = model.get(indexes[i2]);
                 data[count + 1][h2++] = model.get(indexes[i1]);
 
@@ -2530,8 +2529,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 data[count + 1][h2++] = count + 1;
                 data[count + 1][h2++] = (indexes[i2] + 1);
                 data[count + 1][h2++] = (indexes[i1] + 1);
-                data[count+1][h2++] = ob2.getType();
-                data[count+1][h2++] = ob1.getType();
+                data[count + 1][h2++] = ob2.getType();
+                data[count + 1][h2++] = ob1.getType();
                 data[count + 1][h2++] = model.get(indexes[i2]);
                 data[count + 1][h2++] = model.get(indexes[i1]);
 
@@ -2704,10 +2703,97 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         return indexes;
     }
 
+    void computeRois() {
+        ImagePlus imp = WindowManager.getCurrentImage();
+        if (imp == null) {
+            return;
+        }
+
+        this.registerActiveImage();
+
+        int zmin = imp.getNSlices() + 1;
+        int zmax = -1;
+
+        int[] indexes = list.getSelectedIndices();
+        if (indexes.length == 0) {
+            indexes = getAllIndexes();
+        }
+        arrayRois = new Roi[imp.getNSlices()];
+
+        // get zmin and zmax
+        Object3D obj;
+        for (int i = 0; i < indexes.length; i++) {
+            obj = objects3D.getObject(indexes[i]);
+            if (obj.getZmin() < zmin) {
+                zmin = obj.getZmin();
+            }
+            if (obj.getZmax() > zmax) {
+                zmax = obj.getZmax();
+            }
+        }
+        currentZmin = zmin;
+        currentZmax = zmax;
+
+        // draw objects
+        ImageHandler draw = new ImageByte("rois", imp.getWidth(), imp.getHeight(), zmax - zmin + 1);
+        ObjectCreator3D creator3D = new ObjectCreator3D(draw);
+        int roi = (int) Prefs.get("RoiManager3D-Options_roi.double", 0);
+        for (int i = 0; i < indexes.length; i++) {
+            obj = objects3D.getObject(indexes[i]);
+            switch (roi) {
+                case 0:
+                    creator3D.drawObject(obj);
+                    break;
+                case 1:
+                    Point3D point3D = obj.getCenterAsPoint();
+                    creator3D.createEllipsoid(point3D.getRoundX(), point3D.getRoundY(), point3D.getRoundZ(), 2, 2, 1, 255, false);
+                    break;
+                case 2:
+                    Point3D centre = obj.getCenterAsPoint();
+                    creator3D.createPixel(centre.getRoundX(), centre.getRoundY(), centre.getRoundZ(), 255);
+                    break;
+                case 3:
+                    int[] bb = obj.getBoundingBox();
+                    for (int z = bb[4]; z <= bb[5]; z++) {
+                        creator3D.createLine(bb[0], bb[2], z, bb[1], bb[2], z, 255, 0);
+                        creator3D.createLine(bb[0], bb[2], z, bb[0], bb[3], z, 255, 0);
+                        creator3D.createLine(bb[1], bb[3], z, bb[1], bb[2], z, 255, 0);
+                        creator3D.createLine(bb[1], bb[3], z, bb[0], bb[3], z, 255, 0);
+                    }
+                    break;
+                default:
+                    Point3D centre2 = obj.getCenterAsPoint();
+                    creator3D.createPixel(centre2.getRoundX(), centre2.getRoundY(), centre2.getRoundZ(), 255);
+                    break;
+            }
+        }
+        //draw.show("draw");
+
+        arrayRois = new Roi[imp.getNSlices()];
+        // extract selections
+        for (int zz = zmin; zz <= zmax; zz++) {
+            //IJ.showStatus("Computing Roi " + zz);
+            ByteProcessor mask = new ByteProcessor(imp.getWidth(), imp.getHeight(), (byte[]) draw.getArray1D(zz));
+            mask.setThreshold(1, 255, ImageProcessor.NO_LUT_UPDATE);
+            ImagePlus maskPlus = new ImagePlus("mask " + zz, mask);
+            ThresholdToSelection tts = new ThresholdToSelection();
+            tts.setup("", maskPlus);
+            tts.run(mask);
+            arrayRois[zz] = maskPlus.getRoi();
+        }
+        draw = null;
+
+        // update
+        int middle = (int) (0.5 * zmin + 0.5 * zmax);
+        imp.setSlice(middle + 1);
+        imp.setRoi(arrayRois[middle]);
+        imp.updateAndDraw();
+    }
+
     /**
      * Description of the Method
      */
-    void computeRois() {
+    void computeRoisOld() {
         //ImagePlus imp = this.getImage();
         ImagePlus imp = WindowManager.getCurrentImage();
         if (imp == null) {
@@ -2905,7 +2991,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
     @Override
     public void contentSelected(Content c) {
-        IJ.log("Selected content " + c.getName());
+        //IJ.log("Selected content " + c.getName());
         if ((c == null) || (!Prefs.get("RoiManager3D-Options_sync3DViewer.boolean", false))) {
             return;
         }
@@ -2951,7 +3037,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     public void selectByName(String name) {
-        IJ.log("Selecting " + name);
+        //IJ.log("Selecting " + name);
         Integer sel = hashNames.get(name);
         if ((sel != null) && (sel >= 0)) {
             list.setSelectedIndex(sel);
@@ -2975,21 +3061,31 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     public void selectByNumbers(int[] se) {
-        IJ.log("Selecting " + se.length + " objects");
+        //IJ.log("Selecting " + se.length + " objects");
         //list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         list.clearSelection();
         int[] sel = se;
         if (sel.length > 0) {
             for (int c = 0; c < sel.length; c++) {
                 int i = sel[c];
-                IJ.log(c + " " + i + " " + model.getElementAt(i) + " " + sel.length);
+                //IJ.log(c + " " + i + " " + model.getElementAt(i) + " " + sel.length);
                 list.addSelectionInterval(i, i);
-                list.updateUI();
             }
-
             //list.setSelectedIndices(sel);
         }
         //list.ensureIndexIsVisible(list.getSelectedIndex());
+        list.updateUI();
+    }
+
+    private void setLiveMode(boolean mode) {
+        if (live == mode) return;
+        live = mode;
+        if (live) {
+            buttonLiveRoi.setText("Live Roi : ON ");
+        } else {
+            buttonLiveRoi.setText("Live Roi : OFF");
+        }
+        repaint();
     }
 
     @Override
