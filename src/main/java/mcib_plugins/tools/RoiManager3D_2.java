@@ -56,6 +56,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     protected DefaultListModel model = new DefaultListModel();
     boolean canceled;
     boolean live = true;
+    ImageByte label = null;
     private HashMap<String, Integer> hashNames;
     private ImagePlus currentImage;
     private Roi[] arrayRois = null;
@@ -1411,6 +1412,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
         // HASH
         buildHash();
+        // reset draw image
+        label = null;
 
         IJ.log(objects3D.getNbObjects() - nb + " objects added. Total of " + objects3D.getNbObjects() + " objects");
 
@@ -2447,6 +2450,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         if (Recorder.record) {
             Recorder.record("Ext.Manager3D_Load", path);
         }
+        label = null;
     }
 
     private boolean saveObjects() {
@@ -2735,30 +2739,37 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         currentZmax = zmax;
 
         // draw objects
-        ImageHandler draw = new ImageByte("rois", imp.getWidth(), imp.getHeight(), zmax - zmin + 1);
-        ObjectCreator3D creator3D = new ObjectCreator3D(draw);
+        if (label == null)
+            label = new ImageByte("rois", imp.getWidth(), imp.getHeight(), imp.getNSlices());
+        else
+            label.fill(0);
+        ObjectCreator3D creator3D = new ObjectCreator3D(label);
         int roi = (int) Prefs.get("RoiManager3D-Options_roi.double", 0);
         for (int i = 0; i < indexes.length; i++) {
+            //IJ.showStatus("Drawing Rois " + i + " / " + indexes.length);
             obj = objects3D.getObject(indexes[i]);
             switch (roi) {
-                case 0:
+                case 0: // CONTOUR
                     creator3D.drawObject(obj);
                     break;
-                case 1:
+                case 1: // SPHERE
                     Point3D point3D = obj.getCenterAsPoint();
                     creator3D.createEllipsoid(point3D.getRoundX(), point3D.getRoundY(), point3D.getRoundZ(), 2, 2, 1, 255, false);
                     break;
-                case 2:
+                case 2: // POINT
                     Point3D centre = obj.getCenterAsPoint();
                     creator3D.createPixel(centre.getRoundX(), centre.getRoundY(), centre.getRoundZ(), 255);
                     break;
-                case 3:
+                case 3: // BOUNDING BOX
                     int[] bb = obj.getBoundingBox();
+                    int x0 = bb[0];
+                    int x1 = bb[1];
+                    int y0 = bb[2];
+                    int y1 = bb[3];
+                    int z0 = bb[4];
+                    int z1 = bb[5];
                     for (int z = bb[4]; z <= bb[5]; z++) {
-                        creator3D.createLine(bb[0], bb[2], z, bb[1], bb[2], z, 255, 0);
-                        creator3D.createLine(bb[0], bb[2], z, bb[0], bb[3], z, 255, 0);
-                        creator3D.createLine(bb[1], bb[3], z, bb[1], bb[2], z, 255, 0);
-                        creator3D.createLine(bb[1], bb[3], z, bb[0], bb[3], z, 255, 0);
+                        creator3D.createBrick((int) Math.round(0.5 * (x0 + x1)), (int) Math.round(0.5 * (y0 + y1)), (int) Math.round(0.5 * (z0 + z1)), 0.5 * (x1 - x0), 0.5 * (y1 - y0), 0.5 * (z1 - z0), 255);
                     }
                     break;
                 default:
@@ -2772,8 +2783,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         arrayRois = new Roi[imp.getNSlices()];
         // extract selections
         for (int zz = zmin; zz <= zmax; zz++) {
-            //IJ.showStatus("Computing Roi " + zz);
-            ByteProcessor mask = new ByteProcessor(imp.getWidth(), imp.getHeight(), (byte[]) draw.getArray1D(zz));
+            //IJ.showStatus("Computing Rois " + zz + " / " + zmax);
+            ByteProcessor mask = new ByteProcessor(imp.getWidth(), imp.getHeight(), (byte[]) label.getArray1D(zz));
             mask.setThreshold(1, 255, ImageProcessor.NO_LUT_UPDATE);
             ImagePlus maskPlus = new ImagePlus("mask " + zz, mask);
             ThresholdToSelection tts = new ThresholdToSelection();
@@ -2781,7 +2792,6 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             tts.run(mask);
             arrayRois[zz] = maskPlus.getRoi();
         }
-        draw = null;
 
         // update
         int middle = (int) (0.5 * zmin + 0.5 * zmax);
