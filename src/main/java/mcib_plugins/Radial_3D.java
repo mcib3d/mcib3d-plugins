@@ -107,7 +107,7 @@ public class Radial_3D implements PlugInFilter {
                 if (sig < 0) {
                     sig *= -1.0;
                 }
-                // coef sig to radMax
+                // coeff sig to radMax
 
                 double radius = sig;
                 IJ.log("sigma=" + sig + " rad=" + radius);

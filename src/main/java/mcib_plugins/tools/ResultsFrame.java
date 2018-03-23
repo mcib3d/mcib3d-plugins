@@ -120,7 +120,6 @@ public class ResultsFrame extends JFrame implements ActionListener {
                 rows[c++] = nb;
                 //IJ.log("Selecting object "+nb);          
             }
-
             manager.selectByNumbers(rows);
         } else if (ae.getActionCommand().equalsIgnoreCase("show objects 1")) {
             int[] sels = tableResults.getSelectedRows();

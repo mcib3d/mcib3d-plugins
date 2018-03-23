@@ -807,7 +807,6 @@ public class spatialAnalysis {
             if (functions.contains("H")) {
                 processH(pop, mask, verbose, show, save);
             }
-
             return true;
         }
     }

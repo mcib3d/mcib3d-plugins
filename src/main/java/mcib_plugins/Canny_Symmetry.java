@@ -28,6 +28,7 @@ public class Canny_Symmetry implements PlugInFilter {
     boolean showEdgesXYZ = false;
     boolean showIntermediate = false;
     boolean improved = true;
+    boolean symmetry=true;
 
     @Override
     public int setup(String string, ImagePlus ip) {
@@ -56,6 +57,7 @@ public class Canny_Symmetry implements PlugInFilter {
         ImageHandler ed = edges.getEdge();
         ed.show("Edges");
 
+        if(!symmetry) return;
         SymmetryFilter sy = new SymmetryFilter(gg, radius, improved);
         // optional
         sy.setNormalize(normalize); // default 10
@@ -77,6 +79,7 @@ public class Canny_Symmetry implements PlugInFilter {
         gd.addNumericField("alpha Canny", alpha, 3, 10, "");
         gd.addCheckbox("Show edges in X-Y-Z", showEdgesXYZ);
         gd.addMessage("Symmetry detection");
+        gd.addCheckbox("Compute_symmetry", symmetry);
         gd.addNumericField("Radius", radius, 0, 10, "pix");
         gd.addNumericField("Normalization", normalize, 2, 10, "");
         gd.addNumericField("Scaling", scaling, 2, 10, "");
@@ -85,6 +88,7 @@ public class Canny_Symmetry implements PlugInFilter {
         gd.showDialog();
         alpha = gd.getNextNumber();
         showEdgesXYZ = gd.getNextBoolean();
+        symmetry=gd.getNextBoolean();
         radius = (int) gd.getNextNumber();
         normalize = gd.getNextNumber();
         scaling = gd.getNextNumber();
