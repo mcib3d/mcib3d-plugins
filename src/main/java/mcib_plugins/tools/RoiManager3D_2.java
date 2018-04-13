@@ -178,12 +178,13 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
          * http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
          */
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    //System.out.println(info.getName()+" ");
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-
+            if (Prefs.get("RoiManager3D-Options_UseUI.boolean", false)) {
+                for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                    if ("Nimbus".equals(info.getName())) {
+                        //System.out.println(info.getName()+" ");
+                        javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                        break;
+                    }
                 }
             }
         } catch (ClassNotFoundException ex) {
@@ -818,14 +819,14 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-
         try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                //System.out.println(info.getName()+" ");
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-
+            if (Prefs.get("RoiManager3D-Options_UseUI.boolean", false)) {
+                for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                    //System.out.println(info.getName()+" ");
+                    if ("Nimbus".equals(info.getName())) {
+                        javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                        break;
+                    }
                 }
             }
         } catch (ClassNotFoundException ex) {

@@ -94,6 +94,7 @@ public class RoiManager3D_Options implements PlugIn {
         boolean excludeZ = Prefs.get("RoiManager3D-Options_ExcludeZ.boolean", false);
         boolean sync3Dviewer = Prefs.get("RoiManager3D-Options_sync3DViewer.boolean", false);
         int roi= (int)Prefs.get("RoiManager3D-Options_roi.double", 0);
+        boolean useNewUI= Prefs.get("RoiManager3D-Options_UseUI.boolean", false);
 
         GenericDialog gd = new GenericDialog("RoiManager3D Set Measurements");
         gd.addMessage("Measurements :", Font.decode("dialog bold 14"));
@@ -110,7 +111,7 @@ public class RoiManager3D_Options implements PlugIn {
         gd.addMessage("Overlay 3D ROI option : ");
         String[] rois={"Contour","Sphere","Point","Bounding Box"};
         gd.addChoice("Drawing : ",rois,rois[roi]);
-
+        gd.addCheckbox("Use new UI",useNewUI);
         gd.showDialog();
 
         if (gd.wasCanceled()) {
@@ -148,6 +149,6 @@ public class RoiManager3D_Options implements PlugIn {
         Prefs.set("RoiManager3D-Options_splitDist.double", gd.getNextNumber());
         Prefs.set("RoiManager3D-Options_surfDist.double", gd.getNextNumber());
         Prefs.set("RoiManager3D-Options_roi.double", gd.getNextChoiceIndex());
-
+        Prefs.set("RoiManager3D-Options_UseUI.boolean", gd.getNextBoolean());
     }
 }
