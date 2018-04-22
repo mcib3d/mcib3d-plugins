@@ -2,6 +2,7 @@ package mcib_plugins;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.GenericDialog;
 import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.PlugInFilter;
@@ -22,6 +23,8 @@ public class Ellipsoids_3D implements PlugInFilter {
 
     ImagePlus imp;
     float rad;
+    private boolean drawVectors = false;
+    private boolean drawOriented = false;
 
     /**
      * Main processing method for the Axes3D_ object
@@ -41,12 +44,26 @@ public class Ellipsoids_3D implements PlugInFilter {
                 unit = cal.getUnits();
             }
         }
+        // options
+        GenericDialog dialog = new GenericDialog("Ellipsoids options");
+        dialog.addMessage("draw ellipsoid");
+        dialog.addCheckbox("Draw_vectors", drawVectors);
+        //dialog.addCheckbox("Draw_oriented contours", drawOriented);
+        dialog.showDialog();
+        drawVectors = dialog.getNextBoolean();
+        //drawOriented = dialog.getNextBoolean();
+        if (dialog.wasCanceled()) return;
+
         //drawing of ellipses
         ObjectCreator3D ellipsoid = new ObjectCreator3D(imp.getWidth(), imp.getHeight(), imp.getStackSize());
         ellipsoid.setResolution(resXY, resZ, unit);
         //drawing of main direction vectors 
-        ObjectCreator3D vectors = new ObjectCreator3D(imp.getWidth(), imp.getHeight(), imp.getStackSize());
-        vectors.setResolution(resXY, resZ, unit);
+        ObjectCreator3D vectors1 = new ObjectCreator3D(imp.getWidth(), imp.getHeight(), imp.getStackSize());
+        vectors1.setResolution(resXY, resZ, unit);
+        ObjectCreator3D vectors2 = new ObjectCreator3D(imp.getWidth(), imp.getHeight(), imp.getStackSize());
+        vectors2.setResolution(resXY, resZ, unit);
+        ObjectCreator3D vectors3 = new ObjectCreator3D(imp.getWidth(), imp.getHeight(), imp.getStackSize());
+        vectors3.setResolution(resXY, resZ, unit);
         //drawing of oriented contours
         ObjectCreator3D oriC = new ObjectCreator3D(imp.getWidth(), imp.getHeight(), imp.getStackSize());
         oriC.setResolution(resXY, resZ, unit);
@@ -119,7 +136,14 @@ public class Ellipsoids_3D implements PlugInFilter {
                 // draw line for direction vectors
                 Vector3D Vec = obj.getCenterAsVectorUnit();
                 Vector3D end = Vec.add(obj.getVectorAxis(2), 1, rad1);
-                vectors.createLineUnit(Vec, end, val, 1);
+                vectors1.createLineUnit(Vec, end, val, 1);
+                Vec = obj.getCenterAsVectorUnit();
+                end = Vec.add(obj.getVectorAxis(1), 1, rad1);
+                vectors2.createLineUnit(Vec, end, val, 1);
+                Vec = obj.getCenterAsVectorUnit();
+                end = Vec.add(obj.getVectorAxis(0), 1, rad1);
+                vectors3.createLineUnit(Vec, end, val, 1);
+
 
                 // The two poles as Feret 
                 Voxel3D Feret1 = obj.getFeretVoxel1();
@@ -218,22 +242,36 @@ public class Ellipsoids_3D implements PlugInFilter {
         }
         rt.show("Results");
 
+        // draw ellipsoids
         ImagePlus plus = new ImagePlus("Ellipsoids", ellipsoid.getStack());
         if (cal != null) {
             plus.setCalibration(cal);
         }
         plus.show();
-        ImagePlus plus2 = new ImagePlus("Vectors", vectors.getStack());
-        if (cal != null) {
-            plus2.setCalibration(cal);
-        }
-        plus2.show();
 
-        ImagePlus plus3 = new ImagePlus("Oriented Contours", oriC.getStack());
-        if (cal != null) {
-            plus3.setCalibration(cal);
+        // draw vectors
+        if (drawVectors) {
+            ImagePlus plusV1 = new ImagePlus("Vectors1 (Max)", vectors1.getStack());
+            ImagePlus plusV2 = new ImagePlus("Vectors2 (Middle)", vectors2.getStack());
+            ImagePlus plusV3 = new ImagePlus("Vectors3 (Min)", vectors3.getStack());
+            if (cal != null) {
+                plusV1.setCalibration(cal);
+                plusV2.setCalibration(cal);
+                plusV3.setCalibration(cal);
+            }
+            plusV1.show();
+            plusV2.show();
+            plusV3.show();
         }
-        plus3.show();
+
+        // draw oriented contours
+        if (drawOriented) {
+            ImagePlus plus3 = new ImagePlus("Oriented Contours", oriC.getStack());
+            if (cal != null) {
+                plus3.setCalibration(cal);
+            }
+            plus3.show();
+        }
 
     }
 
