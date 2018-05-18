@@ -12,14 +12,6 @@ import ij.plugin.frame.Recorder;
 import ij.process.Blitter;
 import ij.process.ImageProcessor;
 import ij.process.StackProcessor;
-import java.awt.Checkbox;
-import java.awt.Font;
-import java.awt.TextField;
-import java.text.NumberFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Vector;
-import java.util.concurrent.atomic.AtomicInteger;
 import mcib3d.image3d.ImageShort;
 import mcib3d.image3d.processing.FastFilters3D;
 import mcib3d.utils.CheckInstall;
@@ -28,6 +20,11 @@ import mcib_plugins.Filter3D.Filter3Dmax;
 import mcib_plugins.Filter3D.Filter3DmaxLocal;
 import mcib_plugins.Filter3D.Filter3Dmean;
 import mcib_plugins.Filter3D.Filter3Dmin;
+
+import java.awt.*;
+import java.util.Date;
+import java.util.Vector;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 3D filtering
@@ -195,7 +192,7 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
                             if (xy) {
                                 uvoisy = uvoisx;
                                 voisy = voisx;
-                                ((TextField) fields.elementAt(2)).setText(""+uvoisy);
+                                ((TextField) fields.elementAt(2)).setText("" + uvoisy);
                                 ((TextField) fields.elementAt(3)).setText(Integer.toString((int) Math.round(voisy)));
                             }
                         }
@@ -205,13 +202,13 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
                     case 1:
                         int v1 = Integer.valueOf(((TextField) fields.elementAt(1)).getText()).intValue();
                         if (v1 != voisx) {
-                            ((TextField) fields.elementAt(0)).setText(""+v1 * calibration.pixelWidth);
+                            ((TextField) fields.elementAt(0)).setText("" + v1 * calibration.pixelWidth);
                             voisx = v1;
                             uvoisx = v1 * calibration.pixelWidth;
                             if (xy) {
                                 uvoisy = uvoisx;
                                 voisy = voisx;
-                                ((TextField) fields.elementAt(2)).setText(""+uvoisy);
+                                ((TextField) fields.elementAt(2)).setText("" + uvoisy);
                                 ((TextField) fields.elementAt(3)).setText(Integer.toString((int) Math.round(voisy)));
                             }
                         }
@@ -226,7 +223,7 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
                             if (xy) {
                                 uvoisx = uvoisy;
                                 voisx = voisy;
-                                ((TextField) fields.elementAt(0)).setText(""+uvoisx);
+                                ((TextField) fields.elementAt(0)).setText("" + uvoisx);
                                 ((TextField) fields.elementAt(1)).setText(Integer.toString((int) Math.round(voisx)));
                             }
                         }
@@ -236,13 +233,13 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
                     case 3:
                         int v2 = Integer.valueOf(((TextField) fields.elementAt(3)).getText()).intValue();
                         if (v2 != voisy) {
-                            ((TextField) fields.elementAt(2)).setText(""+v2 * calibration.pixelHeight);
+                            ((TextField) fields.elementAt(2)).setText("" + v2 * calibration.pixelHeight);
                             voisy = v2;
                             uvoisy = v2 * calibration.pixelHeight;
                             if (xy) {
                                 uvoisx = uvoisy;
                                 voisx = voisy;
-                                ((TextField) fields.elementAt(0)).setText(""+uvoisx);
+                                ((TextField) fields.elementAt(0)).setText("" + uvoisx);
                                 ((TextField) fields.elementAt(1)).setText(Integer.toString((int) Math.round(voisx)));
                             }
                         }
@@ -259,7 +256,7 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
                     case 5:
                         int v5 = Integer.valueOf(((TextField) fields.elementAt(5)).getText()).intValue();
                         if (v5 != voisz) {
-                            ((TextField) fields.elementAt(4)).setText(""+v5 * calibration.pixelDepth);
+                            ((TextField) fields.elementAt(4)).setText("" + v5 * calibration.pixelDepth);
                             voisz = v5;
                             uvoisz = v5 * calibration.pixelDepth;
                         }
@@ -268,7 +265,7 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
                         break;
                 }
             }
-            if (!gd.invalidNumber());
+            if (!gd.invalidNumber()) ;
         } catch (NumberFormatException nfe) {
             IJ.log(nfe.getMessage());
         }
@@ -297,7 +294,9 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
         gd.addMessage("Parallelization", new Font("Arial", Font.BOLD, 12));
         gd.addChoice("Algorithm", algos, algos[algo]);
         gd.addSlider("Nb_cpus", 1, ThreadUtil.getNbCpus(), ThreadUtil.getNbCpus());
-        gd.addDialogListener(this);
+        if (!IJ.macroRunning()) {
+            gd.addDialogListener(this);
+        }
         gd.showDialog();
         filter = gd.getNextChoiceIndex();
         uvoisx = gd.getNextNumber();
