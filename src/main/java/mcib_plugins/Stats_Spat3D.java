@@ -86,12 +86,12 @@ public class Stats_Spat3D implements PlugInFilter {
         if (!Dialogue()) {
             return;
         }
-        imp = WindowManager.getImage(imaspots + 1);
+        imp = WindowManager.getImage(imaspots+1);
         calibration = imp.getCalibration();
         spatialAnalysis spa = new spatialAnalysis(numEvaluationPointsF, numRandomSamples, distHardCore, env / 100.0);
         spa.setMultiThread(nbcpus);
         spa.setColorsPlot(Color.DARK_GRAY, Color.LIGHT_GRAY, colorDraw);
-        if (spa.process(imp, WindowManager.getImage(imamask + 1), functions, true, show, save))
+        if (spa.process(imp, WindowManager.getImage(imamask+1), functions, true, show, save))
             spa.getRandomSample().show("Random Sample");
     }
 

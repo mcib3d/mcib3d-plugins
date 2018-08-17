@@ -22,13 +22,14 @@ package mcib_plugins.tools;
  *
  */
 // Modified by Thomas Boudier for RoiManager3D_
+
 import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
-import java.awt.Font;
+
+import java.awt.*;
 
 /**
- *
  * @author Fabrice P. Cordelières, fabrice.cordelieres@gmail.com
  * @version 1.0, 7/11/07
  */
@@ -38,7 +39,7 @@ public class RoiManager3D_Options implements PlugIn {
     public void run(String arg) {
         // Parameters to compute
 
-        String[] label = new String[22];
+        String[] label = new String[23];
         boolean[] state = new boolean[label.length];
         int h = 0;
         label[h] = "Volume (unit)";
@@ -77,6 +78,8 @@ public class RoiManager3D_Options implements PlugIn {
         state[h++] = Prefs.get("RoiManager3D-Options_COM-pix.boolean", true);
         label[h] = "Centre_of_mass_(unit)";
         state[h++] = Prefs.get("RoiManager3D-Options_COM-unit.boolean", true);
+        label[h] = "Objects numbering";
+        state[h++] = Prefs.get("RoiManager3D-Options_Numbering.boolean", false);
         label[h] = "Bounding_box (pix)";
         state[h++] = Prefs.get("RoiManager3D-Options_BB.boolean", true);
         label[h] = "Radial_distance (unit)";
@@ -93,8 +96,8 @@ public class RoiManager3D_Options implements PlugIn {
         boolean excludeXY = Prefs.get("RoiManager3D-Options_ExcludeXY.boolean", false);
         boolean excludeZ = Prefs.get("RoiManager3D-Options_ExcludeZ.boolean", false);
         boolean sync3Dviewer = Prefs.get("RoiManager3D-Options_sync3DViewer.boolean", false);
-        int roi= (int)Prefs.get("RoiManager3D-Options_roi.double", 0);
-        boolean useNewUI= Prefs.get("RoiManager3D-Options_UseUI.boolean", false);
+        int roi = (int) Prefs.get("RoiManager3D-Options_roi.double", 0);
+        boolean useNewUI = Prefs.get("RoiManager3D-Options_UseUI.boolean", false);
 
         GenericDialog gd = new GenericDialog("RoiManager3D Set Measurements");
         gd.addMessage("Measurements :", Font.decode("dialog bold 14"));
@@ -109,9 +112,9 @@ public class RoiManager3D_Options implements PlugIn {
         gd.addMessage("Surf. contact options : ");
         gd.addNumericField("Distance_max_contact", surfDist, 2);
         gd.addMessage("Overlay 3D ROI option : ");
-        String[] rois={"Contour","Sphere","Point","Bounding Box"};
-        gd.addChoice("Drawing : ",rois,rois[roi]);
-        gd.addCheckbox("Use new UI",useNewUI);
+        String[] rois = {"Contour", "Sphere", "Point", "Bounding Box"};
+        gd.addChoice("Drawing : ", rois, rois[roi]);
+        gd.addCheckbox("Use new UI", useNewUI);
         gd.showDialog();
 
         if (gd.wasCanceled()) {
@@ -136,6 +139,7 @@ public class RoiManager3D_Options implements PlugIn {
         Prefs.set("RoiManager3D-Options_dist2Surf.boolean", gd.getNextBoolean());
         Prefs.set("RoiManager3D-Options_COM-pix.boolean", gd.getNextBoolean());
         Prefs.set("RoiManager3D-Options_COM-unit.boolean", gd.getNextBoolean());
+        Prefs.set("RoiManager3D-Options_Numbering.boolean", gd.getNextBoolean());
         Prefs.set("RoiManager3D-Options_BB.boolean", gd.getNextBoolean());
         Prefs.set("RoiManager3D-Options_RadDist.boolean", gd.getNextBoolean());
         Prefs.set("RoiManager3D-Options_SurfContact.boolean", gd.getNextBoolean());
@@ -145,7 +149,7 @@ public class RoiManager3D_Options implements PlugIn {
         Prefs.set("RoiManager3D-Options_ExcludeXY.boolean", gd.getNextBoolean());
         Prefs.set("RoiManager3D-Options_ExcludeZ.boolean", gd.getNextBoolean());
         Prefs.set("RoiManager3D-Options_sync3DViewer.boolean", gd.getNextBoolean());
-        
+
         Prefs.set("RoiManager3D-Options_splitDist.double", gd.getNextNumber());
         Prefs.set("RoiManager3D-Options_surfDist.double", gd.getNextNumber());
         Prefs.set("RoiManager3D-Options_roi.double", gd.getNextChoiceIndex());

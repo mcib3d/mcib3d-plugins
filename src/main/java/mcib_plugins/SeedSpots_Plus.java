@@ -27,8 +27,6 @@ public class SeedSpots_Plus implements PlugIn {
     ImagePlus spotPlus;
     ImageStack spotStack;
     ImageHandler spot3DImage;
-    // Segmentation algo
-    Segment3DSpots seg;
     // segResulrs
     //IntImage3D fishImage;
     ImagePlus segPlus = null;
@@ -209,7 +207,7 @@ public class SeedSpots_Plus implements PlugIn {
     }
 
     private void Segmentation() {
-        seg = new Segment3DSpots(this.spot3DImage, this.seed3DImage);
+        Segment3DSpots seg = new Segment3DSpots(this.spot3DImage, this.seed3DImage);
         seg.show = debug;
         // set parameters
         seg.setSeedsThreshold(this.seeds_threshold);

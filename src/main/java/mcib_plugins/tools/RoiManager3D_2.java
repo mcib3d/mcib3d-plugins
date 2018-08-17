@@ -12,7 +12,6 @@ import ij.macro.ExtensionDescriptor;
 import ij.macro.Functions;
 import ij.macro.MacroExtension;
 import ij.measure.Calibration;
-import ij.plugin.Concatenator;
 import ij.plugin.Duplicator;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.ThresholdToSelection;
@@ -52,7 +51,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
     public javax.swing.JPanel jPanel;
     public javax.swing.JList list;
-    protected Objects3DPopulation objects3D;
+    protected Objects3DPopulation objects3DPopulation;
     protected DefaultListModel model = new DefaultListModel();
     boolean canceled;
     boolean live = true;
@@ -112,10 +111,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         initComponents();
         this.setTitle("RoiManager3D " + version);
         setVisible(true);
-        objects3D = new Objects3DPopulation();
-        objects3D.setLog(new IJLog());
+        objects3DPopulation = new Objects3DPopulation();
+        objects3DPopulation.setLog(new IJLog());
         list.setModel(model);
-        //list.setCellRenderer(new Manager3DCellRenderer(objects3D));
+        //list.setCellRenderer(new Manager3DCellRenderer(objects3DPopulation));
         hashNames = new HashMap();
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         // window
@@ -150,9 +149,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
                 int[] indices = list.getSelectedIndices();
                 for (int i : indices) {
-                    objects3D.getObject(i).setType(Integer.parseInt(key));
-                    objects3D.getObject(i).setComment("");
-                    if (objects3D.getObject(i).getType() > 0) {
+                    objects3DPopulation.getObject(i).setType(Integer.parseInt(key));
+                    objects3DPopulation.getObject(i).setComment("");
+                    if (objects3DPopulation.getObject(i).getType() > 0) {
                         updateName(i);
                     } else {
                         updateName(i);
@@ -442,7 +441,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         } else if (name.equals("Manager3D_Feret1")) {
             Double D = (Double) args[0];
             int a = D.intValue();
-            Object3D ob = objects3D.getObject(a);
+            Object3D ob = objects3DPopulation.getObject(a);
             Voxel3D vox = ob.getFeretVoxel1();
             ((Double[]) args[1])[0] = vox.getX();
             ((Double[]) args[2])[0] = vox.getY();
@@ -450,7 +449,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         } else if (name.equals("Manager3D_Feret2")) {
             Double D = (Double) args[0];
             int a = D.intValue();
-            Object3D ob = objects3D.getObject(a);
+            Object3D ob = objects3DPopulation.getObject(a);
             Voxel3D vox = ob.getFeretVoxel2();
             ((Double[]) args[1])[0] = vox.getX();
             ((Double[]) args[2])[0] = vox.getY();
@@ -458,10 +457,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         } else if (name.equals("Manager3D_BorderVoxel")) {
             Double D = (Double) args[0];
             int a = D.intValue();
-            Object3D ob1 = objects3D.getObject(a);
+            Object3D ob1 = objects3DPopulation.getObject(a);
             D = (Double) args[1];
             a = D.intValue();
-            Object3D ob2 = objects3D.getObject(a);
+            Object3D ob2 = objects3DPopulation.getObject(a);
             Voxel3D vox = ob1.VoxelsBorderBorder(ob2)[0];
             ((Double[]) args[2])[0] = vox.getX();
             ((Double[]) args[3])[0] = vox.getY();
@@ -504,7 +503,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         int count = model.getSize();
         if (count > 0) {
             model.removeAllElements();
-            objects3D = new Objects3DPopulation();
+            objects3DPopulation = new Objects3DPopulation();
         }
         list.updateUI();
         if (universe != null) {
@@ -554,13 +553,13 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
         dist[0] = -1;
 
-        if ((i >= 0) && (i < objects3D.getNbObjects())) {
-            ob1 = objects3D.getObject(i);
+        if ((i >= 0) && (i < objects3DPopulation.getNbObjects())) {
+            ob1 = objects3DPopulation.getObject(i);
         } else {
             return;
         }
-        if ((j >= 0) && (j < objects3D.getNbObjects())) {
-            ob2 = objects3D.getObject(j);
+        if ((j >= 0) && (j < objects3DPopulation.getNbObjects())) {
+            ob2 = objects3DPopulation.getObject(j);
         } else {
             return;
         }
@@ -609,13 +608,13 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         coloc[1] = -1;
         coloc[2] = -1;
 
-        if ((i >= 0) && (i < objects3D.getNbObjects())) {
-            ob1 = objects3D.getObject(i);
+        if ((i >= 0) && (i < objects3DPopulation.getNbObjects())) {
+            ob1 = objects3DPopulation.getObject(i);
         } else {
             return;
         }
-        if ((j >= 0) && (j < objects3D.getNbObjects())) {
-            ob2 = objects3D.getObject(j);
+        if ((j >= 0) && (j < objects3DPopulation.getNbObjects())) {
+            ob2 = objects3DPopulation.getObject(j);
         } else {
             return;
         }
@@ -644,8 +643,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
         Object3D obj;
 
-        if ((i >= 0) && (i < objects3D.getNbObjects())) {
-            obj = objects3D.getObject(i);
+        if ((i >= 0) && (i < objects3DPopulation.getNbObjects())) {
+            obj = objects3DPopulation.getObject(i);
         } else {
             return res;
         }
@@ -694,8 +693,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         double res = Double.NaN;
         Object3D obj;
 
-        if ((i >= 0) && (i < objects3D.getNbObjects())) {
-            obj = objects3D.getObject(i);
+        if ((i >= 0) && (i < objects3DPopulation.getNbObjects())) {
+            obj = objects3DPopulation.getObject(i);
         } else {
             return res;
         }
@@ -718,7 +717,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     private void handleCentroid3D(Object[] args) {
         Double D = (Double) args[0];
         int i = D.intValue();
-        Object3D obj = objects3D.getObject(i);
+        Object3D obj = objects3DPopulation.getObject(i);
         ((Double[]) args[1])[0] = obj.getCenterX();
         ((Double[]) args[2])[0] = obj.getCenterY();
         ((Double[]) args[3])[0] = obj.getCenterZ();
@@ -729,7 +728,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
         Double D = (Double) args[0];
         int i = D.intValue();
-        Object3D obj = objects3D.getObject(i);
+        Object3D obj = objects3DPopulation.getObject(i);
         ((Double[]) args[1])[0] = obj.getMassCenterX(ima);
         ((Double[]) args[2])[0] = obj.getMassCenterY(ima);
         ((Double[]) args[3])[0] = obj.getMassCenterZ(ima);
@@ -746,9 +745,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         D = (Double) args[2];
         int s = D.intValue();
 
-        Object3D obj1 = objects3D.getObject(i);
+        Object3D obj1 = objects3DPopulation.getObject(i);
         Point3D cen1 = obj1.getCenterAsPoint();
-        Object3D obj2 = objects3D.getObject(j);
+        Object3D obj2 = objects3DPopulation.getObject(j);
         Point3D cen2 = obj2.getCenterAsPoint();
         // direction
         Vector3D dir;
@@ -770,15 +769,15 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             indices = getAllIndexes();
         }
         // closest object in selected indices
-        Object3D ob1 = objects3D.getObject(a);
+        Object3D ob1 = objects3DPopulation.getObject(a);
         Object3D ob2 = null;
         if (Dist.equalsIgnoreCase("bb")) {
-            ob2 = objects3D.closestBorder(ob1, indices);
+            ob2 = objects3DPopulation.closestBorder(ob1, indices);
         } else if (Dist.equalsIgnoreCase("cc")) {
-            ob2 = objects3D.closestCenter(ob1, indices, true);
+            ob2 = objects3DPopulation.closestCenter(ob1, indices, true);
         }
 
-        return objects3D.getIndexOf(ob2);
+        return objects3DPopulation.getIndexOf(ob2);
     }
 
     private int kClosestObject(int a, int k, String Dist) {
@@ -787,22 +786,22 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 //            indexes = getAllIndexes();
 //        }
         // TODO closest object in  selected indices ??
-        Object3D ob1 = objects3D.getObject(a);
+        Object3D ob1 = objects3DPopulation.getObject(a);
         Object3D ob2 = null;
         if (Dist.equalsIgnoreCase("bb")) {
-            ob2 = objects3D.kClosestBorder(ob1, k);
+            ob2 = objects3DPopulation.kClosestBorder(ob1, k);
         } else if (Dist.equalsIgnoreCase("cc")) {
-            ob2 = objects3D.kClosestCenter(ob1, k, true);
+            ob2 = objects3DPopulation.kClosestCenter(ob1, k, true);
         }
 
-        return objects3D.getIndexOf(ob2);
+        return objects3DPopulation.getIndexOf(ob2);
     }
 
     private void handleBounding3D(Object[] args) {
         // object1
         Double D = (Double) args[0];
         int i = D.intValue();
-        Object3D obj = objects3D.getObject(i);
+        Object3D obj = objects3DPopulation.getObject(i);
         ((Double[]) args[1])[0] = new Double(obj.getXmin());
         ((Double[]) args[2])[0] = new Double(obj.getXmax());
         ((Double[]) args[3])[0] = new Double(obj.getYmin());
@@ -1346,7 +1345,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         }
         ImagePlus contours;
         String title = plus.getTitle();
-        objects3D.setCalibration(plus.getCalibration());
+        objects3DPopulation.setCalibration(plus.getCalibration());
 
         // cannot add RGB
         if (plus.getBitDepth() == 24) {
@@ -1379,7 +1378,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         int minZ = 0;
         int maxZ = seg.sizeZ;
 
-        int nb = objects3D.getNbObjects();
+        int nb = objects3DPopulation.getNbObjects();
 
         int min = (int) seg.getMinAboveValue(0);
         int max = (int) seg.getMax();
@@ -1416,7 +1415,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         // reset draw image
         label = null;
 
-        IJ.log(objects3D.getNbObjects() - nb + " objects added. Total of " + objects3D.getNbObjects() + " objects");
+        IJ.log(objects3DPopulation.getNbObjects() - nb + " objects added. Total of " + objects3DPopulation.getNbObjects() + " objects");
 
         if (Recorder.record) {
             Recorder.record("Ext.Manager3D_AddImage");
@@ -1491,8 +1490,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     public void addObject3D(Object3D obj) {
-        objects3D.addObject(obj);
-        String name = getModelNameFromObject(objects3D.getNbObjects() - 1);
+        objects3DPopulation.addObject(obj);
+        String name = getModelNameFromObject(objects3DPopulation.getNbObjects() - 1);
         model.addElement(name);
         list.updateUI();
         this.list.repaint();
@@ -1501,11 +1500,11 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     private String getModelNameFromObject(int i) {
-        Object3D obj = objects3D.getObject(i);
+        Object3D obj = objects3DPopulation.getObject(i);
         String name;
         //IJ.log("obj:"+obj+" "+obj.getName());
         if (obj.getName().length() == 0) {
-            name = "obj" + objects3D.getNbObjects() + "-val" + obj.getValue();
+            name = "obj" + objects3DPopulation.getNbObjects() + "-val" + obj.getValue();
             obj.setName(name);
         } else {
             name = obj.getName();
@@ -1534,13 +1533,13 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     private boolean merge() {
         int[] indexes = list.getSelectedIndices();
 
-        Object3DVoxels obj0 = (Object3DVoxels) objects3D.getObject(indexes[0]);
+        Object3DVoxels obj0 = (Object3DVoxels) objects3DPopulation.getObject(indexes[0]);
 
         Object3DVoxels obj;
         int le = indexes.length;
         for (int i = 1; i < le; i++) {
             IJ.showStatus("Merging Object " + model.get(indexes[i]));
-            obj = (Object3DVoxels) objects3D.getObject(indexes[i]);
+            obj = (Object3DVoxels) objects3DPopulation.getObject(indexes[i]);
             obj0.addVoxels(obj.getVoxels());
         }
 
@@ -1568,7 +1567,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         int[] indexes = list.getSelectedIndices();
         int i0 = indexes[0];
 
-        Object3D obj0 = objects3D.getObject(i0);
+        Object3D obj0 = objects3DPopulation.getObject(i0);
         Calibration cal = Object3D_IJUtils.getCalibration(obj0);
         int val0 = obj0.getValue();
         //IntImage3D ima0 = obj0.getSegImage();
@@ -1640,7 +1639,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         int c = 1;
         for (int i : indices) {
             //IJ.log("renaming "+i+" "+name2+" "+c);
-            objects3D.getObject(i).setName(name2 + "" + c);
+            objects3DPopulation.getObject(i).setName(name2 + "" + c);
             updateName(i);
             c++;
         }
@@ -1737,7 +1736,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         //roimanager.getROIs().remove(name);
         //list.remove(i);
         model.remove(i);
-        objects3D.removeObject(i);
+        objects3DPopulation.removeObject(i);
         // rebuild hash
         //buildHash();
         // 3D
@@ -1787,7 +1786,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             intensity = (int) Math.round(rr * 0.3 + gg * 0.6 + bb * 0.1);
         }
         for (int i = 0; i < indexes.length; i++) {
-            Object3D obj = objects3D.getObject(indexes[i]);
+            Object3D obj = objects3DPopulation.getObject(indexes[i]);
             // if gray draw luminosity gray level
             if (gray) {
                 Object3D_IJUtils.draw(obj, stack, intensity);
@@ -1836,7 +1835,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         }
 
         for (int i = 0; i < indexes.length; i++) {
-            Object3D obj = objects3D.getObject(indexes[i]);
+            Object3D obj = objects3DPopulation.getObject(indexes[i]);
             add3DViewer(obj, (String) model.get(indexes[i]), new Color3f(r / 255.0f, g / 255.0f, b / 255.0f));
         }
 
@@ -1921,9 +1920,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         int i1 = indexes[0];
         int i2 = indexes[1];
         int i3 = indexes[2];
-        Object3D ob1 = objects3D.getObject(i1);
-        Object3D ob2 = objects3D.getObject(i2);
-        Object3D ob3 = objects3D.getObject(i3);
+        Object3D ob1 = objects3DPopulation.getObject(i1);
+        Object3D ob2 = objects3DPopulation.getObject(i2);
+        Object3D ob3 = objects3DPopulation.getObject(i3);
 
         IJ.log("\nObjects : " + model.get(i1) + " " + model.get(i2) + " " + model.get(i3));
         IJ.log("Angle 1 (213) : " + ob1.angle(ob2, ob3));
@@ -1970,10 +1969,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
         int count = 0;
         for (int i1 = 0; i1 < nb; i1++) {
-            ob1 = objects3D.getObject(indexes[i1]);
+            ob1 = objects3DPopulation.getObject(indexes[i1]);
             for (int i2 = i1 + 1; i2 < nb; i2++) {
                 IJ.showStatus("Coloc " + (indexes[i1] + 1) + "-" + (indexes[i2] + 1));
-                ob2 = objects3D.getObject(indexes[i2]);
+                ob2 = objects3DPopulation.getObject(indexes[i2]);
                 int h1 = 0;
                 int h2 = 0;
                 data[count][h1++] = count;
@@ -2117,7 +2116,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         double resZ;
         //int count = rtMeasure.getCounter();
         for (int i = 0; i < indexes.length; i++) {
-            obj = objects3D.getObject(indexes[i]);
+            obj = objects3DPopulation.getObject(indexes[i]);
             int h = 0;
             data[i][h++] = i;
             data[i][h++] = indexes[i] + 1;
@@ -2288,13 +2287,23 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             headings.add("Mode");
             headings.add("Mode NonZero");
         }
+        if (Prefs.get("RoiManager3D-Options_Numbering.boolean", true)) {
+            headings.add("NbObjects");
+            headings.add("VolObjects");
+        }
+
 
         Object[][] data = new Object[indexes.length][headings.size()];
         double resXY, resZ;
         Object3D obj;
         ImageHandler ima = this.getImage3D();
+        Objects3DPopulationColocalisation colocalisation = null;
+        if (Prefs.get("RoiManager3D-Options_Numbering.boolean", true)) {
+            colocalisation = new Objects3DPopulationColocalisation(objects3DPopulation, new Objects3DPopulation(ima));
+        }
+
         for (int i = 0; i < indexes.length; i++) {
-            obj = objects3D.getObject(indexes[i]);
+            obj = objects3DPopulation.getObject(indexes[i]);
             int h = 0;
             data[i][h++] = i;
             data[i][h++] = indexes[i] + 1;
@@ -2332,7 +2341,13 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 data[i][h++] = obj.getPixModeValue(ima);
                 data[i][h++] = obj.getPixModeNonZero(ima);
             }
+            if (Prefs.get("RoiManager3D-Options_Numbering.boolean", true)) {
+                // need to perform co-localisation analysis
+                data[i][h++] = colocalisation.getObject1ColocalisationPairs(obj).size();
+                data[i][h++] = obj.listVoxels(ima, 0).size();
+            }
         }
+        colocalisation = null;
 
         // JTABLE
         //Create and set up the window.
@@ -2380,7 +2395,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         ArrayList<String> headings = new ArrayList<String>();
         headings.add("Nb");
         headings.add("Obj");
-        headings.add("TYpe");
+        headings.add("Type");
         headings.add("Label");
         headings.add("X");
         headings.add("Y");
@@ -2390,7 +2405,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         // nb totals de voxels
         int vol = 0;
         for (int idx : indexes) {
-            vol += objects3D.getObject(idx).getVolumePixels();
+            vol += objects3DPopulation.getObject(idx).getVolumePixels();
         }
 
         Object[][] data = new Object[vol][headings.size()];
@@ -2401,7 +2416,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         for (int ob = 0; ob < indexes.length; ob++) {
             int nbObj = indexes[ob] + 1;
             Object nameObj = model.get(indexes[ob]);
-            obj = objects3D.getObject(indexes[ob]);
+            obj = objects3DPopulation.getObject(indexes[ob]);
             //IJ.log("image to list: "+image);
             v = obj.listVoxels(image);
             if (v == null) {
@@ -2411,7 +2426,6 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             for (int i = 0; i < v.size(); i++) {
                 int h = 0;
                 data[count][h++] = count;
-                data[count][h++] = nbObj;
                 data[count][h++] = nbObj;
                 data[count][h++] = obj.getType();
                 data[count][h++] = nameObj;
@@ -2469,7 +2483,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             indexes = getAllIndexes();
         }
 
-        return objects3D.saveObjects(path, indexes);
+        return objects3DPopulation.saveObjects(path, indexes);
     }
 
     /**
@@ -2518,9 +2532,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         double d1, d2;
         double dist;
         for (int i1 = 0; i1 < nb; i1++) {
-            ob1 = objects3D.getObject(indexes[i1]);
+            ob1 = objects3DPopulation.getObject(indexes[i1]);
             for (int i2 = i1 + 1; i2 < nb; i2++) {
-                ob2 = objects3D.getObject(indexes[i2]);
+                ob2 = objects3DPopulation.getObject(indexes[i2]);
                 IJ.showStatus("Distance " + (indexes[i1] + 1) + "-" + (indexes[i2] + 1));
                 int h1 = 0;
                 int h2 = 0;
@@ -2566,18 +2580,18 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                     data[count + 1][h2++] = dist / d2;
                 }
                 if (Prefs.get("RoiManager3D-Options_Closest.boolean", true)) {
-                    int closest = objects3D.getIndexOf(objects3D.closestCenter(ob1, true));
+                    int closest = objects3DPopulation.getIndexOf(objects3DPopulation.closestCenter(ob1, true));
                     String name1 = (String) model.get(closest);
                     data[count][h1++] = closest + 1;
-                    closest = objects3D.getIndexOf(objects3D.closestBorder(ob1));
+                    closest = objects3DPopulation.getIndexOf(objects3DPopulation.closestBorder(ob1));
                     String name2 = (String) model.get(closest);
                     data[count][h1++] = closest + 1;
                     data[count][h1++] = name1;
                     data[count][h1++] = name2;
-                    closest = objects3D.getIndexOf(objects3D.closestCenter(ob2, true));
+                    closest = objects3DPopulation.getIndexOf(objects3DPopulation.closestCenter(ob2, true));
                     name1 = (String) model.get(closest);
                     data[count + 1][h2++] = closest + 1;
-                    closest = objects3D.getIndexOf(objects3D.closestBorder(ob2));
+                    closest = objects3DPopulation.getIndexOf(objects3DPopulation.closestBorder(ob2));
                     name2 = (String) model.get(closest);
                     data[count + 1][h2++] = closest + 1;
                     data[count + 1][h2++] = name1;
@@ -2728,7 +2742,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         // get zmin and zmax
         Object3D obj;
         for (int i = 0; i < indexes.length; i++) {
-            obj = objects3D.getObject(indexes[i]);
+            obj = objects3DPopulation.getObject(indexes[i]);
             if (obj.getZmin() < zmin) {
                 zmin = obj.getZmin();
             }
@@ -2748,7 +2762,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         int roi = (int) Prefs.get("RoiManager3D-Options_roi.double", 0);
         for (int i = 0; i < indexes.length; i++) {
             //IJ.showStatus("Drawing Rois " + i + " / " + indexes.length);
-            obj = objects3D.getObject(indexes[i]);
+            obj = objects3DPopulation.getObject(indexes[i]);
             switch (roi) {
                 case 0: // CONTOUR
                     creator3D.drawObject(obj);
@@ -2830,7 +2844,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
         Object3D obj;
         for (int i = 0; i < indexes.length; i++) {
-            obj = objects3D.getObject(indexes[i]);
+            obj = objects3DPopulation.getObject(indexes[i]);
             if (obj.getZmin() < zmin) {
                 zmin = obj.getZmin();
             }
@@ -2847,7 +2861,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             ByteProcessor mask = new ByteProcessor(imp.getWidth(), imp.getHeight());
             boolean ok = false;
             for (int i = 0; i < indexes.length; i++) {
-                obj = objects3D.getObject(indexes[i]);
+                obj = objects3DPopulation.getObject(indexes[i]);
                 ok |= Object3D_IJUtils.draw(obj, mask, zz, 255);
                 //ok |= obj.draw(mask, zz, 255);
             }
@@ -2907,7 +2921,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         over.drawLabels(false);
         Font font = new Font(Font.DIALOG, Font.PLAIN, 10);
         for (int i = 0; i < idx.length; i++) {
-            Object3D obj = objects3D.getObject(idx[i]);
+            Object3D obj = objects3DPopulation.getObject(idx[i]);
             String name = (String) model.get(idx[i]);
             Roi roi = new TextRoi((int) (obj.getCenterX() - name.length() * font.getSize() / 4), obj.getYmax() + font.getSize() / 2, name, font);
             roi.setPosition((int) (obj.getCenterZ() + 1));
