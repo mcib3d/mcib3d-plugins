@@ -47,7 +47,7 @@ public class Segment3D_ implements PlugInFilter {
     @Override
     public int setup(String arg, ImagePlus imp) {
         myPlus = imp;
-        return PlugInFilter.DOES_16 + PlugInFilter.DOES_8G + PlugInFilter.STACK_REQUIRED;
+        return PlugInFilter.DOES_16 + PlugInFilter.DOES_8G;
     }
 
     @Override

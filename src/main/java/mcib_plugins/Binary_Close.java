@@ -24,6 +24,7 @@ public class Binary_Close implements PlugInFilter {
     boolean debug;
     // TODO utiliser une methode classique si le rayon est petit    
     float radiusXY, radiusZ;
+    boolean dilate = false;
     ImagePlus plus;
 
     public ImageInt runPostFilter(ImageInt input) {
@@ -34,7 +35,11 @@ public class Binary_Close implements PlugInFilter {
             if (debug) {
                 IJ.log("binaryClose: radius XY" + radXY + " radZ:" + radZ);
             }
-            return BinaryMorpho.binaryCloseMultilabel(input, radXY, radZ, ThreadUtil.getNbCpus());
+            if (dilate) {
+                return BinaryMorpho.binaryDilateMultilabel(input, radXY, radZ);
+            } else {
+                return BinaryMorpho.binaryCloseMultilabel(input, radXY, radZ, ThreadUtil.getNbCpus());
+            }
         } catch (Exception e) {
             exceptionPrinter.print(e, "", true);
         }
@@ -53,12 +58,14 @@ public class Binary_Close implements PlugInFilter {
         GenericDialog gd = new GenericDialog("BinaryClose");
         gd.addNumericField("radiusXY (pix):", 5, 1);
         gd.addNumericField("radiusZ (pix):", 3, 1);
+        gd.addCheckbox("Dilate", dilate);
         gd.showDialog();
         ImageInt input = ImageInt.wrap(plus);
         //IJ.log("input "+input.getMax());
         if (gd.wasOKed()) {
             radiusXY = (float) gd.getNextNumber();
             radiusZ = (float) gd.getNextNumber();
+            dilate = gd.getNextBoolean();
             ImageHandler res = runPostFilter(input);
             //IJ.log("res "+res.getMax());
             ImagePlus resplus = res.getImagePlus();
