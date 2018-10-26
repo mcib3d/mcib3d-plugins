@@ -6,14 +6,11 @@ import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
-import ij.util.ThreadUtil;
 import mcib3d.geom.Objects3DPopulation;
-import mcib3d.image3d.ImageFloat;
 import mcib3d.image3d.ImageHandler;
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.ImageLabeller;
-
-import java.util.concurrent.atomic.AtomicInteger;
+import mcib3d.image3d.processing.Density3D;
 
 public class Density3D_ implements PlugIn {
     private double sigma = 20;
@@ -41,38 +38,14 @@ public class Density3D_ implements PlugIn {
                 handler = labeller.getLabels(handler);
             }
             final ImageInt img = handler;
-            ImageHandler res = new ImageFloat("density", img.sizeX, img.sizeY, img.sizeZ);
             Objects3DPopulation population = new Objects3DPopulation(img);
             population.createKDTreeCenters();
-            // non parallel version
-            if (!multi) {
-                densityProcess(img, population, res, 0, handler.sizeZ, neighbours, sigma);
-                res.setScale(img);
-                res.show("density3D");
-            } else { // parallel version
-                ImageHandler res2 = new ImageFloat("density", img.sizeX, img.sizeY, img.sizeZ);
-
-                // PARALLEL, need to duplicate populations
-                int neighbours2 = Math.min(neighbours, population.getNbObjects());
-                final AtomicInteger ai = new AtomicInteger(0);
-                final int n_cpus = ThreadUtil.getNbCpus();
-                final int dec = (int) Math.ceil((double) handler.sizeZ / (double) n_cpus);
-                Thread[] threads = ThreadUtil.createThreadArray(n_cpus);
-                int bound = threads.length;
-                for (int iThread = 0; iThread < bound; iThread++) {
-                    threads[iThread] = new Thread(() -> {
-                        for (int k = ai.getAndIncrement(); k < n_cpus; k = ai.getAndIncrement()) {
-                            Objects3DPopulation pop = new Objects3DPopulation(img);
-                            densityProcess(img, pop, res2, dec * k, dec * (k + 1), neighbours2, sigma);
-                        }
-                    });
-                }
-                ThreadUtil.startAndJoin(threads);
-                res2.setScale(img);
-                res2.show("density3D");
-            }
-            System.gc();
+            // density
+            Density3D density3D = new Density3D(neighbours, sigma);
+            ImageHandler res = density3D.computeDensity(img, multi);
+            res.show("density3D");
         }
+        System.gc();
     }
 
     private boolean dialog() {
