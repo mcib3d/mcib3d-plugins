@@ -161,6 +161,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 list.updateUI();
             }
         });
+
+        WindowManager.addWindow(this);
     }
 
     /**
@@ -230,6 +232,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         int[] argBorder3D = {ARG_NUMBER, ARG_NUMBER, ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER};
         int[] argBounding3D = {ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER};
         int[] argClosestK = {ARG_NUMBER, ARG_NUMBER, ARG_STRING, ARG_OUTPUT + ARG_NUMBER};
+        int[] argString = {ARG_OUTPUT + ARG_STRING};
 
         ExtensionDescriptor[] extensions = {
                 ExtensionDescriptor.newDescriptor("Manager3D_Close", this),
@@ -256,6 +259,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 ExtensionDescriptor.newDescriptor("Manager3D_MonoSelect", this),
                 //ExtensionDescriptor.newDescriptor("Manager3D_3DViewerSelect", this),
                 ExtensionDescriptor.newDescriptor("Manager3D_DeselectAll", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_GetSelected", this, argString),
                 ExtensionDescriptor.newDescriptor("Manager3D_Count", this, argCount),
                 ExtensionDescriptor.newDescriptor("Manager3D_Segment", this, argSeg),
                 ExtensionDescriptor.newDescriptor("Manager3D_ShowRoi", this),
@@ -384,6 +388,13 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         } else if (name.equals("Manager3D_MonoSelect")) {
             multi = false;
             //multiSelect();
+        } else if (name.equals("Manager3D_GetSelected")) {
+            int[] idx = list.getSelectedIndices();
+            String res=""+idx[0];
+            for (int i = 1; i < idx.length; i++) {
+                res=res.concat(":"+idx[i]);
+            }
+            ((String[]) args[0])[0] = res;
         } else if (name.equals("Manager3D_3DViewerSelect")) {
             //selectFrom3DViewer();
         } else if (name.equals("Manager3D_Count")) {
