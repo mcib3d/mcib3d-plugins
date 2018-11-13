@@ -161,8 +161,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 list.updateUI();
             }
         });
-
+        // add to windowmanager of IJ
         WindowManager.addWindow(this);
+        WindowManager.setWindow(this);
     }
 
     /**
@@ -505,6 +506,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             currentImage.killRoi();
             currentImage.updateAndDraw();
             currentImage = null;
+            WindowManager.removeWindow(this);
         }
         dispose();
     }
