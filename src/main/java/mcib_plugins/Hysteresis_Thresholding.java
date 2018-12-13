@@ -5,6 +5,7 @@ package mcib_plugins;
  * and open the template in the editor.
  */
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.filter.PlugInFilter;
@@ -12,6 +13,9 @@ import ij.process.ImageProcessor;
 import mcib3d.image3d.ImageByte;
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.processing.Flood3D;
+
+import java.time.Duration;
+import java.time.Instant;
 
 public class Hysteresis_Thresholding implements PlugInFilter {
     ImagePlus plus;
@@ -63,7 +67,10 @@ public class Hysteresis_Thresholding implements PlugInFilter {
         } else hyst = temp;
         hyst.setTitle(image.getTitle() + "_Hyst");
         // connect 255 to 128
+        Instant t0 = Instant.now();
         Flood3D.connect3D(hyst, LOW, HIGH);
+        Instant t1 = Instant.now();
+        IJ.log("Flooding took " + Duration.between(t0, t1));
 
         return hyst.getImagePlus();
     }

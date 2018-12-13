@@ -391,9 +391,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             //multiSelect();
         } else if (name.equals("Manager3D_GetSelected")) {
             int[] idx = list.getSelectedIndices();
-            String res=""+idx[0];
+            String res = "" + idx[0];
             for (int i = 1; i < idx.length; i++) {
-                res=res.concat(":"+idx[i]);
+                res = res.concat(":" + idx[i]);
             }
             ((String[]) args[0])[0] = res;
         } else if (name.equals("Manager3D_3DViewerSelect")) {
@@ -1506,9 +1506,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         objects3DPopulation.addObject(obj);
         String name = getModelNameFromObject(objects3DPopulation.getNbObjects() - 1);
         model.addElement(name);
-        list.updateUI();
-        this.list.repaint();
-        this.list.revalidate();
+        //list.updateUI();
+        //this.list.repaint();
+        //this.list.revalidate();
         hashNames.put(name, model.size() - 1);
     }
 
