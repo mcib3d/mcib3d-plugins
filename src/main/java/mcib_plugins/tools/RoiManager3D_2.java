@@ -43,6 +43,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * @author thomas
@@ -1397,9 +1398,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         int max = (int) seg.getMax();
         IJ.log("Adding image : min-max " + min + " " + max);
         // iterate in image  and constructs objects
-        ArrayList<Voxel3D>[] objects = new ArrayList[max - min + 1];
+        LinkedList<Voxel3D>[] objects = new LinkedList[max - min + 1];
         for (int i = 0; i < max - min + 1; i++) {
-            objects[i] = new ArrayList<Voxel3D>();
+            objects[i] = new LinkedList<>();
         }
         float pix;
         for (int k = minZ; k < maxZ; k++) {
@@ -1413,7 +1414,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             }
         }
         // ARRAYLIST
-        ArrayList listObjects = new ArrayList();
+        LinkedList listObjects = new LinkedList<>();
         for (int i = 0; i < max - min + 1; i++) {
             if (!objects[i].isEmpty()) {
                 // test roi
@@ -1436,8 +1437,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         list.updateUI();
     }
 
-    public void addListVoxels(ArrayList list, ImagePlus plus) {
-        ArrayList<Voxel3D> objList;
+    public void addListVoxels(LinkedList list, ImagePlus plus) {
+        LinkedList<Voxel3D> objList;
         Iterator it = list.iterator();
         Object3D obj;
         Calibration cal = plus.getCalibration();
@@ -1452,7 +1453,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         }
         while (it.hasNext()) {
             // Object3D
-            objList = (ArrayList<Voxel3D>) it.next();
+            objList = (LinkedList<Voxel3D>) it.next();
             if (!objList.isEmpty()) {
                 boolean roiok = false;
                 boolean edgeok = false;
@@ -2381,7 +2382,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
     private boolean listVoxels() {
         Object3D obj;
-        ArrayList v;
+        LinkedList v;
 
         ImagePlus imp = getImage();
         if (imp == null) {
