@@ -687,6 +687,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             res = obj.getDistCenterMean();
         } else if (par.equalsIgnoreCase("DCSD")) {
             res = obj.getDistCenterSigma();
+        }else if (par.equalsIgnoreCase("RatioVolEll")) {
+            res = obj.getRatioEllipsoid();
         }
 
         return res;
