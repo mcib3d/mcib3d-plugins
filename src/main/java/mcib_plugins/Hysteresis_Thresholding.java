@@ -39,13 +39,16 @@ public class Hysteresis_Thresholding implements PlugInFilter {
         gd.addNumericField("High Threshold:", 128, 1);
         gd.addNumericField("Low Threshold:", 50, 1);
         gd.addCheckbox("Show multi-threshold", false);
+        gd.addCheckbox(" Labelling", true);
         gd.showDialog();
         if (gd.wasOKed()) {
             double high = gd.getNextNumber();
             double low = gd.getNextNumber();
+            boolean show = gd.getNextBoolean();
+            boolean label = gd.getNextBoolean();
 
             Instant t0 = Instant.now();
-            ImagePlus hyst = hysteresis(plus, low, high, gd.getNextBoolean());
+            ImagePlus hyst = hysteresis(plus, low, high, show, label);
             Instant t1 = Instant.now();
             hyst.setDisplayRange(0, 255);
             hyst.show();
@@ -54,7 +57,7 @@ public class Hysteresis_Thresholding implements PlugInFilter {
     }
 
 
-    public ImagePlus hysteresis(ImagePlus image, double lowval, double highval, boolean show) {
+    public ImagePlus hysteresis(ImagePlus image, double lowval, double highval, boolean show, boolean label) {
         int HIGH = 255;
         int LOW = 128;
         // first threshold the image
@@ -75,10 +78,13 @@ public class Hysteresis_Thresholding implements PlugInFilter {
         ImageLabeller labeller = new ImageLabeller();
         ArrayList<Object3DVoxels> objects = labeller.getObjects(thresholded);
 
-        ImageHandler hyst = new ImageByte("Hyst_"+image.getTitle(), multi.sizeX, multi.sizeY, multi.sizeZ);
+        ImageHandler hyst = new ImageByte("Hyst_" + image.getTitle(), multi.sizeX, multi.sizeY, multi.sizeZ);
+        int val = 1;
         for (Object3DVoxels object3DVoxels : objects) {
             if (hasOneVoxelValueRange(object3DVoxels, multi, HIGH, HIGH)) {
-                object3DVoxels.draw(hyst, 255);
+                if (label)
+                    object3DVoxels.draw(hyst, val++);
+                else object3DVoxels.draw(hyst, 255);
             }
         }
 
