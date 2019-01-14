@@ -126,6 +126,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             setLiveMode(false);
             //buttonLiveRoi.setSelected(false);
         }
+        setLiveMode(false);
 
         if (Recorder.record) {
             //Recorder.record("Ext.install", "RoiManager3D_");
@@ -165,6 +166,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         // add to windowmanager of IJ
         WindowManager.addWindow(this);
         WindowManager.setWindow(this);
+
+        setMinimumSize(new Dimension(500, 500));
+        setPreferredSize(new Dimension(500, 500));
+        setResizable(true);
     }
 
     /**
@@ -687,7 +692,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             res = obj.getDistCenterMean();
         } else if (par.equalsIgnoreCase("DCSD")) {
             res = obj.getDistCenterSigma();
-        }else if (par.equalsIgnoreCase("RatioVolEll")) {
+        } else if (par.equalsIgnoreCase("RatioVolEll")) {
             res = obj.getRatioEllipsoid();
         }
 
@@ -1236,16 +1241,35 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }//GEN-LAST:event_buttonSaveActionPerformed
 
     private void buttonSegmentation3DActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonSegmentation3DActionPerformed
-        segmentation3D();
+        String text = buttonSegmentation3D.getText();
+        buttonSegmentation3D.setText("Segmenting...");
+        buttonSegmentation3D.setEnabled(false);
+        Thread thread = new Thread(() -> {
+            segmentation3D();
+            SwingUtilities.invokeLater(() -> {
+                buttonSegmentation3D.setText(text);
+                list.updateUI();
+                buttonSegmentation3D.setEnabled(true);
+                //repaint();
+            });
+        });
+        thread.start();
+
     }//GEN-LAST:event_buttonSegmentation3DActionPerformed
 
     private void buttonAddImageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonAddImageActionPerformed
         buttonAddImage.setText("Adding ...");
-        repaint();
-        addImage();
-        buttonAddImage.setText("Add Image");
-        repaint();
-
+        buttonAddImage.setEnabled(false);
+        Thread thread = new Thread(() -> {
+            addImage();
+            SwingUtilities.invokeLater(() -> {
+                buttonAddImage.setText("Add Image");
+                list.updateUI();
+                buttonAddImage.setEnabled(true);
+                //repaint();
+            });
+        });
+        thread.start();
     }//GEN-LAST:event_buttonAddImageActionPerformed
 
     private void listValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_listValueChanged
@@ -1271,18 +1295,56 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }//GEN-LAST:event_buttonSplitActionPerformed
 
     private void buttonMeasureActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonMeasureActionPerformed
-        measure3D();
+        String text = buttonMeasure.getText();
+        buttonMeasure.setText("Measure ...");
+        buttonMeasure.setEnabled(false);
+        Thread thread = new Thread(() -> {
+            measure3D();
+            SwingUtilities.invokeLater(() -> {
+                buttonMeasure.setText(text);
+                list.updateUI();
+                buttonMeasure.setEnabled(true);
+                //repaint();
+            });
+        });
+        thread.start();
+
     }//GEN-LAST:event_buttonMeasureActionPerformed
 
     private void buttonQuantifActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonQuantifActionPerformed
-        quantif3D();
+        String text = buttonQuantif.getText();
+        buttonQuantif.setText("Quantif ...");
+        buttonQuantif.setEnabled(false);
+        Thread thread = new Thread(() -> {
+            quantif3D();
+            SwingUtilities.invokeLater(() -> {
+                buttonQuantif.setText(text);
+                list.updateUI();
+                buttonQuantif.setEnabled(true);
+                //repaint();
+            });
+        });
+        thread.start();
+
     }//GEN-LAST:event_buttonQuantifActionPerformed
 
     private void buttonDistancesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonDistancesActionPerformed
         if (list.getSelectedIndices().length == 1) {
             IJ.showMessage("Needs at least 2 selected objects");
         } else {
-            distance();
+            String text = buttonDistances.getText();
+            buttonDistances.setText("Distances ...");
+            buttonDistances.setEnabled(false);
+            Thread thread = new Thread(() -> {
+                distance();
+                SwingUtilities.invokeLater(() -> {
+                    buttonDistances.setText(text);
+                    list.updateUI();
+                    buttonDistances.setEnabled(true);
+                    //repaint();
+                });
+            });
+            thread.start();
         }
     }//GEN-LAST:event_buttonDistancesActionPerformed
 
@@ -1298,12 +1360,38 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         if (list.getSelectedIndices().length == 1) {
             IJ.showMessage("Needs at least 2 selected objects");
         } else {
-            coloc();
+            String text = buttonColoc.getText();
+            buttonColoc.setText("Coloc ...");
+            buttonColoc.setEnabled(false);
+            Thread thread = new Thread(() -> {
+                coloc();
+                SwingUtilities.invokeLater(() -> {
+                    buttonColoc.setText(text);
+                    list.updateUI();
+                    buttonColoc.setEnabled(true);
+                    //repaint();
+                });
+            });
+            thread.start();
         }
     }//GEN-LAST:event_buttonColocActionPerformed
 
     private void buttonListVoxelsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonListVoxelsActionPerformed
-        listVoxels();
+        String text = buttonListVoxels.getText();
+        buttonListVoxels.setText("List ...");
+        buttonListVoxels.setEnabled(false);
+        Thread thread = new Thread(() -> {
+            listVoxels();
+            SwingUtilities.invokeLater(() -> {
+                buttonListVoxels.setText(text);
+                list.updateUI();
+                buttonListVoxels.setEnabled(true);
+                //repaint();
+            });
+        });
+        thread.start();
+
+
     }//GEN-LAST:event_buttonListVoxelsActionPerformed
 
     private void buttonLiveRoiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttonLiveRoiActionPerformed
@@ -1767,6 +1855,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         gd.addNumericField("Low_Threshold", 128, 0);
         gd.addNumericField("High_Threshold", 255, 0);
         gd.showDialog();
+        if (gd.wasCanceled()) return;
         int low = (int) gd.getNextNumber();
         int high = (int) gd.getNextNumber();
 
