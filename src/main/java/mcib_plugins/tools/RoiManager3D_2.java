@@ -2402,10 +2402,6 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         double resXY, resZ;
         Object3D obj;
         ImageHandler ima = this.getImage3D();
-        Objects3DPopulationColocalisation colocalisation = null;
-        if (Prefs.get("RoiManager3D-Options_Numbering.boolean", true)) {
-            colocalisation = new Objects3DPopulationColocalisation(objects3DPopulation, new Objects3DPopulation(ima));
-        }
 
         for (int i = 0; i < indexes.length; i++) {
             obj = objects3DPopulation.getObject(indexes[i]);
@@ -2447,12 +2443,11 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 data[i][h++] = obj.getPixModeNonZero(ima);
             }
             if (Prefs.get("RoiManager3D-Options_Numbering.boolean", true)) {
-                // need to perform co-localisation analysis
-                data[i][h++] = colocalisation.getObject1ColocalisationPairs(obj).size();
-                data[i][h++] = obj.listVoxels(ima, 0).size();
+                int[] res = obj.getNumbering(ima);
+                data[i][h++] = res[0];
+                data[i][h++] = res[1];
             }
         }
-        colocalisation = null;
 
         // JTABLE
         //Create and set up the window.
