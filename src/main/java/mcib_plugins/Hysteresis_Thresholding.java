@@ -13,6 +13,7 @@ import ij.process.ImageProcessor;
 import mcib3d.geom.Object3DVoxels;
 import mcib3d.geom.Voxel3D;
 import mcib3d.image3d.ImageByte;
+import mcib3d.image3d.ImageShort;
 import mcib3d.image3d.ImageHandler;
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.ImageLabeller;
@@ -30,7 +31,7 @@ public class Hysteresis_Thresholding implements PlugInFilter {
     public int setup(String arg, ImagePlus imp) {
         plus = imp;
 
-        return PlugInFilter.DOES_8G + PlugInFilter.DOES_16;
+        return PlugInFilter.DOES_8G + PlugInFilter.DOES_16 + PlugInFilter.DOES_32;
     }
 
     @Override
@@ -61,7 +62,7 @@ public class Hysteresis_Thresholding implements PlugInFilter {
         int HIGH = 255;
         int LOW = 128;
         // first threshold the image
-        ImageInt img = ImageInt.wrap(image);
+        ImageHandler img = ImageHandler.wrap(image);
         ImageByte multi = new ImageByte(image.getTitle() + "_Multi", img.sizeX, img.sizeY, img.sizeZ);
         for (int z = 0; z < img.sizeZ; z++) {
             for (int xy = 0; xy < img.sizeXY; xy++) {
@@ -78,7 +79,10 @@ public class Hysteresis_Thresholding implements PlugInFilter {
         ImageLabeller labeller = new ImageLabeller();
         ArrayList<Object3DVoxels> objects = labeller.getObjects(thresholded);
 
-        ImageHandler hyst = new ImageByte("Hyst_" + image.getTitle(), multi.sizeX, multi.sizeY, multi.sizeZ);
+        ImageHandler hyst;
+        if(label) hyst= new ImageShort("HystLabel_" + image.getTitle(), multi.sizeX, multi.sizeY, multi.sizeZ);
+        else hyst= new ImageByte("HystBin_" + image.getTitle(), multi.sizeX, multi.sizeY, multi.sizeZ);
+        hyst.setScale(img);
         int val = 1;
         for (Object3DVoxels object3DVoxels : objects) {
             if (hasOneVoxelValueRange(object3DVoxels, multi, HIGH, HIGH)) {

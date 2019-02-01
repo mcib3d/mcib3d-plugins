@@ -144,8 +144,8 @@ public class Ellipsoids_3D implements PlugInFilter {
                 end = Vec.add(obj.getVectorAxis(0), 1, rad1);
                 vectors3.createLineUnit(Vec, end, val, 1);
 
-
-                // The two poles as Feret 
+                // The two poles as Feret
+                IJ.log("Computing feret and poles");
                 Voxel3D Feret1 = obj.getFeretVoxel1();
                 Voxel3D Feret2 = obj.getFeretVoxel2();
                 IJ.log("Pole1 as Feret 1 : " + Feret1);

@@ -83,7 +83,7 @@ public class Radial_3D implements PlugInFilter {
 
             // max local
             ArrayUtil tab = new ArrayUtil(radtab);
-            int ml = tab.getFirstLocalMaxima(tab.getSize() / 2 + 1, 0);
+            int ml = tab.getFirstLocalMaxima(tab.size() / 2 + 1, 0);
             IJ.log("Max local " + radidx[ml]);
             int maxl = tab.getMaximumIndex();
             IJ.log("Max " + -radidx[maxl]);
