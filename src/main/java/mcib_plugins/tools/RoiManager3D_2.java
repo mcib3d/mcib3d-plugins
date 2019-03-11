@@ -175,7 +175,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         /*
          * Set the Nimbus look and feel
          */
@@ -1554,7 +1554,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 // seg image is only used to compute contours, after remove, in case user closes image
                 obj.setLabelImage(null);
                 // check if center inside roi
-                if (((roi != null) && (roi.contains((int) Math.round(obj.getCenterX()), (int) Math.round(obj.getCenterY())))) || (roi == null)) {
+                if (roi == null || (roi.contains((int) Math.round(obj.getCenterX()), (int) Math.round(obj.getCenterY())))) {
                     roiok = true;
                 }
                 // check touch edges
@@ -1768,7 +1768,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         if (count == 0) {
             return false;
         }
-        int index[] = list.getSelectedIndices();
+        int[] index = list.getSelectedIndices();
 
         if ((index.length == 0) || (index.length == list.getModel().getSize())) {
             String msg = "Delete all items on the list?";
@@ -3027,8 +3027,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             roi.setPosition((int) (obj.getCenterZ() + 1));
             over.add(roi);
             // test draw
-            Object3D_IJUtils.drawLabel(obj, plus.getStack(), 255);
+            //Object3D_IJUtils.drawLabel(obj, plus.getStack(), 255);
         }
+        //over.drawLabels(true);
         plus.setOverlay(over);
         plus.updateAndDraw();
 
