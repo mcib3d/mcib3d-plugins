@@ -1,0 +1,19 @@
+import mcib3d.image3d.processing.FastFilters3D;
+import mcib3d.image3d.regionGrowing.Watershed3D;
+import ij.*;
+
+plus=WindowManager.getCurrentImage();
+stack=plus.getImageStack();
+// get local maxima as seeds
+rx=4;
+ry=4;
+rz=2;
+stack2=FastFilters3D.filterImageStack(stack,FastFilters3D.MAXLOCAL,rx,ry,rz,0,false);
+plus2=new ImagePlus("seeds",stack2);
+plus2.show();
+// watershed
+voxels_threshold=1000;
+seeds_threshold=5000;
+Watershed3D water = new Watershed3D(stack, stack2, voxels_threshold, seeds_threshold);
+plus3=water.getWatershedImage3D().getImagePlus();
+plus3.show();
