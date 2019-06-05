@@ -64,8 +64,10 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
         }
 
         calibration = imp.getCalibration();
-        ImageStack stack = imp.getStack();
+        ImagePlus extract = extractCurrentStack(imp);
+        ImageStack stack = extract.getStack();
         int depth = stack.getBitDepth();
+
 
         if (Dialogue()) {
             // Macro
@@ -85,7 +87,7 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
                 if (debug) {
                     IJ.log("Using isotropic filtering");
                 }
-                FastFilter((int) voisx, filters[filter]);
+                FastFilter(extract, (int) voisx, filters[filter]);
             } else {
                 ImageStack res = null;
                 if ((depth == 8) || (depth == 16)) {
@@ -100,7 +102,7 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
                     // }
                     // }
                 } else {
-                    IJ.log("Does not wotk with stack with bitDepth " + depth);
+                    IJ.log("Does not work with stack with bitDepth " + depth);
                 }
                 if (res != null) {
                     ImagePlus plus = new ImagePlus("3D_" + filters[filter], res);
@@ -117,10 +119,9 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
         }
     }
 
-    private void FastFilter(int radius, String selected_filter) {
-
+    private void FastFilter(ImagePlus in_image_j, int radius, String selected_filter) {
         //read image
-        ImagePlus in_image_j = IJ.getImage();
+        //ImagePlus in_image_j = IJ.getImage();
         ImageStack instack = in_image_j.getStack();
         Duplicator dup = new Duplicator();
         final ImagePlus img = dup.run(in_image_j);
@@ -344,5 +345,21 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
         } else {
             nbcpus = ThreadUtil.getNbCpus();
         }
+    }
+
+    private ImagePlus extractCurrentStack(ImagePlus plus) {
+        // check dimensions
+        int[] dims = plus.getDimensions();//XYCZT
+        int channel = plus.getChannel();
+        int frame = plus.getFrame();
+        ImagePlus stack;
+        // crop actual frame
+        if ((dims[2] > 1) || (dims[4] > 1)) {
+            IJ.log("Hyperstack found, extracting current channel " + channel + " and frame " + frame);
+            Duplicator duplicator = new Duplicator();
+            stack = duplicator.run(plus, channel, channel, 1, dims[3], frame, frame);
+        } else stack = plus.duplicate();
+
+        return stack;
     }
 }

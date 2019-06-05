@@ -10,6 +10,7 @@ import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.Plot;
 import ij.measure.Calibration;
+import ij.plugin.Duplicator;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 import mcib3d.geom.Objects3DPopulation;
@@ -40,7 +41,7 @@ public class Simple_Dist_Analysis implements PlugInFilter {
     public void run(ImageProcessor ip) {
         NumberFormat nf = NumberFormat.getInstance();
         nf.setMaximumFractionDigits(3);
-        ImageInt img = ImageInt.wrap(plus);
+        ImageInt img = ImageInt.wrap(extractCurrentStack(plus));
         Calibration cal = plus.getCalibration();
         if (Dialogue()) {
             if (cal != null) img.setScale(cal.pixelWidth, cal.pixelDepth, cal.getUnits());//img.setCalibration(cal);
@@ -126,6 +127,22 @@ public class Simple_Dist_Analysis implements PlugInFilter {
         }
 
         return (gd.wasOKed());
+    }
+
+    private ImagePlus extractCurrentStack(ImagePlus plus) {
+        // check dimensions
+        int[] dims = plus.getDimensions();//XYCZT
+        int channel = plus.getChannel();
+        int frame = plus.getFrame();
+        ImagePlus stack;
+        // crop actual frame
+        if ((dims[2] > 1) || (dims[4] > 1)) {
+            IJ.log("Hyperstack found, extracting current channel " + channel + " and frame " + frame);
+            Duplicator duplicator = new Duplicator();
+            stack = duplicator.run(plus, channel, channel, 1, dims[3], frame, frame);
+        } else stack = plus.duplicate();
+
+        return stack;
     }
 
 }

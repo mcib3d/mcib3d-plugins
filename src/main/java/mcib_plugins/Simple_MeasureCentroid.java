@@ -1,6 +1,7 @@
 package mcib_plugins;
 
 import ij.IJ;
+import ij.plugin.Duplicator;
 import mcib_plugins.analysis.simpleMeasure;
 import ij.ImagePlus;
 import ij.measure.ResultsTable;
@@ -54,7 +55,10 @@ public class Simple_MeasureCentroid implements PlugInFilter {
     @Override
     public void run(ImageProcessor ip) {
         String title = myPlus.getTitle();
-        ImageInt img = ImageInt.wrap(myPlus);
+        // check dimensions
+        int channel = myPlus.getChannel();
+        int frame = myPlus.getFrame();
+        ImageInt img = ImageInt.wrap(extractCurrentStack(myPlus));
         ImagePlus seg;
         if (img.isBinary(0)) {
             IJ.log("Labelling image.");
@@ -62,7 +66,7 @@ public class Simple_MeasureCentroid implements PlugInFilter {
             seg = label.getLabels(img).getImagePlus();
             seg.show("Labels");
         } else {
-            seg = myPlus;
+            seg = img.getImagePlus();
         }
         simpleMeasure mes = new simpleMeasure(seg);
         ResultsTable rt = ResultsTable.getResultsTable();
@@ -78,9 +82,27 @@ public class Simple_MeasureCentroid implements PlugInFilter {
                 rt.setValue(keysBase_s[k], row, m[k]);
             }
             rt.setLabel(title, row);
+            rt.setValue("Channel", row, channel);
+            rt.setValue("Frame", row, frame);
             row++;
         }
         rt.updateResults();
         rt.show("Results");
+    }
+
+    private ImagePlus extractCurrentStack(ImagePlus plus) {
+        // check dimensions
+        int[] dims = plus.getDimensions();//XYCZT
+        int channel = plus.getChannel();
+        int frame = plus.getFrame();
+        ImagePlus stack;
+        // crop actual frame
+        if ((dims[2] > 1) || (dims[4] > 1)) {
+            IJ.log("Hyperstack found, extracting current channel " + channel + " and frame " + frame);
+            Duplicator duplicator = new Duplicator();
+            stack = duplicator.run(plus, channel, channel, 1, dims[3], frame, frame);
+        } else stack = plus.duplicate();
+
+        return stack;
     }
 }

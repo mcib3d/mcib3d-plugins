@@ -810,7 +810,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         Object3D ob1 = objects3DPopulation.getObject(a);
         Object3D ob2 = null;
         if (Dist.equalsIgnoreCase("bb")) {
-            ob2 = objects3DPopulation.kClosestBorder(ob1, k);
+            ObjectsPopulationDistances distances = new ObjectsPopulationDistances(objects3DPopulation);
+            distances.setCurrentObject(ob1);
+            ob2 = distances.kClosestBorder(k);
         } else if (Dist.equalsIgnoreCase("cc")) {
             ob2 = objects3DPopulation.kClosestCenter(ob1, k, true);
         }
@@ -1472,7 +1474,15 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 IJ.log("Contours found : " + title);
             }
         }
-        // TODO , should work with 4D hyperstacks, extract current frame
+        // should work with 4D hyperstacks, extract current frame
+        int[] dims = plus.getDimensions();//XYCZT
+        int channel = plus.getChannel();
+        int frame = plus.getFrame();
+        if ((plus.isHyperStack()) || (dims[2] > 1) || (dims[4] > 1)) {
+            IJ.log("Hyperstack found, extracting current channel " + channel + " and frame " + frame);
+            Duplicator duplicator = new Duplicator();
+            plus = duplicator.run(plus, channel, channel, 1, dims[3], frame, frame);
+        }
         ImageHandler seg = ImageHandler.wrap(plus);
 
         int minX = 0;
