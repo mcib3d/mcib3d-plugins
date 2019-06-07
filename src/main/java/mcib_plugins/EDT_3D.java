@@ -5,18 +5,19 @@ import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
+
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import mcib3d.image3d.ImageFloat;
 import mcib3d.image3d.ImageHandler;
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.distanceMap3d.EDT;
 
 /**
- * Euclidean Distance Map Eroded Volume Fraction (originally written by Jean O
- * for TANGO)
- *
+ * Euclidean Distance Map and Eroded Volume Fraction
+ * (originally written by Jean Ollion for TANGO)
  */
 public class EDT_3D implements PlugIn {
 
@@ -43,18 +44,19 @@ public class EDT_3D implements PlugIn {
         }
 
         int struct = 0;
-        int mask = nbima > 1 ? nbima - 1 : 0;
+        int mask = 0; // use default mask
+        //int mask = nbima > 1 ? nbima - 1 : 0;
 
         GenericDialog dia = new GenericDialog("EDT");
         dia.addChoice("Map", new String[]{"EDT", "EVF", "Both"}, "EDT");
         dia.addChoice("Image", namesStructure, namesStructure[struct]);
-        dia.addChoice("Mask (for EVF)", namesMask, namesMask[mask]);
+        //dia.addChoice("Mask (for EVF)", namesMask, namesMask[mask]);
         dia.addNumericField("Threshold", threshold, 0);
         dia.addCheckbox("Inverse", inverse);
         dia.showDialog();
         String map = dia.getNextChoice();
         struct = dia.getNextChoiceIndex();
-        mask = dia.getNextChoiceIndex();
+        //mask = dia.getNextChoiceIndex();
         threshold = (int) dia.getNextNumber();
         inverse = dia.getNextBoolean();
 
@@ -71,9 +73,14 @@ public class EDT_3D implements PlugIn {
                     // EVF 
                     if (map.compareTo("EDT") != 0) {
                         ImageFloat r2 = r.duplicate();
-                        ImageInt imgMask = img.thresholdAboveExclusive(threshold);
+                        ImageHandler imgMask = img.thresholdAboveExclusive(threshold);
                         if (mask > 0) {
-                            imgMask = (ImageInt) ImageHandler.wrap(WindowManager.getImage(mask));
+                            imgMask = ImageHandler.wrap(WindowManager.getImage(mask));
+                        }
+                        // check if inverse case
+                        if (inverse) {
+                            imgMask = imgMask.duplicate();
+                            imgMask.invert();
                         }
                         IJ.log("Normalizing Distance Map (EVF) ...");
                         EDT.normalizeDistanceMap(r2, imgMask, true);

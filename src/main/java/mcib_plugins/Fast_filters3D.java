@@ -35,20 +35,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SuppressWarnings("empty-statement")
 public class Fast_filters3D implements PlugInFilter, DialogListener {
 
-    int nbcpus;
+    private int nbcpus;
     ImagePlus imp;
-    String filters[] = {"Mean", "Median", "Minimum", "Maximum", "MaximumLocal", "TopHat", "OpenGray", "CloseGray", "Variance", "Sobel", "Adaptive"};
-    String algos[] = {"Parallelized", "Isotropic"};
-    int filter;
-    float voisx = 2;
-    float voisy = 2;
-    float voisz = 2;
-    boolean xy = true;
-    Calibration calibration;
-    double uvoisx = 0;
-    double uvoisy = 0;
-    double uvoisz = 0;
-    boolean debug = false;
+    private String[] filters = new String[]{"Mean", "Median", "Minimum", "Maximum", "MaximumLocal", "TopHat", "OpenGray", "CloseGray", "Variance", "Sobel", "Adaptive"};
+    private String[] algos = new String[]{"Parallelized", "Isotropic"};
+    private int filter;
+    private float voisx = 2;
+    private float voisy = 2;
+    private float voisz = 2;
+    private boolean xy = true;
+    private Calibration calibration;
+    private double uvoisx = 0;
+    private double uvoisy = 0;
+    private double uvoisz = 0;
+    private boolean debug = false;
     private int algo = 0;
 
     /**
@@ -139,31 +139,41 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
         //Thread[] threads = ThreadUtil.createThreadArray(n_cpus);
 
         //process filter
-        if (selected_filter.equals("Mean")) {
-            Filter3Dmean mean = new Filter3Dmean(instack, out_image, rad);
-            mean.filter();
-        } else if (selected_filter.equals("Minimum")) {
-            Filter3Dmin min = new Filter3Dmin(instack, out_image, rad);
-            min.filter();
+        switch (selected_filter) {
+            case "Mean":
+                Filter3Dmean mean = new Filter3Dmean(instack, out_image, rad);
+                mean.filter();
+                break;
+            case "Minimum": {
+                Filter3Dmin min = new Filter3Dmin(instack, out_image, rad);
+                min.filter();
 
-        } else if (selected_filter.equals("Maximum")) {
-            Filter3Dmax max = new Filter3Dmax(instack, out_image, rad);
-            max.filter();
+                break;
+            }
+            case "Maximum": {
+                Filter3Dmax max = new Filter3Dmax(instack, out_image, rad);
+                max.filter();
 
-        } else if (selected_filter.equals("MaximumLocal")) {
-            Filter3DmaxLocal max = new Filter3DmaxLocal(instack, out_image, rad);
-            max.filter();
-        } else if (selected_filter.equals("TopHat")) {
-            Filter3Dmin min = new Filter3Dmin(instack, out_image, rad);
-            min.filter();
-            // MAXIMUM
-            ImageShort out3d2 = new ImageShort("out3d2", instack.getWidth(), instack.getHeight(), instack.getSize());
-            ImageStack out_image2 = out3d2.getImageStack();
-            Filter3Dmax max = new Filter3Dmax(out_image, out_image2, rad);
-            max.filter();
+                break;
+            }
+            case "MaximumLocal": {
+                Filter3DmaxLocal max = new Filter3DmaxLocal(instack, out_image, rad);
+                max.filter();
+                break;
+            }
+            case "TopHat": {
+                Filter3Dmin min = new Filter3Dmin(instack, out_image, rad);
+                min.filter();
+                // MAXIMUM
+                ImageShort out3d2 = new ImageShort("out3d2", instack.getWidth(), instack.getHeight(), instack.getSize());
+                ImageStack out_image2 = out3d2.getImageStack();
+                Filter3Dmax max = new Filter3Dmax(out_image, out_image2, rad);
+                max.filter();
 
-            StackProcessor stackprocess = new StackProcessor(out_image2, null);
-            stackprocess.copyBits(orig, 0, 0, Blitter.SUBTRACT);
+                StackProcessor stackprocess = new StackProcessor(out_image2, null);
+                stackprocess.copyBits(orig, 0, 0, Blitter.SUBTRACT);
+                break;
+            }
         }
         ImagePlus out_plus = new ImagePlus(filters[filter], out_image);
         out_plus.setCalibration(calibration);
@@ -185,7 +195,7 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
                 switch (fields.indexOf(e.getSource())) {
                     //////// X
                     case 0:
-                        double v0 = Double.valueOf(((TextField) fields.elementAt(0)).getText()).doubleValue();
+                        double v0 = Double.valueOf(((TextField) fields.elementAt(0)).getText());
                         if (v0 != uvoisx) {
                             ((TextField) fields.elementAt(1)).setText(Integer.toString((int) Math.round(v0 / calibration.pixelWidth)));
                             uvoisx = v0;
@@ -194,14 +204,14 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
                                 uvoisy = uvoisx;
                                 voisy = voisx;
                                 ((TextField) fields.elementAt(2)).setText("" + uvoisy);
-                                ((TextField) fields.elementAt(3)).setText(Integer.toString((int) Math.round(voisy)));
+                                ((TextField) fields.elementAt(3)).setText(Integer.toString(Math.round(voisy)));
                             }
                         }
                         break;
 
 
                     case 1:
-                        int v1 = Integer.valueOf(((TextField) fields.elementAt(1)).getText()).intValue();
+                        int v1 = Integer.valueOf(((TextField) fields.elementAt(1)).getText());
                         if (v1 != voisx) {
                             ((TextField) fields.elementAt(0)).setText("" + v1 * calibration.pixelWidth);
                             voisx = v1;
@@ -210,13 +220,13 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
                                 uvoisy = uvoisx;
                                 voisy = voisx;
                                 ((TextField) fields.elementAt(2)).setText("" + uvoisy);
-                                ((TextField) fields.elementAt(3)).setText(Integer.toString((int) Math.round(voisy)));
+                                ((TextField) fields.elementAt(3)).setText(Integer.toString(Math.round(voisy)));
                             }
                         }
                         break;
                     //////// Y
                     case 2:
-                        double v3 = Double.valueOf(((TextField) fields.elementAt(2)).getText()).doubleValue();
+                        double v3 = Double.valueOf(((TextField) fields.elementAt(2)).getText());
                         if (v3 != uvoisy) {
                             ((TextField) fields.elementAt(3)).setText(Integer.toString((int) Math.round(v3 / calibration.pixelHeight)));
                             uvoisy = v3;
@@ -225,14 +235,14 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
                                 uvoisx = uvoisy;
                                 voisx = voisy;
                                 ((TextField) fields.elementAt(0)).setText("" + uvoisx);
-                                ((TextField) fields.elementAt(1)).setText(Integer.toString((int) Math.round(voisx)));
+                                ((TextField) fields.elementAt(1)).setText(Integer.toString(Math.round(voisx)));
                             }
                         }
                         break;
 
 
                     case 3:
-                        int v2 = Integer.valueOf(((TextField) fields.elementAt(3)).getText()).intValue();
+                        int v2 = Integer.valueOf(((TextField) fields.elementAt(3)).getText());
                         if (v2 != voisy) {
                             ((TextField) fields.elementAt(2)).setText("" + v2 * calibration.pixelHeight);
                             voisy = v2;
@@ -241,13 +251,13 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
                                 uvoisx = uvoisy;
                                 voisx = voisy;
                                 ((TextField) fields.elementAt(0)).setText("" + uvoisx);
-                                ((TextField) fields.elementAt(1)).setText(Integer.toString((int) Math.round(voisx)));
+                                ((TextField) fields.elementAt(1)).setText(Integer.toString(Math.round(voisx)));
                             }
                         }
                         break;
                     //////// Z
                     case 4:
-                        double v4 = Double.valueOf(((TextField) fields.elementAt(4)).getText()).doubleValue();
+                        double v4 = Double.valueOf(((TextField) fields.elementAt(4)).getText());
                         if (v4 != uvoisz) {
                             ((TextField) fields.elementAt(5)).setText(Integer.toString((int) Math.round(v4 / calibration.pixelDepth)));
                             uvoisz = v4;
@@ -255,7 +265,7 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
                         }
                         break;
                     case 5:
-                        int v5 = Integer.valueOf(((TextField) fields.elementAt(5)).getText()).intValue();
+                        int v5 = Integer.valueOf(((TextField) fields.elementAt(5)).getText());
                         if (v5 != voisz) {
                             ((TextField) fields.elementAt(4)).setText("" + v5 * calibration.pixelDepth);
                             voisz = v5;
@@ -266,7 +276,7 @@ public class Fast_filters3D implements PlugInFilter, DialogListener {
                         break;
                 }
             }
-            if (!gd.invalidNumber()) ;
+            //if (!gd.invalidNumber()) ;
         } catch (NumberFormatException nfe) {
             IJ.log(nfe.getMessage());
         }
