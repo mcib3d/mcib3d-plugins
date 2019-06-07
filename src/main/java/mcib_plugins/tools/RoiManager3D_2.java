@@ -1965,7 +1965,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     private void add3DViewer(Object3D obj, String name, Color3f col) {
         if (obj.getAreaPixels() > 0) {
             if (!universe.contains(name)) {
-                ImageInt labelImage = obj.getMaxLabelImage(1);
+                ImageHandler labelImage = obj.getMaxLabelImage(1);
                 ImageByte imageByte = ((ImageShort) labelImage).convertToByte(false);
                 ImagePlus imagePlus = imageByte.getImagePlus();
                 Content c = ContentCreator.createContent(name, imagePlus, 2, 1, 0, col, 0, new boolean[]{true, true, true});
