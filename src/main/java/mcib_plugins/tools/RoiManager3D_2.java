@@ -3176,7 +3176,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             create3DManager();
             manager3d = this;
         }
-        Functions.registerExtensions(manager3d);
+        if (IJ.macroRunning())
+            Functions.registerExtensions(manager3d);
     }
 
     private void selectAll() {
