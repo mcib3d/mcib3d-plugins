@@ -49,7 +49,8 @@ import java.util.LinkedList;
  * @author thomas
  */
 public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener, AdjustmentListener, MacroExtension, UniverseListener, DropTargetListener, WindowListener {
-
+    // 3DManager instance
+    private static RoiManager3D_2 manager3d = null;
     public javax.swing.JPanel jPanel;
     public javax.swing.JList list;
     protected Objects3DPopulation objects3DPopulation;
@@ -104,6 +105,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
      * Creates new form RoiManager3D_2
      */
     public RoiManager3D_2() {
+
+    }
+
+    private void create3DManager() {
         if (!CheckInstall.installComplete()) {
             IJ.log("Not starting RoiManager3D");
             return;
@@ -170,6 +175,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         setMinimumSize(new Dimension(500, 500));
         setPreferredSize(new Dimension(500, 500));
         setResizable(true);
+
     }
 
     /**
@@ -211,7 +217,14 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
          */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new RoiManager3D_2().setVisible(true);
+                boolean multiple = Prefs.get("RoiManager3D-Options_UseMultiple.boolean", false);
+                if ((manager3d == null) || (multiple)) {
+                    if (manager3d == null) IJ.log("First instance of 3D Manager");
+                    if (multiple) IJ.log("Multiple instances of 3D Manager allowed, check options");
+                    manager3d = new RoiManager3D_2();
+                    manager3d.setVisible(true);
+                }
+                Functions.registerExtensions(manager3d);
             }
         });
     }
@@ -512,8 +525,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             currentImage.killRoi();
             currentImage.updateAndDraw();
             currentImage = null;
-            WindowManager.removeWindow(this);
         }
+        WindowManager.removeWindow(this);
         dispose();
     }
 
@@ -1983,6 +1996,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
     private void getUniverse() {
         System.out.println("Getting universes");
+        IJ.log(ImageJ_3D_Viewer.getJava3DVersion());
         java.util.List Viewers3D = Image3DUniverse.universes;
         System.out.println("Universes opened " + Viewers3D.size());
         if (!Viewers3D.isEmpty()) {
@@ -3155,6 +3169,14 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     // run plugin
     @Override
     public void run(String arg) {
+        boolean multiple = Prefs.get("RoiManager3D-Options_UseMultiple.boolean", false);
+        if ((manager3d == null) || (multiple)) {
+            if (manager3d == null) IJ.log("First instance of 3D Manager");
+            if (multiple) IJ.log("Multiple instances of 3D Manager allowed, check options");
+            create3DManager();
+            manager3d = this;
+        }
+        Functions.registerExtensions(manager3d);
     }
 
     private void selectAll() {
