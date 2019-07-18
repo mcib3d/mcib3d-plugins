@@ -527,6 +527,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             currentImage = null;
         }
         WindowManager.removeWindow(this);
+        manager3d = null;
         dispose();
     }
 
