@@ -37,7 +37,7 @@ public class EDT_3D implements PlugIn {
         String[] namesStructure = new String[nbima];
         String[] namesMask = new String[nbima + 1];
 
-        namesMask[0] = "None";
+        namesMask[0] = "Same";
         for (int i = 0; i < nbima; i++) {
             namesStructure[i] = WindowManager.getImage(i + 1).getShortTitle();
             namesMask[i + 1] = WindowManager.getImage(i + 1).getShortTitle();
@@ -50,13 +50,13 @@ public class EDT_3D implements PlugIn {
         GenericDialog dia = new GenericDialog("EDT");
         dia.addChoice("Map", new String[]{"EDT", "EVF", "Both"}, "EDT");
         dia.addChoice("Image", namesStructure, namesStructure[struct]);
-        //dia.addChoice("Mask (for EVF)", namesMask, namesMask[mask]);
+        dia.addChoice("Mask (for EVF)", namesMask, namesMask[mask]);
         dia.addNumericField("Threshold", threshold, 0);
         dia.addCheckbox("Inverse", inverse);
         dia.showDialog();
         String map = dia.getNextChoice();
         struct = dia.getNextChoiceIndex();
-        //mask = dia.getNextChoiceIndex();
+        mask = dia.getNextChoiceIndex();
         threshold = (int) dia.getNextNumber();
         inverse = dia.getNextBoolean();
 
@@ -78,9 +78,11 @@ public class EDT_3D implements PlugIn {
                             imgMask = ImageHandler.wrap(WindowManager.getImage(mask));
                         }
                         // check if inverse case
-                        if (inverse) {
-                            imgMask = imgMask.duplicate();
-                            imgMask.invert();
+                        if (inverse) { // do not invert if other image
+                            if (mask == 0) {
+                                imgMask = imgMask.duplicate();
+                                imgMask.invert();
+                            }
                         }
                         IJ.log("Normalizing Distance Map (EVF) ...");
                         EDT.normalizeDistanceMap(r2, imgMask, true);
@@ -92,74 +94,6 @@ public class EDT_3D implements PlugIn {
                 }
             } catch (Exception ex) {
                 Logger.getLogger(EDT_3D.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-
-//    public void normalizeDistanceMap(ImageFloat distanceMap, ImageInt mask) {
-//        int count = 0;
-//        Vox[] idx = new Vox[mask.countMaskVolume()];
-//        double volume = idx.length;
-//        for (int z = 0; z < distanceMap.sizeZ; z++) {
-//            for (int xy = 0; xy < distanceMap.sizeXY; xy++) {
-//                if (mask.getPixelInt(xy, z) != 0) {
-//                    idx[count] = new Vox(distanceMap.pixels[z][xy], xy, z);
-//                    count++;
-//                }
-//            }
-//        }
-//        Arrays.sort(idx);
-//        for (int i = 0; i < idx.length - 1; i++) {
-//            // gestion des repetitions
-//            if (idx[i + 1].distance == idx[i].distance) {
-//                int j = i + 1;
-//                while (j < (idx.length - 1) && idx[i].distance == idx[j].distance) {
-//                    j++;
-//                }
-//                double median = (i + j) / 2d;
-//                for (int k = i; k <= j; k++) {
-//                    idx[k].index = median;
-//                }
-//                i = j;
-//            } else {
-//                idx[i].index = i;
-//            }
-//        }
-//        if (idx[idx.length - 1].index == 0) {
-//            idx[idx.length - 1].index = idx.length - 1;
-//        }
-//        for (Vox idx1 : idx) {
-//            distanceMap.pixels[idx1.z][idx1.xy] = (float) (idx1.index / volume);
-//        }
-//    }
-
-    protected class Vox implements Comparable<Vox> {
-
-        float distance;
-        double index;
-        int xy, z;
-
-        public Vox(float distance, int xy, int z) {
-            this.distance = distance;
-            this.xy = xy;
-            this.z = z;
-        }
-
-        public Vox(float distance, double index, int xy, int z) {
-            this.distance = distance;
-            this.index = index;
-            this.xy = xy;
-            this.z = z;
-        }
-
-        @Override
-        public int compareTo(Vox v) {
-            if (distance > v.distance) {
-                return 1;
-            } else if (distance < v.distance) {
-                return -1;
-            } else {
-                return 0;
             }
         }
     }
