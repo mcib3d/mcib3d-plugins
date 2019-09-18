@@ -1,19 +1,15 @@
 package mcib_plugins;
 
 import ij.IJ;
-import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
-
-import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import mcib3d.image3d.ImageFloat;
 import mcib3d.image3d.ImageHandler;
-import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.distanceMap3d.EDT;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Euclidean Distance Map and Eroded Volume Fraction
