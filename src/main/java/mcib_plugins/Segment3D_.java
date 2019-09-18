@@ -5,6 +5,7 @@ import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
+import mcib3d.image3d.ImageHandler;
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.ImageLabeller;
 
@@ -57,18 +58,21 @@ public class Segment3D_ implements PlugInFilter {
         int min = 0;
         int max = -1;
         boolean individual = false;
+        boolean bits32 = false;// more than 65,535 objects
         GenericDialog gd = new GenericDialog("Segment3D");
         gd.addNumericField("Low_threshold (included)", low, 0);
         //gd.addNumericField("High_threshold (-1 for max)", high, 0);
         gd.addNumericField("Min_size", min, 0);
         gd.addNumericField("Max_size (-1 for infinity)", max, 0);
         gd.addCheckbox("Individual voxels are objects", individual);
+        gd.addCheckbox("32-bit segmentation (nb objects > 65,535)", bits32);
         gd.showDialog();
         low = (int) gd.getNextNumber();
         //high = (int) gd.getNextNumber();
         min = (int) gd.getNextNumber();
         max = (int) gd.getNextNumber();
         individual = gd.getNextBoolean();
+        bits32 = gd.getNextBoolean();
         if (gd.wasCanceled()) {
             return;
         }
@@ -83,9 +87,13 @@ public class Segment3D_ implements PlugInFilter {
         ImageInt bin = img.thresholdAboveInclusive(low);
         bin.setScale(img);
         bin.show("Bin");
-        ImageInt res;
+        ImageHandler res;
         if (individual) res = labeler.getLabelsIndividualVoxels(bin);
-        else res = labeler.getLabels(bin);
+        else {
+            if (bits32) res = labeler.getLabelsFloat(bin);
+            else res = labeler.getLabels(bin);
+        }
+
         res.setScale(img);
         res.show("Seg");
         IJ.log("Nb obj total =" + labeler.getNbObjectsTotal(bin));
