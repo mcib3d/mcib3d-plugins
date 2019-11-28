@@ -68,12 +68,14 @@ public class Distances_ implements PlugIn {
             if (closest == 0) closestS = "cc";
             else closestS = "bb";
 
+            IJ.log("");
             IJ.log("Building objects population");
             ImagePlus plusA = WindowManager.getImage(idxA + 1);
             ImagePlus plusB = WindowManager.getImage(idxB + 1);
             Objects3DPopulation population1 = new Objects3DPopulation(ImageInt.wrap(plusA));
             Objects3DPopulation population2 = new Objects3DPopulation(ImageInt.wrap(plusB));
 
+            IJ.log("");
             IJ.log("Computing distances, please wait ...");
             ArrayList<Object3D>[] all = null;
             if (compute == 0) all = closestAll(population1, population2, 1, closestS);

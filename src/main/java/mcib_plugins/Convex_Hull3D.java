@@ -53,7 +53,7 @@ public class Convex_Hull3D implements PlugInFilter {
         int valmin = (int) ima.getMinAboveValue(0);
         int valmax = (int) ima.getMax();
         for (int val = valmin; val <= valmax; val++) {
-            IJ.showStatus("Trying obj " + val);
+            if (!ima.hasOneValue(val)) continue;
             obj = new Object3DVoxels(ima, val);
             NumberFormat nf = NumberFormat.getInstance();
             nf.setMaximumFractionDigits(3);

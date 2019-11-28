@@ -257,6 +257,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         ExtensionDescriptor[] extensions = {
                 ExtensionDescriptor.newDescriptor("Manager3D_Close", this),
                 ExtensionDescriptor.newDescriptor("Manager3D_AddImage", this),
+                ExtensionDescriptor.newDescriptor("Manager3D_LiveRoi", this),
                 ExtensionDescriptor.newDescriptor("Manager3D_Delete", this),
                 ExtensionDescriptor.newDescriptor("Manager3D_Reset", this),
                 ExtensionDescriptor.newDescriptor("Manager3D_Erase", this),
@@ -2391,12 +2392,12 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         if (Prefs.get("RoiManager3D-Options_COM-pix.boolean", true)) {
             headings.add("CMx (pix)");
             headings.add("CMy (pix)");
-            headings.add("CMy (pix)");
+            headings.add("CMz (pix)");
         }
         if (Prefs.get("RoiManager3D-Options_COM-unit.boolean", true)) {
             headings.add("CMx (unit)");
             headings.add("CMy (unit)");
-            headings.add("CMy (unit)");
+            headings.add("CMz (unit)");
         }
         if (Prefs.get("RoiManager3D-Options_intDens.boolean", true)) {
             headings.add("IntDen");
