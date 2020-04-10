@@ -9,6 +9,7 @@ import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.measure.Calibration;
 import ij.plugin.PlugIn;
+import mcib3d.image3d.ImageHandler;
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.regionGrowing.Watershed3DVoronoi;
 
@@ -41,10 +42,10 @@ public class Watershed_Voronoi3D implements PlugIn {
     private void WatershedVoronoi() {
         IJ.log("");
         long t = System.currentTimeMillis();
-        ImageInt imageInt = ImageInt.wrap(seedPlus);
-        Watershed3DVoronoi watershed3DVoronoi = new Watershed3DVoronoi(imageInt, radMax);
-        if (imageInt.isBinary()) watershed3DVoronoi.setLabelSeeds(true);
-        else watershed3DVoronoi.setLabelSeeds(false);
+        ImageHandler image = ImageHandler.wrap(seedPlus);
+        Watershed3DVoronoi watershed3DVoronoi = new Watershed3DVoronoi(image, radMax);
+        //if (image.isBinary()) watershed3DVoronoi.setLabelSeeds(true);// FIXME check binary for ImageHandler
+        //else watershed3DVoronoi.setLabelSeeds(false);
         watershed3DVoronoi.getVoronoiZones(showEDT).show("VoronoiZones");
         if (showLines) watershed3DVoronoi.getVoronoiLines(true).show("VoronoiLines");
         IJ.log("Finished in " + (System.currentTimeMillis() - t) + " ms.");

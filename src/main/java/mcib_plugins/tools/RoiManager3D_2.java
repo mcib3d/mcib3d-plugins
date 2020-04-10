@@ -460,7 +460,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             Double D = (Double) args[0];
             int a = D.intValue();
             String s = (String) args[1];
-            double res = (double) closestObject(a, s);
+            double res = closestObject(a, s);
             ((Double[]) args[2])[0] = res;
         } else if (name.equals("Manager3D_ClosestK")) {
             Double D = (Double) args[0];
@@ -1898,7 +1898,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         // current image to fill in
         ImagePlus ima = WindowManager.getCurrentImage();
         if (ima.isHyperStack()) {
-            IJ.log("3D fill does not work with hyperstack");
+            IJ.log("3D filling does not work with hyperstack");
             return;
         }
         if (ima == null) {
@@ -2494,7 +2494,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
     private boolean listVoxels() {
         Object3D obj;
-        LinkedList v;
+        LinkedList<Voxel3D> voxel3DS;
 
         ImagePlus imp = getImage();
         if (imp == null) {
@@ -2544,18 +2544,18 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             Object nameObj = model.get(indexes[ob]);
             obj = objects3DPopulation.getObject(indexes[ob]);
             //IJ.log("image to list: "+image);
-            v = obj.listVoxels(image);
-            if (v == null) {
+            voxel3DS = obj.listVoxels(image);
+            if (voxel3DS == null) {
                 IJ.log("No voxels to display for " + model.get(indexes[ob]));
                 return false;
             }
-            for (int i = 0; i < v.size(); i++) {
+            for (int i = 0; i < voxel3DS.size(); i++) {
                 int h = 0;
                 data[count][h++] = count;
                 data[count][h++] = nbObj;
                 data[count][h++] = obj.getType();
                 data[count][h++] = nameObj;
-                voxel = (Voxel3D) v.get(i);
+                voxel = voxel3DS.get(i);
                 data[count][h++] = voxel.getX();
                 data[count][h++] = voxel.getY();
                 data[count][h++] = voxel.getZ();
