@@ -1511,6 +1511,11 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
         int min = (int) seg.getMinAboveValue(0);
         int max = (int) seg.getMax();
+        // check if some objects in image
+        if ((min == Integer.MAX_VALUE) || (max == 0)) {
+            IJ.log("No objects found.");
+            return;
+        }
         IJ.log("Adding image : min-max " + min + " " + max);
         // iterate in image  and constructs objects
         LinkedList<Voxel3D>[] objects = new LinkedList[max - min + 1];
