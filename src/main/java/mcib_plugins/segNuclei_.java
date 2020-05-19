@@ -3,7 +3,6 @@ package mcib_plugins;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
-import ij.plugin.Converter;
 import ij.plugin.Duplicator;
 import ij.plugin.ZProjector;
 import ij.plugin.filter.Binary;
@@ -11,19 +10,13 @@ import ij.plugin.filter.EDM;
 import ij.plugin.filter.ParticleAnalyzer;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.AutoThresholder;
-import ij.process.AutoThresholder.Method;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import mcib3d.image3d.ImageHandler;
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.ImageShort;
 import mcib3d.image3d.ImageStats;
-
 import mcib_plugins.segmentation.SegNuclei;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 public class segNuclei_ implements PlugInFilter {
     private int method = 0;
@@ -31,6 +24,7 @@ public class segNuclei_ implements PlugInFilter {
     private static String[] methods = AutoThresholder.getMethods();
     ImagePlus myPlus;
     private boolean separate = true;
+    private float manual = 0;
 
     @Override
     public int setup(String s, ImagePlus imagePlus) {
@@ -45,7 +39,7 @@ public class segNuclei_ implements PlugInFilter {
             ImageHandler seg = segment2D(imageHandler);
             ImagePlus segPlus = seg.getImagePlus();
             segPlus.setCalibration(myPlus.getCalibration());
-            segPlus.setTitle(myPlus.getTitle()+"_segNuclei");
+            segPlus.setTitle(myPlus.getTitle() + "_segNuclei");
             segPlus.setSlice(segPlus.getNSlices() / 2);
             segPlus.getProcessor().setMinAndMax(0, seg.getMax());
             seg.getImagePlus().show();
@@ -56,25 +50,18 @@ public class segNuclei_ implements PlugInFilter {
         GenericDialog dialog = new GenericDialog("Nuclei Segmentation");
         dialog.addMessage("3D segmentation of fluorescent nuclei for cell cultures.");
         dialog.addChoice("Auto_Threshold", methods, methods[0]);
+        dialog.addNumericField("Manual threshold (0=auto)", 0, 0, 6, null);
         dialog.addCheckbox("Separate_nuclei", separate);
         dialog.showDialog();
         method = dialog.getNextChoiceIndex();
+        manual = (float) dialog.getNextNumber();
         separate = dialog.getNextBoolean();
 
         return dialog.wasOKed();
     }
 
-    private ImageHandler segment2D(ImageHandler input) {
-        // do projection
-        ZProjector zProjector = new ZProjector();
-        zProjector.setMethod(ZProjector.MAX_METHOD);
-        zProjector.setStartSlice(1);
-        zProjector.setStopSlice(input.sizeZ);
-        zProjector.setImage(input.getImagePlus());
-        zProjector.doProjection();
-        ImagePlus plus = zProjector.getProjection();
-
-
+    private float getThtreshold(ImagePlus plus) {
+        if (manual > 0) return manual;
         // compute histogram
         ImageHandler imageHandler = ImageHandler.wrap(plus);
         ImageStats stat = imageHandler.getImageStats(null);
@@ -90,6 +77,22 @@ public class segNuclei_ implements PlugInFilter {
         else
             threshold = (float) thld;
         IJ.log(methods[method] + " threshold (2D) :" + threshold);
+
+        return threshold;
+    }
+
+    private ImageHandler segment2D(ImageHandler input) {
+        // do projection
+        ZProjector zProjector = new ZProjector();
+        zProjector.setMethod(ZProjector.MAX_METHOD);
+        zProjector.setStartSlice(1);
+        zProjector.setStopSlice(input.sizeZ);
+        zProjector.setImage(input.getImagePlus());
+        zProjector.doProjection();
+        ImagePlus plus = zProjector.getProjection();
+
+        // threshold
+        float threshold = getThtreshold(plus);
         plus.getProcessor().threshold((int) threshold);
         Duplicator duplicator = new Duplicator();
         ImagePlus bin2 = duplicator.run(plus);
