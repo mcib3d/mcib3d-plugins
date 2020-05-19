@@ -5,22 +5,23 @@
  */
 package mcib_plugins.tools;
 
+import javax.swing.table.AbstractTableModel;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.table.AbstractTableModel;
 
 /**
- *
  * @author thomasb from internet code
  */
 public class ResultsTableModel extends AbstractTableModel {
 
     private final String[] columnNames;
     private final Object[][] data;
+
+    private String delimiter = ",";
 
     public ResultsTableModel(String[] columnNames, Object[][] data) {
         this.columnNames = columnNames;
@@ -108,13 +109,13 @@ public class ResultsTableModel extends AbstractTableModel {
             int numRows = getRowCount();
             int numCols = getColumnCount();
             for (String col : columnNames) {
-                buf.write(col + "\t");
+                buf.write(col + delimiter);
             }
             buf.write("\n");
             for (int i = 0; i < numRows; i++) {
                 //buf.write("    row " + i + ":");
                 for (int j = 0; j < numCols; j++) {
-                    buf.write(data[i][j] + "\t");
+                    buf.write(data[i][j] + delimiter);
                 }
                 buf.write("\n");
             }
@@ -139,14 +140,14 @@ public class ResultsTableModel extends AbstractTableModel {
         try {
             buf = new BufferedWriter(new FileWriter(name));
             for (String col : columnNames) {
-                buf.write(col + "\t");
+                buf.write(col + delimiter);
             }
             buf.write("\n");
             int numCols = getColumnCount();
             for (int i : rows) {
                 //buf.write("    row " + i + ":");
                 for (int j = 0; j < numCols; j++) {
-                    buf.write(data[i][j] + "\t");
+                    buf.write(data[i][j] + delimiter);
                 }
                 buf.write("\n");
             }

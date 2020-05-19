@@ -6,29 +6,19 @@
 package mcib_plugins.tools;
 
 import ij.IJ;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.HeadlessException;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.JTable;
 
 /**
  *
  * @author thomasb
  */
 public class ResultsFrame extends JFrame implements ActionListener {
-
-    private final RoiManager3D_2 manager;
+    private RoiManager3D_2 manager;
     private ResultsTableModel model;
     private JTable tableResults;
     private final String[] columnNames;
@@ -49,6 +39,22 @@ public class ResultsFrame extends JFrame implements ActionListener {
         this.manager = manager;
         this.type = type;
 
+        createGUI();
+    }
+
+    public ResultsFrame(String title, String[] columnNames, Object[][] data, int type) throws HeadlessException {
+        super(title);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        this.columnNames = columnNames;
+        this.data = data;
+        this.type = type;
+
+        createGUI();
+    }
+
+
+    private void createGUI() {
         // add menu
         JMenuBar menuBar = new JMenuBar();
         JMenu menu = new JMenu("Menu");
@@ -85,6 +91,10 @@ public class ResultsFrame extends JFrame implements ActionListener {
         setJMenuBar(menuBar);
     }
 
+    public void setManager(RoiManager3D_2 manager) {
+        this.manager = manager;
+    }
+
     @Override
     public void actionPerformed(ActionEvent ae) {
         // IJ.log("action " + ae + " " + ae.getActionCommand());
@@ -109,18 +119,17 @@ public class ResultsFrame extends JFrame implements ActionListener {
                 model.writeDataSelected(file.getAbsolutePath(), sels);
             }
         } else if (ae.getActionCommand().equalsIgnoreCase("show objects")) {
-
             int[] sels = tableResults.getSelectedRows();
-            int[] rows = new int[sels.length];
+            String[] names = new String[sels.length];
             IJ.log("Showing " + sels.length + " selected objects ");
             int c = 0;
             for (int i : sels) {
                 int row = tableResults.convertRowIndexToModel(i);
-                int nb = Integer.parseInt(model.getValueAt(row, 1).toString()) - 1;
-                rows[c++] = nb;
+                String name = model.getValueAt(row, 2).toString();
+                names[c++] = name;
                 //IJ.log("Selecting object "+nb);          
             }
-            manager.selectByNumbers(rows);
+            manager.selectByNames(names);
         } else if (ae.getActionCommand().equalsIgnoreCase("show objects 1")) {
             int[] sels = tableResults.getSelectedRows();
 

@@ -16,10 +16,7 @@ import ij.plugin.Duplicator;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.ThresholdToSelection;
 import ij.plugin.frame.Recorder;
-import ij.process.ByteProcessor;
-import ij.process.ColorProcessor;
-import ij.process.ImageProcessor;
-import ij.process.ShortProcessor;
+import ij.process.*;
 import ij3d.*;
 import mcib3d.geom.*;
 import mcib3d.image3d.*;
@@ -238,7 +235,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     public ExtensionDescriptor[] getExtensionFunctions() {
         int[] argSeg = {ARG_NUMBER, ARG_NUMBER};
         int[] argCol = {ARG_NUMBER, ARG_NUMBER, ARG_NUMBER};
-        int[] argViewer = {ARG_NUMBER, ARG_NUMBER, ARG_NUMBER};
+        int[] argViewer = {ARG_NUMBER, ARG_NUMBER, ARG_NUMBER, ARG_NUMBER};
         int[] argSel = {ARG_NUMBER};
         int[] argName = {ARG_NUMBER, ARG_OUTPUT + ARG_STRING};
         int[] argRename = {ARG_STRING};
@@ -264,7 +261,9 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 ExtensionDescriptor.newDescriptor("Manager3D_Rename", this, argRename),
                 ExtensionDescriptor.newDescriptor("Manager3D_Merge", this),
                 ExtensionDescriptor.newDescriptor("Manager3D_FillStack", this, argCol),
-                ExtensionDescriptor.newDescriptor("Manager3D_Fill3DViewer", this, argViewer),
+                ExtensionDescriptor.newDescriptor("Manager3D_FillStack2", this, argViewer),
+                ExtensionDescriptor.newDescriptor("Manager3D_Fill3DViewer", this, argCol),
+                ExtensionDescriptor.newDescriptor("Manager3D_Fill3DViewer2", this, argViewer),
                 ExtensionDescriptor.newDescriptor("Manager3D_Split", this, argCount),
                 ExtensionDescriptor.newDescriptor("Manager3D_Measure", this),
                 ExtensionDescriptor.newDescriptor("Manager3D_List", this),
@@ -294,8 +293,8 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
                 ExtensionDescriptor.newDescriptor("Manager3D_Label", this),
                 ExtensionDescriptor.newDescriptor("Manager3D_Load", this, argRename),
                 ExtensionDescriptor.newDescriptor("Manager3D_Save", this, argRename),
-                ExtensionDescriptor.newDescriptor("Manager3D_SaveMeasure", this, argRename),
-                ExtensionDescriptor.newDescriptor("Manager3D_SaveQuantif", this, argRename),
+                //ExtensionDescriptor.newDescriptor("Manager3D_SaveMeasure", this, argRename),
+                //ExtensionDescriptor.newDescriptor("Manager3D_SaveQuantif", this, argRename),
                 ExtensionDescriptor.newDescriptor("Manager3D_Bounding3D", this, argBounding3D),
                 ExtensionDescriptor.newDescriptor("Manager3D_Closest", this, argMeasure3D),
                 ExtensionDescriptor.newDescriptor("Manager3D_ClosestK", this, argClosestK),
@@ -344,16 +343,34 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             D = (Double) args[2];
             int c = D.intValue();
             fill3D(a, b, c);
+        } else if (name.equals("Manager3D_FillStack2")) {
+            Double D = (Double) args[0];
+            int obj = D.intValue();
+            D = (Double) args[1];
+            int r = D.intValue();
+            D = (Double) args[2];
+            int g = D.intValue();
+            D = (Double) args[3];
+            int b = D.intValue();
+            fill3D(obj, r, g, b);
         } else if (name.equals("Manager3D_Fill3DViewer")) {
             Double D = (Double) args[0];
-            int a = D.intValue();
+            int r = D.intValue();
             D = (Double) args[1];
-            int b = D.intValue();
+            int g = D.intValue();
             D = (Double) args[2];
-            int c = D.intValue();
-            //D = (Double) args[3];
-            //double s = D;
-            fill3DViewer(a, b, c);
+            int b = D.intValue();
+            fill3DViewer(r, g, b);
+        } else if (name.equals("Manager3D_Fill3DViewer2")) {
+            Double D = (Double) args[0];
+            int obj = D.intValue();
+            D = (Double) args[1];
+            int r = D.intValue();
+            D = (Double) args[2];
+            int g = D.intValue();
+            D = (Double) args[3];
+            int b = D.intValue();
+            fill3DViewer(obj, r, g, b);
         } else if (name.equals("Manager3D_Split")) {
             if (split()) {
                 ((Double[]) args[0])[0] = new Double(1);
@@ -1915,32 +1932,53 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         double gg = g;
         double bb = b;
         boolean color = (processor instanceof ColorProcessor);
-        boolean gray = ((processor instanceof ByteProcessor) || (processor instanceof ShortProcessor));
+        boolean gray = ((processor instanceof ByteProcessor) || (processor instanceof ShortProcessor) || (processor instanceof FloatProcessor));
         int intensity = 0;
         if (gray) {
             intensity = (int) Math.round(rr * 0.3 + gg * 0.6 + bb * 0.1);
         }
-        for (int i = 0; i < indexes.length; i++) {
-            Object3D obj = objects3DPopulation.getObject(indexes[i]);
-            // if gray draw luminosity gray level
-            if (gray) {
-                Object3D_IJUtils.draw(obj, stack, intensity);
-                //obj.draw(stack, intensity);
-                ima.updateAndDraw();
-            } else if (color) {
-                Object3D_IJUtils.draw(obj, stack, r, g, b);
-                //obj.draw(stack, r, g, b);
-                ima.updateAndDraw();
-            } else {
-                IJ.log("Image Type not supported for fill 3D");
-            }
+        if (!gray && !color) {
+            IJ.log("Image Type not supported for fill 3D");
+            return;
         }
+        for (int i = 0; i < indexes.length; i++) {
+            fill3DImage(stack, indexes[i], r, g, b, gray);
+        }
+        ima.updateAndDraw();
         if (Recorder.record) {
             if (gray) {
                 Recorder.record("Ext.Manager3D_FillStack", intensity, intensity, intensity);
             } else if (color) {
                 Recorder.record("Ext.Manager3D_FillStack", r, g, b);
             }
+        }
+    }
+
+    private void fill3D(int sel, int r, int g, int b) {
+        // current image to fill in
+        ImagePlus ima = WindowManager.getCurrentImage();
+        if (ima.isHyperStack()) {
+            IJ.log("3D filling does not work with hyperstack");
+            return;
+        }
+        if (ima == null) {
+            return;
+        }
+        ImageStack stack = ima.getStack();
+        ImageProcessor processor = stack.getProcessor(1);
+        boolean gray = ((processor instanceof ByteProcessor) || (processor instanceof ShortProcessor) || (processor instanceof FloatProcessor));
+
+        fill3DImage(stack, sel, r, g, b, gray);
+    }
+
+    private void fill3DImage(ImageStack stack, int sel, int r, int g, int b, boolean gray) {
+        Object3D obj = objects3DPopulation.getObject(sel);
+        // if gray draw luminosity gray level
+        if (gray) {
+            int intensity = (int) Math.round(r * 0.3 + g * 0.6 + b * 0.1);
+            Object3D_IJUtils.draw(obj, stack, intensity);
+        } else {
+            Object3D_IJUtils.draw(obj, stack, r, g, b);
         }
     }
 
@@ -1978,9 +2016,26 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         canvas.render();
 
         if (Recorder.record) {
-            Recorder.record("Ext.Manager3D_Fill3DViewer", r, g, b, 0);
+            Recorder.record("Ext.Manager3D_Fill3DViewer", r, g, b);
         }
     }
+
+    // draw one object in a color in a image
+    private void fill3DViewer(int sel, int r, int g, int b) {
+        // from TANGO
+        if (universe == null || universe.getWindow() == null || universe.getCanvas() == null) {
+            universe = new Image3DUniverse();
+            universe.show();
+            //univ.sync(true);
+        }
+
+        Object3D obj = objects3DPopulation.getObject(sel);
+        add3DViewer(obj, (String) model.get(sel), new Color3f(r / 255.0f, g / 255.0f, b / 255.0f));
+
+        ImageCanvas3D canvas = (ImageCanvas3D) universe.getCanvas();
+        canvas.render();
+    }
+
 
     private void add3DViewer(Object3D obj, String name, Color3f col) {
         if (obj.getAreaPixels() > 0) {
@@ -2158,206 +2213,29 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
     }
 
-    /**
-     * Description of the Method
-     *
-     * @return Description of the Return Value
-     */
-    private boolean measure3D() {
+    private ArrayList<Object3D> getObjects3DList() {
         int[] indexes = list.getSelectedIndices();
         if (indexes.length == 0) {
             indexes = getAllIndexes();
         }
 
         if (indexes.length == 0) {
-            return false;
+            return null;
         }
 
-        ArrayList<String> headings = new ArrayList<String>();
-        headings.add("Nb");
-        headings.add("Obj");
-        headings.add("Type");
-        headings.add("Label");
-        if (Prefs.get("RoiManager3D-Options_centroid-pix.boolean", true)) {
-            headings.add("CX (pix)");
-            headings.add("CY (pix)");
-            headings.add("CZ (pix)");
-        }
-        if (Prefs.get("RoiManager3D-Options_centroid-unit.boolean", true)) {
-            headings.add("CX (unit)");
-            headings.add("CY (unit)");
-            headings.add("CZ (unit)");
-        }
-        if (Prefs.get("RoiManager3D-Options_BB.boolean", true)) {
-            headings.add("Xmin (pix)");
-            headings.add("Ymin (pix)");
-            headings.add("Zmin (pix)");
-            headings.add("Xmax (pix)");
-            headings.add("Ymax (pix)");
-            headings.add("Zmax (pix)");
-            headings.add("VolBounding (pix)");
-            headings.add("RatioVolbox");
-        }
-        if (Prefs.get("RoiManager3D-Options_volume.boolean", true)) {
-            headings.add("Vol (unit)");
-            headings.add("Vol (pix)");
-        }
-        if (Prefs.get("RoiManager3D-Options_surface.boolean", true)) {
-            headings.add("Surf (unit)");
-            headings.add("Surf (pix)");
-            headings.add("SurfCorr (pix)");
-        }
-        if (Prefs.get("RoiManager3D-Options_compacity.boolean", true)) {
-            headings.add("Comp (pix)");
-            headings.add("Spher (pix)");
-            headings.add("CompCorr (pix)");
-            headings.add("SpherCorr (pix)");
-            headings.add("Comp (unit)");
-            headings.add("Spher (unit)");
-            headings.add("CompDiscrete");
-        }
-        if (Prefs.get("RoiManager3D-Options_feret.boolean", false)) {
-            headings.add("Feret (unit)");
-        }
-        if (Prefs.get("RoiManager3D-Options_ellipse.boolean", true)) {
-            headings.add("Ell_MajRad");
-            headings.add("Ell_Elon");
-            headings.add("Ell_Flatness");
-            headings.add("volEllipsoid (unit)");
-            headings.add("RatioVolEllipsoid");
-        }
-        if (Prefs.get("RoiManager3D-Options_invariants.boolean", false)) {
-            for (int g = 0; g < Object3D.getNbMoments3D(); g++) {
-                headings.add("Moment" + (g + 1));
-            }
-        }
-        // CONVEX HULL
-        if (Prefs.get("RoiManager3D-Options_convexhull.boolean", false)) {
-            //headings.add("SurfMesh (unit)");
-            //headings.add("SurfMeshsmooth (unit)");
-            //headings.add("SurfMeshHull (unit)");
-            headings.add("VolHull (unit)");
-        }
-        if (Prefs.get("RoiManager3D-Options_dist2Surf.boolean", true)) {
-            headings.add("DCMin (unit)");
-            headings.add("DCMax (unit)");
-            headings.add("DCMean (unit)");
-            headings.add("DCSD (unit)");
-        }
-
-        final Object[][] data = new Object[indexes.length][headings.size()];
-
-        Object3D obj;
-        double resXY;
-        double resZ;
-        //int count = rtMeasure.getCounter();
+        // get array of objects
+        ArrayList<Object3D> object3DS = new ArrayList<>(indexes.length);
         for (int i = 0; i < indexes.length; i++) {
-            obj = objects3DPopulation.getObject(indexes[i]);
-            int h = 0;
-            data[i][h++] = i;
-            data[i][h++] = indexes[i] + 1;
-            data[i][h++] = obj.getType();
-            data[i][h++] = model.get(indexes[i]);
-            resXY = obj.getResXY();
-            resZ = obj.getResZ();
-            if (Prefs.get("RoiManager3D-Options_centroid-pix.boolean", true)) {
-                data[i][h++] = obj.getCenterX();
-                data[i][h++] = obj.getCenterY();
-                data[i][h++] = obj.getCenterZ();
-            }
-            if (Prefs.get("RoiManager3D-Options_centroid-unit.boolean", true)) {
-                data[i][h++] = obj.getCenterX() * resXY;
-                data[i][h++] = obj.getCenterY() * resXY;
-                data[i][h++] = obj.getCenterZ() * resZ;
-            }
-            if (Prefs.get("RoiManager3D-Options_BB.boolean", true)) {
-                data[i][h++] = obj.getXmin();
-                data[i][h++] = obj.getYmin();
-                data[i][h++] = obj.getZmin();
-                data[i][h++] = obj.getXmax();
-                data[i][h++] = obj.getYmax();
-                data[i][h++] = obj.getZmax();
-                data[i][h++] = obj.getVolumeBoundingBoxPixel();
-                data[i][h++] = obj.getRatioBox();
-            }
-            if (Prefs.get("RoiManager3D-Options_volume.boolean", true)) {
-                data[i][h++] = obj.getVolumeUnit();
-                data[i][h++] = obj.getVolumePixels();
-            }
-            if (Prefs.get("RoiManager3D-Options_surface.boolean", true)) {
-                data[i][h++] = obj.getAreaUnit();
-                data[i][h++] = obj.getAreaPixels();
-                if (obj instanceof Object3DVoxels) {
-                    data[i][h++] = ((Object3DVoxels) obj).getAreaPixelsCorrected();
-                } else {
-                    data[i][h++] = -1;
-                }
-            }
-            if (Prefs.get("RoiManager3D-Options_compacity.boolean", true)) {
-                data[i][h++] = obj.getCompactness(false);
-                data[i][h++] = obj.getSphericity(false);
-                // TEST LAURENT GOLE
-                if (obj instanceof Object3DVoxels) {
-                    data[i][h++] = ((Object3DVoxels) obj).getCompactnessCorrected();
-                    data[i][h++] = ((Object3DVoxels) obj).getSphericityCorrected();
-                } else {
-                    data[i][h++] = -1;
-                    data[i][h++] = -1;
-                }
-                data[i][h++] = obj.getCompactness(true);
-                data[i][h++] = obj.getSphericity(true);
-
-                // TEST DISCRETE COMPACITE
-                if (obj instanceof Object3DVoxels) {
-                    data[i][h++] = ((Object3DVoxels) obj).getDiscreteCompactness();
-                } else {
-                    data[i][h++] = -1;
-                }
-            }
-            if (Prefs.get("RoiManager3D-Options_feret.boolean", false)) {
-                data[i][h++] = obj.getFeret();
-            }
-            if (Prefs.get("RoiManager3D-Options_ellipse.boolean", true)) {
-                data[i][h++] = obj.getRadiusMoments(2);
-                data[i][h++] = obj.getMainElongation();
-                data[i][h++] = obj.getMedianElongation();
-                data[i][h++] = obj.getVolumeEllipseUnit();
-                data[i][h++] = obj.getRatioEllipsoid();
-            }
-            if (Prefs.get("RoiManager3D-Options_invariants.boolean", false)) {
-                double[] geoinv = obj.getMoments3D();
-                for (int g = 0; g < geoinv.length; g++) {
-                    data[i][h++] = geoinv[g];
-                }
-            }
-            // CONVEX HULL //TODO put in a thread because very long
-            if (Prefs.get("RoiManager3D-Options_convexhull.boolean", false)) {
-                //Object3DSurface surf = new Object3DSurface(Viewer3D_Utils.computeMeshSurface(obj, false));
-                //Object3D_IJUtils.setCalibration(surf, Object3D_IJUtils.getCalibration(obj));
-                //surf.setSmoothingFactor(0.1f);
-                //Object3DSurface convexSurface = surf.getConvexSurface();
-                //convexSurface.multiThread = true;
-                Object3D object3DConvex = obj.getConvexObject();
-                double volHull = object3DConvex.getVolumeUnit();
-                //data[i][h++] = object3DConvex.getSurfaceMeshUnit();
-                //data[i][h++] = object3DConvex.getSmoothSurfaceAreaUnit();
-                //data[i][h++] = object3DConvex.getSurfaceMeshUnit();
-                data[i][h++] = volHull;
-                //h += 4;
-            }
-            if (Prefs.get("RoiManager3D-Options_dist2Surf.boolean", true)) {
-                data[i][h++] = obj.getDistCenterMin();
-                data[i][h++] = obj.getDistCenterMax();
-                data[i][h++] = obj.getDistCenterMean();
-                data[i][h++] = obj.getDistCenterSigma();
-            }
+            object3DS.add(objects3DPopulation.getObject(indexes[i]));
         }
 
-        // JTABLE
-        //Create and set up the window.
-        String[] heads = new String[headings.size()];
-        heads = headings.toArray(heads);
-        tableResultsMeasure = new ResultsFrame("3D Measure", heads, data, this, ResultsFrame.OBJECT_1);
+        return object3DS;
+    }
+
+    private boolean measure3D() {
+        tableResultsMeasure = Manager3DMeasurements.measurements3D(getObjects3DList());
+        if (tableResultsMeasure == null) return false;
+        tableResultsMeasure.setManager(this);
         tableResultsMeasure.showFrame();
 
         if (Recorder.record) {
@@ -2367,128 +2245,16 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         return true;
     }
 
-    /**
-     * Description of the Method
-     *
-     * @return Description of the Return Value
-     */
     private boolean quantif3D() {
         ImagePlus imp = getImage();
         if (imp == null) {
-            IJ.error("Error : No window opened.");
+            IJ.error("Error : No image opened.");
             return false;
         }
-
-        int[] indexes = list.getSelectedIndices();
-        if (indexes.length == 0) {
-            indexes = getAllIndexes();
-        }
-
-        if (indexes.length == 0) {
-            return false;
-        }
-
-        ArrayList<String> headings = new ArrayList<String>();
-        headings.add("Nb");
-        headings.add("Obj");
-        headings.add("Type");
-        headings.add("Label");
-        headings.add("AtCenter");
-        if (Prefs.get("RoiManager3D-Options_COM-pix.boolean", true)) {
-            headings.add("CMx (pix)");
-            headings.add("CMy (pix)");
-            headings.add("CMz (pix)");
-        }
-        if (Prefs.get("RoiManager3D-Options_COM-unit.boolean", true)) {
-            headings.add("CMx (unit)");
-            headings.add("CMy (unit)");
-            headings.add("CMz (unit)");
-        }
-        if (Prefs.get("RoiManager3D-Options_intDens.boolean", true)) {
-            headings.add("IntDen");
-        }
-        if (Prefs.get("RoiManager3D-Options_min.boolean", true)) {
-            headings.add("Min");
-        }
-        if (Prefs.get("RoiManager3D-Options_max.boolean", true)) {
-            headings.add("Max");
-        }
-        if (Prefs.get("RoiManager3D-Options_mean.boolean", true)) {
-            headings.add("Mean");
-        }
-        if (Prefs.get("RoiManager3D-Options_stdDev.boolean", true)) {
-            headings.add("Sigma");
-        }
-        if (Prefs.get("RoiManager3D-Options_Mode.boolean", true)) {
-            headings.add("Mode");
-            headings.add("Mode NonZero");
-        }
-        if (Prefs.get("RoiManager3D-Options_Numbering.boolean", true)) {
-            headings.add("NbObjects");
-            headings.add("VolObjects");
-        }
-
-
-        Object[][] data = new Object[indexes.length][headings.size()];
-        double resXY, resZ;
-        Object3D obj;
-        ImageHandler ima = this.getImage3D();
-
-        for (int i = 0; i < indexes.length; i++) {
-            obj = objects3DPopulation.getObject(indexes[i]);
-            int h = 0;
-            data[i][h++] = i;
-            data[i][h++] = indexes[i] + 1;
-            data[i][h++] = obj.getType();
-            data[i][h++] = model.get(indexes[i]);
-            resXY = obj.getResXY();
-            resZ = obj.getResZ();
-            data[i][h++] = obj.getPixCenterValue(ima);
-            if (Prefs.get("RoiManager3D-Options_COM-pix.boolean", true)) {
-                data[i][h++] = obj.getMassCenterX(ima);
-                data[i][h++] = obj.getMassCenterY(ima);
-                data[i][h++] = obj.getMassCenterZ(ima);
-            }
-            if (Prefs.get("RoiManager3D-Options_COM-unit.boolean", true)) {
-                data[i][h++] = obj.getMassCenterX(ima) * resXY;
-                data[i][h++] = obj.getMassCenterY(ima) * resXY;
-                data[i][h++] = obj.getMassCenterZ(ima) * resZ;
-            }
-            if (Prefs.get("RoiManager3D-Options_intDens.boolean", true)) {
-                data[i][h++] = obj.getIntegratedDensity(ima);
-            }
-            if (Prefs.get("RoiManager3D-Options_min.boolean", true)) {
-                data[i][h++] = obj.getPixMinValue(ima);
-            }
-            if (Prefs.get("RoiManager3D-Options_max.boolean", true)) {
-                data[i][h++] = obj.getPixMaxValue(ima);
-            }
-            if (Prefs.get("RoiManager3D-Options_mean.boolean", true)) {
-                data[i][h++] = obj.getPixMeanValue(ima);
-            }
-            if (Prefs.get("RoiManager3D-Options_stdDev.boolean", true)) {
-                data[i][h++] = obj.getPixStdDevValue(ima);
-            }
-            if (Prefs.get("RoiManager3D-Options_Mode.boolean", true)) {
-                data[i][h++] = obj.getPixModeValue(ima);
-                data[i][h++] = obj.getPixModeNonZero(ima);
-            }
-            if (Prefs.get("RoiManager3D-Options_Numbering.boolean", true)) {
-                int[] res = obj.getNumbering(ima);
-                data[i][h++] = res[0];
-                data[i][h++] = res[1];
-            }
-        }
-
-        // JTABLE
-        //Create and set up the window.
-        String[] heads = new String[headings.size()];
-        heads = headings.toArray(heads);
-        tableResultsQuantif = new ResultsFrame("3D Quantif", heads, data, this, ResultsFrame.OBJECT_1);
-        //Create and set up the content pane.
-
+        tableResultsQuantif = Manager3DMeasurements.quantif3D(getObjects3DList(), getImage3D());
+        if (tableResultsQuantif == null) return false;
+        tableResultsQuantif.setManager(this);
         tableResultsQuantif.showFrame();
-//
 
         if (Recorder.record) {
             Recorder.record("Ext.Manager3D_Quantif");
@@ -2498,6 +2264,24 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     }
 
     private boolean listVoxels() {
+        ImagePlus imp = getImage();
+        if (imp == null) {
+            IJ.error("Error : No image opened.");
+            return false;
+        }
+        tableResultsVoxels = Manager3DMeasurements.listVoxels(getObjects3DList(), getImage3D());
+        if (tableResultsVoxels == null) return false;
+        tableResultsVoxels.setManager(this);
+        tableResultsVoxels.showFrame();
+
+        if (Recorder.record) {
+            Recorder.record("Ext.Manager3D_List");
+        }
+
+        return true;
+    }
+
+    private boolean listVoxelsOld() {
         Object3D obj;
         LinkedList<Voxel3D> voxel3DS;
 
@@ -3223,7 +3007,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
         for (String na : names) {
             sels[c++] = hashNames.get(na);
         }
-        list.setSelectedIndices(sels);
+        selectByNumbers(sels);
     }
 
     public void selectByNumbers(int[] se) {
