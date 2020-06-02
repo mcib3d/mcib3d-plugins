@@ -125,9 +125,9 @@ public class ResultsFrame extends JFrame implements ActionListener {
             int c = 0;
             for (int i : sels) {
                 int row = tableResults.convertRowIndexToModel(i);
-                String name = model.getValueAt(row, 2).toString();
+                String name = model.getValueAt(row, 1).toString();
                 names[c++] = name;
-                //IJ.log("Selecting object "+nb);          
+                IJ.log("Selecting object " + name);
             }
             manager.selectByNames(names);
         } else if (ae.getActionCommand().equalsIgnoreCase("show objects 1")) {
