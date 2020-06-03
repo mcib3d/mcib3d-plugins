@@ -144,6 +144,7 @@ public class Draw_RoiSlices implements PlugIn {
     }
 
     private ImagePlus drawRois() {
+        rawPlus.deleteRoi();
         Duplicator duplicator = new Duplicator();
         ImagePlus rawCopy = duplicator.run(rawPlus);
         ImageConverter converter = new ImageConverter(rawCopy);
@@ -154,7 +155,7 @@ public class Draw_RoiSlices implements PlugIn {
             ImageProcessor processor = stack.getProcessor(z + 1);
             processor.setColor(col);
             Roi roi = arrayRois[z];
-            roi.drawPixels(processor);
+            if (roi != null) roi.drawPixels(processor);
         }
         return rawCopy;
     }
