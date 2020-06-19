@@ -6,6 +6,7 @@ import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import mcib3d.image3d.ImageFloat;
 import mcib3d.image3d.ImageHandler;
+import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.distanceMap3d.EDT;
 
 import java.util.logging.Level;
@@ -18,7 +19,7 @@ import java.util.logging.Logger;
 public class EDT_3D implements PlugIn {
 
     boolean inverse = false;
-    int threshold = 1;
+    int threshold = 0;
 
     @Override
     public void run(String arg) {
@@ -44,6 +45,8 @@ public class EDT_3D implements PlugIn {
         //int mask = nbima > 1 ? nbima - 1 : 0;
 
         GenericDialog dia = new GenericDialog("EDT");
+        dia.addMessage("This plugin will compute 3D Euclidean Distance Map with calibrated unit.\n" +
+                "It will also normalise this distance map in each object to get the EVF inside each object.");
         dia.addChoice("Map", new String[]{"EDT", "EVF", "Both"}, "EDT");
         dia.addChoice("Image", namesStructure, namesStructure[struct]);
         dia.addChoice("Mask (for EVF)", namesMask, namesMask[mask]);
@@ -81,7 +84,9 @@ public class EDT_3D implements PlugIn {
                             }
                         }
                         IJ.log("Normalizing Distance Map (EVF) ...");
-                        EDT.normalizeDistanceMap(r2, imgMask, true);
+                        // TEST
+                        r2 = (ImageFloat) EDT.normaliseLabel((ImageInt) img, r2);
+                        //EDT.normalizeDistanceMap(r2, imgMask, true);
                         if (mask > 0) {
                             r2.intersectMask(imgMask);
                         }

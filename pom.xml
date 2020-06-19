@@ -36,7 +36,7 @@
         <dependency>
             <groupId>net.imagej</groupId>
             <artifactId>ij</artifactId>
-            <version>1.52h</version>
+            <version>1.53b</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -53,7 +53,7 @@
         <dependency>
 			<groupId>com.github.mcib3d</groupId>
 			<artifactId>mcib3d-core</artifactId>
-            <version>b315ac14d8</version>
+            <version>ea0589e806</version>
 		</dependency>
     </dependencies>
 
