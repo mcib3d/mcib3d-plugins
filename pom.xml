@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.mcib3d</groupId>
     <artifactId>mcib3d-plugins</artifactId>
-    <version>3.96.2</version>
+    <version>3.96.3</version>
     <packaging>jar</packaging>
 
     <build>
@@ -53,7 +53,7 @@
         <dependency>
 			<groupId>com.github.mcib3d</groupId>
 			<artifactId>mcib3d-core</artifactId>
-            <version>ea0589e806</version>
+            <version>3.96.3</version>
 		</dependency>
     </dependencies>
 
