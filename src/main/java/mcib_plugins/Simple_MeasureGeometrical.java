@@ -51,7 +51,7 @@ public class Simple_MeasureGeometrical implements PlugInFilter {
     @Override
     public int setup(String arg, ImagePlus imp) {
         myPlus = imp;
-        return PlugInFilter.DOES_16 + PlugInFilter.DOES_8G;
+        return PlugInFilter.DOES_16 + PlugInFilter.DOES_8G + DOES_32;
     }
 
     @Override

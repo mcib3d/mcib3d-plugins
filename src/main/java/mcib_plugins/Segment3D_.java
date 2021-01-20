@@ -5,9 +5,12 @@ import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
+import mcib3d.geom.Object3DVoxels;
 import mcib3d.image3d.ImageHandler;
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.ImageLabeller;
+
+import java.util.ArrayList;
 
 /*
  * To change this template, choose Tools | Templates and open the template in
@@ -83,7 +86,8 @@ public class Segment3D_ implements PlugInFilter {
         if (max > 0) {
             labeler.setMaxsize(max);
         }
-        ImageInt img = ImageInt.wrap(myPlus);
+
+        ImageHandler img = ImageHandler.wrap(myPlus);
         ImageInt bin = img.thresholdAboveInclusive(low);
         bin.setScale(img);
         bin.show("Bin");

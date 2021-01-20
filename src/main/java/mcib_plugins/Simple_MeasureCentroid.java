@@ -7,8 +7,10 @@ import ij.ImagePlus;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
+
 import java.util.ArrayList;
 import java.util.Iterator;
+
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.ImageLabeller;
 
@@ -16,26 +18,26 @@ import mcib3d.image3d.ImageLabeller;
  * To change this template, choose Tools | Templates and open the template in
  * the editor.
  */
+
 /**
- *
- **
+ * *
  * /**
  * Copyright (C) 2008- 2012 Thomas Boudier and others
- *
- *
- *
+ * <p>
+ * <p>
+ * <p>
  * This file is part of mcib3d
- *
+ * <p>
  * mcib3d is free software; you can redistribute it and/or modify it under the
  * terms of the GNU General Public License as published by the Free Software
  * Foundation; either version 3 of the License, or (at your option) any later
  * version.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * <p>
  * You should have received a copy of the GNU General Public License along with
  * this program. If not, see <http://www.gnu.org/licenses/>.
  *
@@ -49,7 +51,7 @@ public class Simple_MeasureCentroid implements PlugInFilter {
     @Override
     public int setup(String arg, ImagePlus imp) {
         myPlus = imp;
-        return PlugInFilter.DOES_16 + PlugInFilter.DOES_8G;
+        return PlugInFilter.DOES_16 + PlugInFilter.DOES_8G + DOES_32;
     }
 
     @Override
@@ -75,7 +77,7 @@ public class Simple_MeasureCentroid implements PlugInFilter {
         }
         ArrayList<double[]> res = mes.getMeasuresCentroid();
         int row = rt.getCounter();
-        for (Iterator<double[]> it = res.iterator(); it.hasNext();) {
+        for (Iterator<double[]> it = res.iterator(); it.hasNext(); ) {
             rt.incrementCounter();
             double[] m = it.next();
             for (int k = 0; k < keysBase_s.length; k++) {

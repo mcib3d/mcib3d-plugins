@@ -50,7 +50,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     private static RoiManager3D_2 manager3d = null;
     public javax.swing.JPanel jPanel;
     public javax.swing.JList list;
-    protected Objects3DPopulation objects3DPopulation;
+    protected Objects3DPopulation objects3DPopulation = null;
     protected DefaultListModel model = new DefaultListModel();
     boolean canceled;
     boolean live = true;
@@ -102,7 +102,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
      * Creates new form RoiManager3D_2
      */
     public RoiManager3D_2() {
-
+        if(objects3DPopulation==null) create3DManager();
     }
 
     private void create3DManager() {

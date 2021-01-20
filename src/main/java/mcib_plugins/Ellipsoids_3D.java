@@ -103,7 +103,7 @@ public class Ellipsoids_3D implements PlugInFilter {
                     IJ.log("Angle " + i + " with plane XZ " + axz[i]);
                     IJ.log("Angle " + i + " with plane YZ " + ayz[i]);
                 }
-                Vector3D V = obj.getVectorAxis(2);
+                Vector3D V = obj.getVectorAxis(2); // main axis
                 Vector3D W = obj.getVectorAxis(1);
                 Vector3D U = obj.getVectorAxis(0);
                 //obj.computeContours();

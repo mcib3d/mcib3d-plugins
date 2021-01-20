@@ -51,7 +51,7 @@ public class Simple_MeasureShape implements PlugInFilter {
     @Override
     public int setup(String arg, ImagePlus imp) {
         myPlus = imp;
-        return PlugInFilter.DOES_16 + PlugInFilter.DOES_8G;
+        return PlugInFilter.DOES_16 + PlugInFilter.DOES_8G + DOES_32;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class Simple_MeasureShape implements PlugInFilter {
         String title = myPlus.getTitle();
         // check dimensions
         int[] dims = myPlus.getDimensions();//XYCZT
-        if(dims[3]==1) IJ.log("Most shape measurements are not relevant for 2D images");
+        if (dims[3] == 1) IJ.log("Most shape measurements are not relevant for 2D images");
         int channel = myPlus.getChannel();
         int frame = myPlus.getFrame();
         ImageInt img = ImageInt.wrap(extractCurrentStack(myPlus));
