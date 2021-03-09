@@ -102,10 +102,10 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
      * Creates new form RoiManager3D_2
      */
     public RoiManager3D_2() {
-        if(objects3DPopulation==null) create3DManager();
+        //need to call create3DManager if instantiated manually
     }
 
-    private void create3DManager() {
+    public void create3DManager() {
         if (!CheckInstall.installComplete()) {
             IJ.log("Not starting RoiManager3D");
             return;
@@ -545,6 +545,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
             currentImage = null;
         }
         WindowManager.removeWindow(this);
+        objects3DPopulation = null;
         manager3d = null;
         dispose();
     }

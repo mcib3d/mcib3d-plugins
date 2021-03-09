@@ -20,7 +20,7 @@ public class Association_ implements PlugIn {
 
         TrackingAssociation trackingAssociation = new TrackingAssociation(img1, img2);
         trackingAssociation.setMerge(false);
-        trackingAssociation.getTracked().show(img1.getTitle() + "-association");
+        trackingAssociation.getTrackedImage().show(img1.getTitle() + "-association");
     }
 
     private boolean dialog() {

@@ -44,7 +44,7 @@ public class Association_Tracking implements PlugInFilter {
             trackingAssociation.setMerge(false);
             for (int i = frame; i < nFrames - 1; i++) {
                 IJ.log("Processing " + i);
-                ImageHandler tracked = trackingAssociation.getTracked();
+                ImageHandler tracked = trackingAssociation.getTrackedImage();
                 result = Concatenator.run(result, tracked.getImagePlus());
                 trackingAssociation.setImage1(tracked);
                 ImagePlus plusTmp = duplicator.run(plus, channel, channel, 1, dims[3], i + 1, i + 1);

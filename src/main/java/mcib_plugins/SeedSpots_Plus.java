@@ -262,6 +262,7 @@ public class SeedSpots_Plus implements PlugIn {
         if ((output == 1) || (output == 2)) {
             ArrayList<Object3D> object3DS = seg.getObjects();
             RoiManager3D_2 roimanager = new RoiManager3D_2();
+            roimanager.create3DManager();
             roimanager.addObjects3D(object3DS);
         }
     }

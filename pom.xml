@@ -36,7 +36,7 @@
         <dependency>
             <groupId>net.imagej</groupId>
             <artifactId>ij</artifactId>
-            <version>1.53b</version>
+            <version>1.53c</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -44,20 +44,37 @@
             <artifactId>j3dcore</artifactId>
             <version>1.6.0-scijava-2</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.scijava/j3dcore -->
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>3D_Viewer</artifactId>
 			<version>4.0.1</version>
 			<type>jar</type>
         </dependency>
+
         <dependency>
-			<groupId>com.github.mcib3d</groupId>
+
+            <groupId>com.github.mcib3d</groupId>
 			<artifactId>mcib3d-core</artifactId>
-            <version>c2aa784855</version>
+            <version>1ba13159</version>
+            <!--
+            <scope>system</scope>
+            <systemPath>/home/thomas/PROG/MCIB/mcib3d-core/target/mcib3d-core-3.96.3.jar</systemPath>
+
+            <version>fe32994f5e</version>
+
+             -->
 		</dependency>
     </dependencies>
 
     <repositories>
+
+        <repository>
+            <id>mcib3d</id>
+            <url>https://dl.bintray.com/mcib3d/mcib3d-core/</url>
+        </repository>
+
+
 		<repository>
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
@@ -66,6 +83,10 @@
 			<id>imagej.public</id>
 			<url>http://maven.imagej.net/content/groups/public</url>
 		</repository>
+        <repository>
+            <id>j3dcore</id>
+            <url>https://mvnrepository.com/artifact/org.scijava</url>
+        </repository>
 	</repositories>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

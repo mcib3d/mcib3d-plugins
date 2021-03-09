@@ -11,6 +11,8 @@ import ij.plugin.frame.RoiManager;
 import ij.process.ImageProcessor;
 import java.awt.List;
 import java.io.File;
+
+import mcib3d.image3d.ImageHandler;
 import mcib3d.image3d.ImageInt;
 
 /**
@@ -49,7 +51,7 @@ public class Crop3D_All implements PlugInFilter {
             //List list = roimanager.  getList();
             //roimanager.
             Roi[] rois = roimanager.getRoisAsArray();
-            ImageInt ima = ImageInt.wrap(imp);
+            ImageHandler ima = ImageHandler.wrap(imp);
             String s;
             int x, y, slice;
             Roi roi;
@@ -67,7 +69,7 @@ public class Crop3D_All implements PlugInFilter {
                 File folder = new File(dir);
                 folder.mkdir();
 
-                ImageInt res = ima.cropRadius(x, y, slice, radX, radY, radZ, true, true);
+                ImageHandler res = ima.cropRadius(x, y, slice, radX, radY, radZ, true, true);
                 res.setTitle(name + (i + 1));
                 plus = res.getImagePlus();
                 //res = ima.extract(x, y, slice, radX, radY, radZ, sp);
@@ -116,6 +118,6 @@ public class Crop3D_All implements PlugInFilter {
     @Override
     public int setup(String arg, ImagePlus imp) {
         this.imp = imp;
-        return DOES_8G + DOES_16;
+        return DOES_8G + DOES_16 +DOES_32;
     }
 }
