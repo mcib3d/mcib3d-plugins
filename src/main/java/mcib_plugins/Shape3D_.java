@@ -14,6 +14,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
+
 import org.scijava.vecmath.Color3f;
 import mcib3d.geom.GeomTransform3D;
 import mcib3d.geom.Object3DSurface;
@@ -116,7 +118,7 @@ public class Shape3D_ implements PlugIn {
             cal.setUnit(unit);
             unit = "unit";
         }
-        NumberFormat nf = NumberFormat.getInstance();
+        NumberFormat nf = NumberFormat.getInstance(Locale.ENGLISH);
         nf.setMaximumFractionDigits(3);
         String[] displays = {"New stack", "Overwrite", "None"};
         int display = 0;
