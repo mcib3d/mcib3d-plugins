@@ -19,12 +19,15 @@ import mcib3d.image3d.ImageStats;
 import mcib_plugins.segmentation.SegNuclei;
 
 public class segNuclei_ implements PlugInFilter {
-    private int method = 0;
-
-    private static String[] methods = AutoThresholder.getMethods();
     ImagePlus myPlus;
+    private static String[] methods = AutoThresholder.getMethods();
+    private int method = 0;
     private boolean separate = true;
     private float manual = 0;
+
+    // default values
+    double minSize2D = 10;
+    double maxSize2D = 1000000;
 
     @Override
     public int setup(String s, ImagePlus imagePlus) {
@@ -60,7 +63,7 @@ public class segNuclei_ implements PlugInFilter {
         return dialog.wasOKed();
     }
 
-    private float getThtreshold(ImagePlus plus) {
+    private float getThreshold(ImagePlus plus) {
         if (manual > 0) return manual;
         // compute histogram
         ImageHandler imageHandler = ImageHandler.wrap(plus);
@@ -81,6 +84,7 @@ public class segNuclei_ implements PlugInFilter {
 
     private ImageHandler segment2D(ImageHandler input) {
         // do projection
+        IJ.log("Performing maximum Z-projection");
         ZProjector zProjector = new ZProjector();
         zProjector.setMethod(ZProjector.MAX_METHOD);
         zProjector.setStartSlice(1);
@@ -90,7 +94,8 @@ public class segNuclei_ implements PlugInFilter {
         ImagePlus plus = zProjector.getProjection();
 
         // threshold
-        float threshold = getThtreshold(plus);
+        IJ.log("Performing 2D thresholding");
+        float threshold = getThreshold(plus);
         plus.getProcessor().threshold((int) threshold);
         Duplicator duplicator = new Duplicator();
         ImagePlus bin2 = duplicator.run(plus);
@@ -98,21 +103,28 @@ public class segNuclei_ implements PlugInFilter {
         bin2.setProcessor(byteProcessor);
 
         // fill holes
+        IJ.log("Performing Fill Holes");
         IJ.run("Options...", "iterations=1 count=1 black");
         ij.plugin.filter.Binary binary = new Binary();
         binary.setup("fill", bin2);
         binary.run(bin2.getProcessor());
+
         // watershed IJ = separate
         if (separate) {
+            IJ.log("Performing IJ Watershed separate");
             ij.plugin.filter.EDM edm = new EDM();
             edm.setup("watershed", bin2);
             edm.toWatershed(bin2.getProcessor());
         }
         // count mask
+        IJ.log("Performing IJ Analyze Particles");
         ParticleAnalyzer particleAnalyzer = new ParticleAnalyzer(ParticleAnalyzer.SHOW_ROI_MASKS, ParticleAnalyzer.AREA, null, 10, 1000000, 0, 1);
         particleAnalyzer.setHideOutputImage(true);
         particleAnalyzer.analyze(bin2);
         ImagePlus seg2D = particleAnalyzer.getOutputImage();
+
+        // expand 3D and do deep segmentation
+        IJ.log("Expanding in 3D and performing 3D segmentation on each region");
         ImageInt seg3D = expand3D(ImageInt.wrap(seg2D), input.sizeZ);
         // perform deep segmentation
         SegNuclei deepSeg = new SegNuclei((ImageInt) input, seg3D);

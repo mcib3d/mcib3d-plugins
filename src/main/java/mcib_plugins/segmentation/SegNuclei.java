@@ -6,13 +6,14 @@ import ij.util.ThreadUtil;
 import mcib3d.geom.Object3D;
 import mcib3d.geom.Object3DVoxels;
 import mcib3d.geom.Objects3DPopulation;
-import mcib3d.geom.Point3D;
 import mcib3d.image3d.ImageByte;
 import mcib3d.image3d.ImageHandler;
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.ImageShort;
-import mcib3d.image3d.IterativeThresholding.TrackThreshold;
+import mcib3d.image3d.processing.FillHoles2D;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -28,7 +29,8 @@ public class SegNuclei {
     HashMap<Integer, Object3D> object3DHashMap;
     // method to use for threshold
     int method = 0;
-    double margin = 0.25;
+    // fill holes regions
+    boolean fillHoles = true;
 
     public SegNuclei(ImageInt rawImage, ImageInt watImage) {
         this.rawImage = rawImage;
@@ -36,7 +38,7 @@ public class SegNuclei {
         setPopulation(new Objects3DPopulation(watImage));
     }
 
-    public void setThresholdMethod(int method){
+    public void setThresholdMethod(int method) {
         this.method = method;
     }
 
@@ -55,6 +57,7 @@ public class SegNuclei {
         final ImageByte[] thresholdedRegions = new ImageByte[rawRegions.length];
         final int nbRegions = watershedRegions.length;
         IJ.log("Nb regions " + rawRegions.length);
+        Instant time0 = Instant.now();
 
         // link population and watershed
         object3DHashMap = new HashMap<>(population.getNbObjects());
@@ -68,26 +71,26 @@ public class SegNuclei {
         final int dec = (int) Math.ceil((double) nbRegions / (double) nbCPUs);
         Thread[] threads = ThreadUtil.createThreadArray(nbCPUs);
         for (int iThread = 0; iThread < nbCPUs; iThread++) {
-            threads[iThread] = new Thread() {
-                @Override
-                public void run() {
-                    for (int i = ai.getAndIncrement(); i < nbCPUs; i = ai.getAndIncrement()) {
-                        for (int r = i * dec; r < (i + 1) * dec; r++) {
-                            if (r >= nbRegions) {
-                                break;
-                            }
-                            ImageInt wa = watershedRegions[r];
-                            ImageInt ra = rawRegions[r];
-                            thresholdedRegions[r] = processRegion(wa, ra);
-                            if (thresholdedRegions[r] == null) IJ.log("process null region " + r);
+            threads[iThread] = new Thread(() -> {
+                for (int i = ai.getAndIncrement(); i < nbCPUs; i = ai.getAndIncrement()) {
+                    for (int r = i * dec; r < (i + 1) * dec; r++) {
+                        if (r >= nbRegions) {
+                            break;
                         }
+                        ImageInt wa = watershedRegions[r];
+                        ImageInt ra = rawRegions[r];
+                        IJ.log("Processing region "+r+" with cpu "+i);
+                        thresholdedRegions[r] = processRegion(wa, ra);
+                        if (thresholdedRegions[r] == null) IJ.log("process null region " + r);
                     }
                 }
-            };
+            });
         }
         ThreadUtil.startAndJoin(threads);
 
+        FillHoles2D fillHoles2D = new FillHoles2D();
         // copy offset to thresholdedRegions
+        IJ.log("Reassembling the regions");
         for (int i = 0; i < nbRegions; i++) {
             if (rawRegions[i] == null) {
                 IJ.log("raw " + i + " " + null);
@@ -95,13 +98,10 @@ public class SegNuclei {
             if (thresholdedRegions[i] == null) {
                 IJ.log("thres " + i + " " + null);
             }
-            if ((rawRegions[i] != null) && (thresholdedRegions[i] != null))
+            if ((rawRegions[i] != null) && (thresholdedRegions[i] != null)) {
                 thresholdedRegions[i].setOffset(rawRegions[i]);
-            if (rawRegions[i] == null) {
-                IJ.log("raw " + i + " " + null);
-            }
-            if (thresholdedRegions[i] == null) {
-                IJ.log("thres " + i + " " + null);
+                // fill holes here  (pb with multi-threading)
+                if (fillHoles) fillHoles2D.process(thresholdedRegions[i]);
             }
         }
 
@@ -120,6 +120,8 @@ public class SegNuclei {
                 }
             }
         }
+        Instant time1 = Instant.now();
+        IJ.log("done in "+ Duration.between(time0,time1));
 
         return mergedImage;
     }
@@ -130,7 +132,6 @@ public class SegNuclei {
         AutoThresholder thresholder = new AutoThresholder();
         int value = (int) watershed.getPixel(watershed.sizeX / 2, watershed.sizeY / 2, watershed.sizeZ / 2);
         ImageByte mask = watershed.thresholdRangeInclusive(value, value);
-        ImageInt ma = null;
         int[] hist = raw.getHistogram(mask, 256, raw.getMin(), raw.getMax());
         double threshold8bits = thresholder.getThreshold(AutoThresholder.getMethods()[method], hist);
         double step = (raw.getMax() - raw.getMin() + 1) / 256.0;
@@ -154,6 +155,8 @@ public class SegNuclei {
                 }
             }
         }
+
+
         return thresholded;
     }
 }

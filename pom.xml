@@ -36,7 +36,7 @@
         <dependency>
             <groupId>net.imagej</groupId>
             <artifactId>ij</artifactId>
-            <version>1.53c</version>
+            <version>1.53j</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -56,13 +56,11 @@
         <dependency>
             <groupId>org.framagit.mcib3d</groupId>
 			<artifactId>mcib3d-core</artifactId>
-            <version>-SNAPSHOT</version>
+            <version>38bc495e56</version>
             <!--
             <scope>system</scope>
             <systemPath>/home/thomas/PROG/MCIB/mcib3d-core/target/mcib3d-core-3.96.3.jar</systemPath>
-
             <version>fe32994f5e</version>
-
              -->
 		</dependency>
     </dependencies>
