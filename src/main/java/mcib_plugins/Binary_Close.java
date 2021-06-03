@@ -61,20 +61,19 @@ public class Binary_Close implements PlugInFilter {
         gd.addCheckbox("Dilate", dilate);
         gd.showDialog();
         ImageInt input = ImageInt.wrap(plus);
-        //IJ.log("input "+input.getMax());
         if (gd.wasOKed()) {
             radiusXY = (float) gd.getNextNumber();
             radiusZ = (float) gd.getNextNumber();
             dilate = gd.getNextBoolean();
             ImageHandler res = runPostFilter(input);
             //IJ.log("res "+res.getMax());
-            ImagePlus resplus = res.getImagePlus();
+            ImagePlus resPlus = res.getImagePlus();
             Calibration cal = plus.getCalibration();
             if (cal != null) {
-                resplus.setCalibration(cal);
+                resPlus.setCalibration(cal);
             }
-            resplus.setTitle("CloseLabels");
-            resplus.show();
+            resPlus.setTitle("CloseLabels");
+            resPlus.show();
         }
     }
 }

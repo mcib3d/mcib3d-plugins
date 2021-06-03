@@ -65,17 +65,15 @@ public class segNuclei_ implements PlugInFilter {
         // compute histogram
         ImageHandler imageHandler = ImageHandler.wrap(plus);
         ImageStats stat = imageHandler.getImageStats(null);
-        int[] histo = stat.getHisto256();
+        int[] histogram = stat.getHisto256();
         double binSize = stat.getHisto256BinSize();
         double min = stat.getMin();
 
         AutoThresholder at = new AutoThresholder();
-        double thld = at.getThreshold(methods[method], histo);
-        float threshold;
+        float threshold = at.getThreshold(methods[method], histogram);
         if (plus.getBitDepth() > 8)
-            threshold = (float) (thld * binSize + min);
-        else
-            threshold = (float) thld;
+            threshold = (float) (threshold * binSize + min);
+
         IJ.log(methods[method] + " threshold (2D) :" + threshold);
 
         return threshold;
@@ -100,6 +98,7 @@ public class segNuclei_ implements PlugInFilter {
         bin2.setProcessor(byteProcessor);
 
         // fill holes
+        IJ.run("Options...", "iterations=1 count=1 black");
         ij.plugin.filter.Binary binary = new Binary();
         binary.setup("fill", bin2);
         binary.run(bin2.getProcessor());
@@ -117,6 +116,7 @@ public class segNuclei_ implements PlugInFilter {
         ImageInt seg3D = expand3D(ImageInt.wrap(seg2D), input.sizeZ);
         // perform deep segmentation
         SegNuclei deepSeg = new SegNuclei((ImageInt) input, seg3D);
+        deepSeg.setThresholdMethod(method);
         // result
         ImageInt result = deepSeg.getSeg();
 

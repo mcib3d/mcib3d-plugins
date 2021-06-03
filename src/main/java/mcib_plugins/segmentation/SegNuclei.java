@@ -19,19 +19,25 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by thomasb on 22/8/16.
+ * Created by Thomas Boudier on 22/8/16.
  */
 public class SegNuclei {
     ImageInt rawImage;
     ImageInt watImage;
     Objects3DPopulation population = null;
     HashMap<Integer, Object3D> object3DHashMap;
+    // method to use for threshold
+    int method = 0;
     double margin = 0.25;
 
     public SegNuclei(ImageInt rawImage, ImageInt watImage) {
         this.rawImage = rawImage;
         this.watImage = watImage;
         setPopulation(new Objects3DPopulation(watImage));
+    }
+
+    public void setThresholdMethod(int method){
+        this.method = method;
     }
 
     public void setPopulation(Objects3DPopulation pop) {
@@ -48,7 +54,7 @@ public class SegNuclei {
         final ImageInt[] rawRegions = rawImage.crop3D(bounds);
         final ImageByte[] thresholdedRegions = new ImageByte[rawRegions.length];
         final int nbRegions = watershedRegions.length;
-        IJ.log("Nb regions " + rawRegions.length + " " + watershedRegions.length);
+        IJ.log("Nb regions " + rawRegions.length);
 
         // link population and watershed
         object3DHashMap = new HashMap<>(population.getNbObjects());
@@ -80,7 +86,6 @@ public class SegNuclei {
             };
         }
         ThreadUtil.startAndJoin(threads);
-
 
         // copy offset to thresholdedRegions
         for (int i = 0; i < nbRegions; i++) {
@@ -127,7 +132,7 @@ public class SegNuclei {
         ImageByte mask = watershed.thresholdRangeInclusive(value, value);
         ImageInt ma = null;
         int[] hist = raw.getHistogram(mask, 256, raw.getMin(), raw.getMax());
-        double threshold8bits = thresholder.getThreshold(AutoThresholder.Method.Triangle, hist);
+        double threshold8bits = thresholder.getThreshold(AutoThresholder.getMethods()[method], hist);
         double step = (raw.getMax() - raw.getMin() + 1) / 256.0;
         thresholded = raw.thresholdAboveExclusive((float) (threshold8bits * step + raw.getMin()));
         thresholded.intersectMask((ImageHandler) mask);
@@ -150,80 +155,5 @@ public class SegNuclei {
             }
         }
         return thresholded;
-    }
-
-    private ImageByte processRegionIT(int region, ImageInt watershed, ImageInt raw, int volMin, int volMax, int thMin, int contMin) {
-        int value = (int) watershed.getPixel(watershed.sizeX / 2, watershed.sizeY / 2, watershed.sizeZ / 2);
-        ImageHandler mask = watershed.thresholdRangeInclusive(value, value);
-        raw.intersectMask(mask);
-
-        if ((region == -1) || (region == -2)) {
-            watershed.show("wat" + value);
-            raw.show("raw" + value);
-            IJ.log("value " + value + " " + volMin + " " + volMax + " " + thMin);
-            IJ.log("object " + object3DHashMap.get(value));
-        }
-
-        Object3D object3D = object3DHashMap.get(value);
-        if (object3D == null) {
-            IJ.log("No object " + region + " " + value);
-            return new ImageByte("", raw.sizeX, raw.sizeY, raw.sizeZ);
-        }
-        volMin = (int) (object3D.getVolumePixels() * (1.0 - 2 * margin)); // mitosis --> 50 % volume
-        volMax = (int) (object3D.getVolumePixels() * (1.0 + margin));
-
-        thMin = (int) (object3D.getType() * (1.0 - margin));
-
-
-        TrackThreshold trackThreshold = new TrackThreshold(volMin, volMax, contMin, 1, 1, thMin);
-        // draw object as marker
-        ImageByte markerObject = new ImageByte("marker", watershed.sizeX, watershed.sizeY, watershed.sizeZ);
-        object3D.drawAt(markerObject, 1, new Point3D(object3D.getCenterX() - raw.offsetX, object3D.getCenterY() - raw.offsetY, object3D.getCenterZ() - raw.offsetZ));
-        trackThreshold.setImageMarkers(markerObject);
-
-        trackThreshold.setImageZones(watershed);
-        trackThreshold.setMethodThreshold(TrackThreshold.THRESHOLD_METHOD_STEP);
-        trackThreshold.setCriteriaMethod(TrackThreshold.CRITERIA_METHOD_MSER);
-
-        ImageHandler thresholded = null;
-        thresholded = trackThreshold.segment(raw, false);
-        // no objects found
-        if (thresholded != null) {
-            thresholded.intersectMask(mask);
-        } else {
-            return new ImageByte("", raw.sizeX, raw.sizeY, raw.sizeZ);
-            /*
-            // try mitosis
-            volMin = (int) (object3D.getVolumePixels() * (0.5));
-            volMax = (int) (object3D.getVolumePixels() * (1.0));
-            thMin = (int) (object3D.getType() * (1.0));
-            trackThreshold = new TrackThreshold(volMin, volMax, contMin, 1, 1, thMin);
-            trackThreshold.setImageMarkers(null);
-            trackThreshold.setImageZones(watershed);
-            trackThreshold.setMethodThreshold(TrackThreshold.THRESHOLD_METHOD_STEP);
-            trackThreshold.setCriteriaMethod(TrackThreshold.CRITERIA_METHOD_MSER);
-            thresholded = trackThreshold.segment(raw, false);
-            if (thresholded != null) {
-                thresholded.intersectMask(mask);
-            } else
-                return new ImageByte("", raw.sizeX, raw.sizeY, raw.sizeZ);
-                */
-        }
-
-        //TEST
-        //if ((region == -1) || (region == -2)) {
-        //    watershed.show("wat" + value);
-        //    raw.show("raw" + value);
-        //}
-
-        ImageByte bin = thresholded.thresholdAboveExclusive(0);
-
-        // TEST
-        // if ((region == -1) || (region == -2)) {
-        //     thresholded.duplicate().show("thD" + value);
-        //     bin.show("bin" + value);
-        // }
-
-        return bin;
     }
 }
