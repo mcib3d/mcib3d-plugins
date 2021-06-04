@@ -292,7 +292,7 @@ public class Manager3DMeasurements {
         //Create and set up the window.
         String[] heads = new String[headings.size()];
         heads = headings.toArray(heads);
-        ResultsFrame tableResultsQuantif = new ResultsFrame("3D Quantif", heads, data, ResultsFrame.OBJECT_NO);
+        ResultsFrame tableResultsQuantif = new ResultsFrame("3D Quantif", heads, data, ResultsFrame.OBJECT_1);
 
         return tableResultsQuantif;
     }
