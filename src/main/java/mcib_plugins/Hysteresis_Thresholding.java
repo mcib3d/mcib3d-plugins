@@ -23,6 +23,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 public class Hysteresis_Thresholding implements PlugInFilter {
     ImagePlus plus;
@@ -96,7 +97,7 @@ public class Hysteresis_Thresholding implements PlugInFilter {
     }
 
     private boolean hasOneVoxelValueRange(Object3DVoxels object3DVoxels, ImageHandler handler, int t0, int t1) {
-        LinkedList<Voxel3D> list = object3DVoxels.getVoxels();
+        List<Voxel3D> list = object3DVoxels.getVoxels();
         for (Voxel3D vox : list) {
             float pix = handler.getPixel(vox);
             if ((pix >= t0) && (pix <= t1)) return true;

@@ -63,7 +63,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
     private ResultsFrame tableResultsColoc = null;
     private ResultsFrame tableResultsDistance = null;
     private ResultsFrame tableResultsVoxels = null;
-    private double version = mcib3d.utils.AboutMCIB.getVERSION();
+    private String version = mcib3d.utils.AboutMCIB.getVERSION();
     private boolean multi = false;
     private Image3DUniverse universe = null;
     private boolean showUniverse = true;
@@ -2284,7 +2284,7 @@ public class RoiManager3D_2 extends JFrame implements PlugIn, MouseWheelListener
 
     private boolean listVoxelsOld() {
         Object3D obj;
-        LinkedList<Voxel3D> voxel3DS;
+        java.util.List<Voxel3D> voxel3DS;
 
         ImagePlus imp = getImage();
         if (imp == null) {

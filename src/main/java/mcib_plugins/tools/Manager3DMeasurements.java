@@ -317,7 +317,7 @@ public class Manager3DMeasurements {
         Object[][] data = new Object[vol][headings.size()];
 
         int count = 0;
-        LinkedList<Voxel3D> voxel3DS;
+        List<Voxel3D> voxel3DS;
         for (int ob = 0; ob < object3DList.size(); ob++) {
             Object3D obj = object3DList.get(ob);
             voxel3DS = obj.listVoxels(ima);
