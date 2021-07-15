@@ -54,14 +54,14 @@
         </dependency>
 
         <dependency>
+            <!-- original is framagit, github is mirror
             <groupId>org.framagit.mcib3d</groupId>
             <artifactId>mcib3d-core</artifactId>
             <version>e967c213b6</version>
-            <!-- original is framagit, github is mirror
+             -->
             <groupId>com.github.mcib3d</groupId>
             <artifactId>mcib3d-core</artifactId>
-            <version>910f3bb4cd</version>
- -->
+            <version>e967c213b6</version>
             <!-- local jar
             <scope>system</scope>
              <systemPath>/home/thomas/PROG/MCIB/mcib3d-core/target/mcib3d-core-3.96.3.jar</systemPath>
