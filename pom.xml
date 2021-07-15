@@ -30,7 +30,7 @@
         <dependency>
             <groupId>sc.fiji</groupId>
             <artifactId>imageware</artifactId>
-            <version>2.0.1-SNAPSHOT</version>
+            <version>2.0.0</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -55,12 +55,17 @@
 
         <dependency>
             <groupId>org.framagit.mcib3d</groupId>
-			<artifactId>mcib3d-core</artifactId>
-            <version>38bc495e56</version>
-            <!--
+            <artifactId>mcib3d-core</artifactId>
+            <version>e967c213b6</version>
+            <!-- original is framagit, github is mirror
+            <groupId>com.github.mcib3d</groupId>
+            <artifactId>mcib3d-core</artifactId>
+            <version>910f3bb4cd</version>
+ -->
+            <!-- local jar
             <scope>system</scope>
-            <systemPath>/home/thomas/PROG/MCIB/mcib3d-core/target/mcib3d-core-3.96.3.jar</systemPath>
-            <version>fe32994f5e</version>
+             <systemPath>/home/thomas/PROG/MCIB/mcib3d-core/target/mcib3d-core-3.96.3.jar</systemPath>
+             <version>fe32994f5e</version>
              -->
 		</dependency>
     </dependencies>
