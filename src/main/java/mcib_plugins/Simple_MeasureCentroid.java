@@ -1,15 +1,13 @@
 package mcib_plugins;
 
 import ij.IJ;
-import ij.plugin.Duplicator;
-import mcib_plugins.analysis.simpleMeasure;
+import mcib_plugins.analysis.SimpleMeasure;
 import ij.ImagePlus;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
 
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.ImageLabeller;
@@ -46,7 +44,7 @@ import mcib3d.image3d.ImageLabeller;
 public class Simple_MeasureCentroid implements PlugInFilter {
 
     ImagePlus myPlus;
-    String[] keysBase_s = new String[]{"Value", "CX(pix)", "CY(unit)", "CZ(pix)"};
+    String[] keysBase_s = new String[]{"Value", "CX(pix)", "CY(pix)", "CZ(pix)"};
 
     @Override
     public int setup(String arg, ImagePlus imp) {
@@ -60,7 +58,7 @@ public class Simple_MeasureCentroid implements PlugInFilter {
         // check dimensions
         int channel = myPlus.getChannel();
         int frame = myPlus.getFrame();
-        ImageInt img = ImageInt.wrap(extractCurrentStack(myPlus));
+        ImageInt img = ImageInt.wrap(SimpleMeasure.extractCurrentStack(myPlus));
         ImagePlus seg;
         if (img.isBinary(0)) {
             IJ.log("Labelling image.");
@@ -70,41 +68,26 @@ public class Simple_MeasureCentroid implements PlugInFilter {
         } else {
             seg = img.getImagePlus();
         }
-        simpleMeasure mes = new simpleMeasure(seg);
+        SimpleMeasure mes = new SimpleMeasure(seg);
         ResultsTable rt = ResultsTable.getResultsTable();
         if (rt == null) {
             rt = new ResultsTable();
         }
-        ArrayList<double[]> res = mes.getMeasuresCentroid();
+        List<Double[]> res;
+        res = mes.getMeasuresCentroid();
         int row = rt.getCounter();
-        for (Iterator<double[]> it = res.iterator(); it.hasNext(); ) {
+        for (Double[] re : res) {
             rt.incrementCounter();
-            double[] m = it.next();
             for (int k = 0; k < keysBase_s.length; k++) {
-                rt.setValue(keysBase_s[k], row, m[k]);
+                rt.setValue(keysBase_s[k], row, re[k]);
             }
             rt.setLabel(title, row);
             rt.setValue("Channel", row, channel);
             rt.setValue("Frame", row, frame);
             row++;
         }
+        rt.sort("Value");
         rt.updateResults();
         rt.show("Results");
-    }
-
-    private ImagePlus extractCurrentStack(ImagePlus plus) {
-        // check dimensions
-        int[] dims = plus.getDimensions();//XYCZT
-        int channel = plus.getChannel();
-        int frame = plus.getFrame();
-        ImagePlus stack;
-        // crop actual frame
-        if ((dims[2] > 1) || (dims[4] > 1)) {
-            IJ.log("Hyperstack found, extracting current channel " + channel + " and frame " + frame);
-            Duplicator duplicator = new Duplicator();
-            stack = duplicator.run(plus, channel, channel, 1, dims[3], frame, frame);
-        } else stack = plus.duplicate();
-
-        return stack;
     }
 }

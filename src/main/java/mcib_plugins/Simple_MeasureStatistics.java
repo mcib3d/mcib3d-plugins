@@ -1,20 +1,17 @@
 package mcib_plugins;
 
-import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.measure.ResultsTable;
-import ij.plugin.Duplicator;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
 
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.ImageLabeller;
-import mcib_plugins.analysis.simpleMeasure;
+import mcib_plugins.analysis.SimpleMeasure;
 
 /*
  * To change this template, choose Tools | Templates and open the template in
@@ -50,8 +47,7 @@ public class Simple_MeasureStatistics implements PlugInFilter {
     ImagePlus myPlus;
     int imaSpots;
     int imaSignal;
-    String[] keys_s = new String[]{"Value", "Average", "StandardDeviation", "Minimum", "Maximum", "IntegratedDensity"};
-    boolean debug = false;
+    String[] keys_s = new String[]{"Value", "Average", "Minimum", "Maximum", "StandardDeviation", "IntegratedDensity"};
     boolean multithread = false;
 
     @Override
@@ -66,7 +62,7 @@ public class Simple_MeasureStatistics implements PlugInFilter {
             int channel = myPlus.getChannel();
             int frame = myPlus.getFrame();
             String title = myPlus.getTitle();
-            ImageInt img = ImageInt.wrap(extractCurrentStack(myPlus));
+            ImageInt img = ImageInt.wrap(SimpleMeasure.extractCurrentStack(myPlus));
             ImagePlus seg;
             if (img.isBinary(0)) {
                 ImageLabeller label = new ImageLabeller();
@@ -75,28 +71,28 @@ public class Simple_MeasureStatistics implements PlugInFilter {
             } else {
                 seg = img.getImagePlus();
             }
-            simpleMeasure mes = new simpleMeasure(seg);
+            SimpleMeasure mes = new SimpleMeasure(seg);
             ResultsTable rt = ResultsTable.getResultsTable();
             if (rt == null) {
                 rt = new ResultsTable();
             }
             myPlus = WindowManager.getImage(imaSignal);
-            ImagePlus plusSignal = extractCurrentStack(myPlus);
+            ImagePlus plusSignal = SimpleMeasure.extractCurrentStack(myPlus);
             title = title.concat(":");
             title = title.concat(plusSignal.getTitle());
-            ArrayList<double[]> res = mes.getMeasuresStats(plusSignal);
+            List<Double[]> res = mes.getMeasuresStats(plusSignal);
             int row = rt.getCounter();
-            for (Iterator<double[]> it = res.iterator(); it.hasNext(); ) {
+            for (Double[] re : res) {
                 rt.incrementCounter();
-                double[] m = it.next();
                 for (int k = 0; k < keys_s.length; k++) {
-                    rt.setValue(keys_s[k], row, m[k]);
+                    rt.setValue(keys_s[k], row, re[k]);
                 }
                 rt.setLabel(title, row);
                 rt.setValue("Channel", row, channel);
                 rt.setValue("Frame", row, frame);
                 row++;
             }
+            rt.sort("Value");
             rt.updateResults();
             rt.show("Results");
         }
@@ -121,19 +117,4 @@ public class Simple_MeasureStatistics implements PlugInFilter {
         return dia.wasOKed();
     }
 
-    private ImagePlus extractCurrentStack(ImagePlus plus) {
-        // check dimensions
-        int[] dims = plus.getDimensions();//XYCZT
-        int channel = plus.getChannel();
-        int frame = plus.getFrame();
-        ImagePlus stack;
-        // crop actual frame
-        if ((dims[2] > 1) || (dims[4] > 1)) {
-            IJ.log("hyperstack found, extracting current channel " + channel + " and frame " + frame);
-            Duplicator duplicator = new Duplicator();
-            stack = duplicator.run(plus, channel, channel, 1, dims[3], frame, frame);
-        } else stack = plus.duplicate();
-
-        return stack;
-    }
 }

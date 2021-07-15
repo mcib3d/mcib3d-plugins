@@ -5,11 +5,12 @@ import ij.ImagePlus;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.PlugInFilter;
 import ij.process.ImageProcessor;
-import java.util.ArrayList;
-import java.util.Iterator;
+
+import java.util.List;
+
 import mcib3d.image3d.ImageInt;
 import mcib3d.image3d.ImageLabeller;
-import mcib_plugins.analysis.simpleMeasure;
+import mcib_plugins.analysis.SimpleMeasure;
 
 /*
  * To change this template, choose Tools | Templates and open the template in
@@ -40,12 +41,10 @@ import mcib_plugins.analysis.simpleMeasure;
  *
  * @author thomas
  */
+@Deprecated
 public class Simple_MeasureMesh implements PlugInFilter {
 
     ImagePlus myPlus;
-    boolean debug = false;
-    boolean multithread = false;
-
     String[] keysBase_s = new String[]{"Value", "SurfaceArea", "SurfaceAreaSmooth"};
 
     @Override
@@ -66,20 +65,19 @@ public class Simple_MeasureMesh implements PlugInFilter {
         } else {
             seg = myPlus;
         }
-        simpleMeasure mes = new simpleMeasure(seg);
+        SimpleMeasure mes = new SimpleMeasure(seg);
         ResultsTable rt = ResultsTable.getResultsTable();
         if (rt == null) {
             rt = new ResultsTable();
         }
         IJ.log("Creating meshes");
-        ArrayList<double[]> res = mes.getMeshSurfaces();
+        List<Double[]> res = mes.getMeshSurfaces();
         IJ.log("Measuring meshes ...");
         int row = rt.getCounter();
-        for (Iterator<double[]> it = res.iterator(); it.hasNext();) {
+        for (Double[] re : res) {
             rt.incrementCounter();
-            double[] m = it.next();
             for (int k = 0; k < keysBase_s.length; k++) {
-                rt.setValue(keysBase_s[k], row, m[k]);
+                rt.setValue(keysBase_s[k], row, re[k]);
             }
             rt.setLabel(title, row);
             row++;
