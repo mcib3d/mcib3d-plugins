@@ -36,21 +36,23 @@ public class Association_Tracking implements PlugInFilter {
             ImagePlus plus1 = duplicator.run(plus, channel, channel, 1, dims[3], frame, frame);
             ImagePlus plus2 = duplicator.run(plus, channel, channel, 1, dims[3], frame + 1, frame + 1);
             // ImageHandlers
+            ImagePlus result = plus1.duplicate();
             ImageHandler img1 = ImageHandler.wrap(plus1);
             ImageHandler img2 = ImageHandler.wrap(plus2);
-            ImagePlus result = img1.getImagePlus();
             // Association
             TrackingAssociation trackingAssociation = new TrackingAssociation(img1, img2);
             trackingAssociation.setMerge(false);
-            for (int i = frame; i < nFrames - 1; i++) {
+            for (int i = frame + 1; i <= nFrames; i++) {
                 IJ.log("Processing " + i);
                 ImageHandler tracked = trackingAssociation.getTrackedImage();
                 result = Concatenator.run(result, tracked.getImagePlus());
-                trackingAssociation.setImage1(tracked);
-                ImagePlus plusTmp = duplicator.run(plus, channel, channel, 1, dims[3], i + 1, i + 1);
-                trackingAssociation.setImage2(ImageHandler.wrap(plusTmp));
+                if (i < nFrames) {
+                    trackingAssociation.setImage1(tracked);
+                    ImagePlus plusTmp = duplicator.run(plus, channel, channel, 1, dims[3], i + 1, i + 1);
+                    trackingAssociation.setImage2(ImageHandler.wrap(plusTmp));
+                }
             }
-            result = HyperStackConverter.toHyperStack(result, 1, img1.sizeZ, nFrames - frame, "xyzct", "composite");
+            result = HyperStackConverter.toHyperStack(result, 1, img1.sizeZ, nFrames - frame + 1, "xyzct", "composite");
             result.show();
         }
     }

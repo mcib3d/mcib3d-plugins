@@ -19,6 +19,7 @@ import ij.process.ColorProcessor;
 import ij.process.ImageConverter;
 import ij.process.ImageProcessor;
 import mcib3d.geom.*;
+import mcib3d.image3d.ImageHandler;
 
 import java.awt.*;
 
@@ -88,7 +89,7 @@ public class Draw_RoiSlices implements PlugIn {
             //IJ.log("Seg : " +segPlus.getShortTitle());
             //if(rawPlus!=null)  IJ.log("Raw : " +rawPlus.getShortTitle());
 
-            objects3D = new Objects3DPopulation(segPlus);
+            objects3D = new Objects3DPopulation(ImageHandler.wrap(segPlus));
 
             if (label3D) {
                 ObjectCreator3D draw = new ObjectCreator3D(segPlus.getWidth(), segPlus.getHeight(), segPlus.getNSlices());
@@ -96,10 +97,11 @@ public class Draw_RoiSlices implements PlugIn {
                 for (int o = 0; o < objects3D.getNbObjects(); o++) {
                     Object3DVoxels obj = (Object3DVoxels) objects3D.getObject(o);
                     obj.computeContours();
+                    int col = obj.getValue();
                     if (segPlus.getNSlices() > 1)
-                        obj.drawContours(draw, (o + 1));
+                        obj.drawContours(draw, col);
                     else {
-                        obj.drawContoursXY(draw, 0, o + 1);
+                        obj.drawContoursXY(draw, 0, col);
                     }
                 }
                 draw.getImageHandler().show("LabelRoi");
@@ -130,11 +132,6 @@ public class Draw_RoiSlices implements PlugIn {
             stack.addSlice(processor);
         }
 
-        for (int z = 0; z < currentZmin; z++) {
-            ImageProcessor processor = new ColorProcessor(segPlus.getWidth(), segPlus.getHeight());
-            stack.addSlice(processor);
-        }
-
         for (int z = currentZmax + 1; z < segPlus.getNSlices(); z++) {
             ImageProcessor processor = new ColorProcessor(segPlus.getWidth(), segPlus.getHeight());
             stack.addSlice(processor);
@@ -151,7 +148,7 @@ public class Draw_RoiSlices implements PlugIn {
         converter.convertToRGB();
         Color col = Toolbar.getForegroundColor();
         ImageStack stack = rawCopy.getImageStack();
-        for (int z = currentZmin; z <= currentZmax; z++) {
+        for (int z = currentZmin; z < currentZmax; z++) {
             ImageProcessor processor = stack.getProcessor(z + 1);
             processor.setColor(col);
             Roi roi = arrayRois[z];
